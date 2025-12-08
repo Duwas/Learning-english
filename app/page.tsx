@@ -15,7 +15,7 @@ const cardData = [
     title: "Grammar Lessons",
     text: "Study the grammar lessons that are typically included in each level: A1, A2, B1, B1+, B2. There are three or more exercises and an explanation in each lesson, and feedback for every single question!",
     buttonLabel: "Go to the lessons",
-    buttonLink: "/page/User/grammar",
+    buttonLink: "/page/User/LessonGrammarCard",
     colorClass: "blue",
   },
   {
@@ -23,7 +23,7 @@ const cardData = [
     title: "Vocabulary Lessons",
     text: "Boost your vocabulary with exercises tailored for each level: A1, A2, B1, B1+, B2. Every lesson features keywords, definitions, pictures and quizzes with personalized feedback to enhance your learning.",
     buttonLabel: "Go to the lessons",
-    buttonLink: "/page/User/vocabulary",
+    buttonLink: "/page/User/LessonVocabCard",
     colorClass: "pink",
   },
   {

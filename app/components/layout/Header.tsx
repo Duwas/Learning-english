@@ -102,20 +102,6 @@ const MainHeader = () => {
   // ===== 5. CẤU HÌNH MENU ITEMS (Dùng Icon Antd cho menu cha) =====
   const items: MenuItem[] = [
     {
-      key: "grammar",
-      label: "Grammar",
-      icon: <FontSizeOutlined style={{ fontSize: "18px" }} />,
-      popupClassName: "styled-submenu-popup",
-      children: getLevelItems("/page/User/grammar"),
-    },
-    {
-      key: "vocabulary",
-      label: "Vocabulary",
-      icon: <TranslationOutlined style={{ fontSize: "18px" }} />,
-      popupClassName: "styled-submenu-popup",
-      children: getLevelItems("/page/User/vocabulary"),
-    },
-    {
       key: "listening",
       label: "Listening",
       icon: <CustomerServiceOutlined style={{ fontSize: "18px" }} />,
