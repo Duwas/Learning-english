@@ -1,0 +1,117 @@
+/* Login.css */
+
+.login-container {
+    padding: 0;
+    overflow: hidden; /* Ngăn cuộn trang */
+}
+
+/* === CỘT TRÁI: HÌNH ẢNH === */
+.login-image-col {
+    background-color: #f5f5f5; /* Nền xám nhạt */
+    
+    /* Tạo nền chấm bi giống trong ảnh */
+    background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
+    background-size: 15px 15px;
+    
+    padding: 4rem;
+    height: 100vh;
+}
+
+.login-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+/* === CỘT PHẢI: FORM === */
+.login-form-container {
+    width: 100%;
+    max-width: 400px; /* Giới hạn độ rộng của form */
+    padding: 2rem;
+}
+
+.login-title {
+    font-size: 2.25rem; /* ~36px */
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #000;
+}
+
+.login-subtitle {
+    font-size: 1rem; /* 16px */
+    color: #6c757d; /* Màu xám */
+    margin-bottom: 2rem;
+}
+
+/* === TÙY CHỈNH FORM === */
+.form-group {
+    position: relative;
+}
+
+.form-label-custom {
+    font-size: 0.875rem; /* 14px */
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+/* Đây là phần quan trọng để tạo input chỉ có gạch dưới */
+.form-control-custom {
+    border: none; /* Bỏ tất cả viền */
+    border-bottom: 1px solid #ced4da; /* Chỉ giữ viền dưới */
+    border-radius: 0; /* Bỏ bo góc */
+    padding: 0.5rem 0.25rem; /* Căn chỉnh padding */
+    font-size: 1rem;
+    width: 100%;
+    background-color: transparent; /* Nền trong suốt */
+    box-shadow: none !important; /* Bỏ shadow khi focus */
+    outline: none; /* Bỏ outline khi focus */
+}
+
+.form-control-custom:focus {
+    border-bottom-color: #000; /* Đổi màu viền dưới khi focus */
+}
+
+/* === CÁC NÚT VÀ LINK === */
+.forgot-password-link {
+    font-size: 0.875rem;
+    color: #dc3545; /* Màu đỏ */
+    text-decoration: none;
+}
+.forgot-password-link:hover {
+    text-decoration: underline;
+}
+
+.signup-link {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+.signup-link a {
+    text-decoration: none;
+    color: #000; /* Màu đen */
+}
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+/* Nút Đăng nhập (Màu đỏ) */
+.btn-login {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    font-weight: 600;
+    padding: 0.75rem; /* Nút cao hơn */
+}
+
+/* Nút Google (Viền xám) */
+.btn-google {
+    font-weight: 500;
+    padding: 0.75rem;
+    border-color: #ced4da;
+    color: #000;
+}
+.btn-google:hover {
+    background-color: #f8f9fa; /* Nền xám nhạt khi hover */
+}
+.btn-google .bi-google {
+    color: #DB4437; /* Màu đỏ của Google */
+}

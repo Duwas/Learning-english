@@ -1,0 +1,629 @@
+.menu{
+    display: flex;
+    margin-left: 20% !important;
+}
+.menu-item{
+    font-family: sans-serif ;
+    font-weight: bold;
+    font-size: 15px !important;
+
+}
+.ant-menu-item-selected {
+    background-color: transparent !important;
+    color: inherit !important;
+}
+.menu-item:hover{
+    color: aqua;
+}.ant-layout-header {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+.ant-menu{
+    background-color: transparent !important;
+    margin-top: 2px;
+}
+.ant-layout {
+  padding: 0;      
+}
+.hero img {
+  margin-top: 0;
+}
+#logo{
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}#find{
+    color: aliceblue;
+}.home-pic{
+    position: relative;
+    display: inline-block;
+    z-index: 0;
+}
+#login_btn{
+    background-color: transparent;
+    border-radius: 20px;
+    border-color: white;
+    color: aliceblue;
+    align-items: center;
+    margin-left: 2%;
+}.text-home{
+    padding-left: 20px;
+    height: 200px;
+    width: 800px;
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+}
+.btn-pro-green:hover {
+
+    background-color: #28a745 !important; 
+    border-color: #28a745 !important; 
+    color: white !important; 
+}
+.btn-pro-green {
+    transition: all 0.8s ease;
+}
+h1{
+    color: white;
+    font-size: 50px;
+}strong{
+    font-size: 40px;
+    color: rgb(28, 167, 28);
+}p{
+    color: white;
+    font-size: 25px;
+}#a{
+    color: black;
+    font-size: 30px;
+    font-weight: bold;
+}#b{
+    font-size: 40px;
+    color:rgb(28, 167, 28) ;
+}.ques{
+    margin-left: 36%;
+    width: 700px;
+}.bg-custom-blue {
+    background-color: #007bff; 
+}
+.text-custom-blue {
+    color: #007bff;
+}
+.border-custom-blue {
+    border-color: #007bff !important;
+}
+.btn-outline-custom-blue {
+    color: #007bff;
+    border-color: #007bff;
+}
+.btn-outline-custom-blue:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.bg-custom-pink {
+    background-color: #FF69B4; 
+}
+.text-custom-pink {
+    color: #FF69B4;
+}
+.border-custom-pink {
+    border-color: #FF69B4 !important;
+}
+.btn-outline-custom-pink {
+    color: #FF69B4;
+    border-color: #FF69B4;
+}
+.btn-outline-custom-pink:hover {
+    background-color: #FF69B4;
+    color: white;
+}
+
+.bg-custom-yellow {
+    background-color: #FFC107; 
+}
+.text-custom-yellow {
+    color: #FFC107;
+}
+.border-custom-yellow {
+    border-color: #FFC107 !important;
+}
+.btn-outline-custom-yellow {
+    color: #FFC107;
+    border-color: #FFC107;
+}
+.btn-outline-custom-yellow:hover {
+    background-color: #FFC107;
+    color: black; 
+}
+.bg-custom-red {
+    background-color: #e74c3c; 
+}
+.text-custom-red {
+    color: #e74c3c;
+}
+.border-custom-red {
+    border-color: #e74c3c !important;
+}
+.btn-outline-custom-red {
+    color: #e74c3c;
+    border-color: #e74c3c;
+}
+.btn-outline-custom-red:hover {
+    background-color: #e74c3c;
+    color: white;
+}
+.bg-custom-orange {
+    background-color: #f39c12; 
+}
+.text-custom-orange {
+    color: #f39c12;
+}
+.border-custom-orange {
+    border-color: #f39c12 !important;
+}
+.btn-outline-custom-orange {
+    color: #f39c12;
+    border-color: #f39c12;
+}
+.btn-outline-custom-orange:hover {
+    background-color: #f39c12;
+    color: white;
+}
+
+.bg-custom-purple {
+    background-color: #9b59b6;
+}
+.text-custom-purple {
+    color: #9b59b6;
+}
+.border-custom-purple {
+    border-color: #9b59b6 !important;
+}
+.btn-outline-custom-purple {
+    color: #9b59b6;
+    border-color: #9b59b6;
+}
+.btn-outline-custom-purple:hover {
+    background-color: #9b59b6;
+    color: white;
+}
+
+.btn-radial-fill {
+    position: relative;
+    overflow: hidden; 
+    z-index: 1;
+    transition: color 1s ease-in-out; 
+}
+
+/* Tạo lớp giả (pseudo-element) để làm hiệu ứng màu nền */
+.btn-radial-fill::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    /* Hiệu ứng bo tròn để tạo ra hình tròn */
+    border-radius: 40%; 
+    /* Đảm bảo lớp màu nền nằm dưới chữ */
+    z-index: -1; 
+    /* Chuyển động mượt mà cho hiệu ứng phóng to */
+    transition: width 1s ease-out, height 1s ease-out;
+    /* Mặc định là trong suốt */
+    background-color: transparent; 
+    /* Căn chỉnh lớp giả về tâm */
+    transform: translate(-50%, -50%); 
+}
+
+/* Khi hover, phóng to lớp giả */
+.btn-radial-fill:hover::before {
+    /* Phóng to lớp giả ra ngoài kích thước nút */
+    width: 250%; 
+    height: 250%;
+}
+
+/* Khi hover, đổi màu chữ thành trắng */
+.btn-radial-fill:hover {
+    color: white !important; /* Đổi màu chữ */
+    /* Quan trọng: Loại bỏ màu nền mặc định của Bootstrap khi hover (nếu có) */
+    background-color: transparent !important; 
+}
+
+
+/* --- BƯỚC 2: ĐỊNH NGHĨA MÀU SẮC CHO TỪNG CLASS --- */
+
+/* Màu BLUE */
+.btn-radial-fill.color-blue {
+    color: #007bff; /* Màu chữ mặc định */
+    border-color: #007bff;
+}
+.btn-radial-fill.color-blue::before {
+    background-color: #007bff; /* Màu nền khi hover */
+}
+
+/* Màu PINK */
+.btn-radial-fill.color-pink {
+    color: #FF69B4;
+    border-color: #FF69B4;
+}
+.btn-radial-fill.color-pink::before {
+    background-color: #FF69B4;
+}
+
+/* Màu YELLOW (Chữ sẽ là màu đen khi hover) */
+.btn-radial-fill.color-yellow {
+    color: #FFC107;
+    border-color: #FFC107;
+}
+.btn-radial-fill.color-yellow::before {
+    background-color: #FFC107;
+}
+.btn-radial-fill.color-yellow:hover {
+    color: black !important; /* Chữ đen trên nền vàng */
+}
+
+/* Màu RED */
+.btn-radial-fill.color-red {
+    color: #e74c3c;
+    border-color: #e74c3c;
+}
+.btn-radial-fill.color-red::before {
+    background-color: #e74c3c;
+}
+
+/* Màu ORANGE */
+.btn-radial-fill.color-orange {
+    color: #f39c12;
+    border-color: #f39c12;
+}
+.btn-radial-fill.color-orange::before {
+    background-color: #f39c12;
+}
+
+/* Màu PURPLE */
+.btn-radial-fill.color-purple {
+    color: #9b59b6;
+    border-color: #9b59b6;
+}
+.btn-radial-fill.color-purple::before {
+    background-color: #9b59b6;
+}
+/* 1. KÍCH THƯỚC VÀ MÀU NỀN CỦA HỘP MENU CON */
+
+/* Áp dụng cho container ngoài */
+.ant-menu-submenu-popup {
+    /* CHIỀU RỘNG HỘP */
+    min-width: 200px !important; 
+    
+    /* MÀU NỀN HỘP: TRẮNG */
+    background-color: white !important; 
+    border: 1px solid #e0e0e0; /* Thêm đường viền nhẹ */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Thêm bóng đổ */
+}
+
+/* Áp dụng cho danh sách UL bên trong (Mục tiêu chính để đổi màu nền) */
+.ant-menu-submenu-popup .ant-menu {
+    background-color: transparent !important; 
+    
+}
+
+/* 2. CHIỀU CAO, MÀU CHỮ VÀ CĂN CHỈNH của Mục Con */
+.ant-menu-submenu-popup .ant-menu-item,
+.ant-menu-submenu-popup .ant-menu-submenu-title {
+    /* CHIỀU CAO ITEM (Làm cho box cao hơn) */
+    padding-top: 0px !important;    
+    padding-bottom: 12px !important; 
+    margin-top: 10px !important;
+    
+    /* MÀU CHỮ: ĐEN trên nền TRẮNG */
+    color: black !important; 
+    
+    /* CĂN LỀ */
+    text-align: left !important;
+    padding-left: 20px !important;
+}
+
+/* 3. MÀU KHI DI CHUỘT (Hover Color) */
+.ant-menu-submenu-popup .ant-menu-item:hover {
+    background-color: #f0f0f0 !important; /* Màu xám nhạt khi hover */
+}.ant-menu-item{
+    font-family: sans-serif ;
+    
+}
+/* =========================================
+   1. GLOBAL & HEADER
+   ========================================= */
+.main-header {
+  height: 70px;
+  line-height: 70px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.demo-logo span {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* =========================================
+   2. MENU CHÍNH (ANTD OVERRIDES)
+   ========================================= */
+.ant-layout-header .ant-menu-horizontal {
+  border-bottom: none !important;
+}
+
+.ant-layout-header .ant-menu-item {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 0 20px !important;
+  top: 0 !important;
+}
+
+/* Gạch chân khi hover */
+.ant-layout-header .ant-menu-item::after {
+  bottom: 15px !important;
+  transition: transform 0.3s ease-in-out !important;
+  transform: scaleX(0);
+}
+.ant-layout-header .ant-menu-item:hover::after,
+.ant-layout-header .ant-menu-item-selected::after {
+  transform: scaleX(1) !important;
+}
+
+/* =========================================
+   3. MENU CON (STYLED SUBMENU) - SỬA LỖI TẠI ĐÂY
+   ========================================= */
+
+/* Class này áp dụng cho container popup của Antd */
+.styled-submenu-popup {
+  z-index: 9999 !important; /* Đảm bảo luôn nổi lên trên cùng (trên cả Header và Flashcard) */
+}
+
+/* Khung menu con */
+.styled-submenu-popup .ant-menu {
+  background-color: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  padding: 8px !important;
+  min-width: 220px !important; /* Tăng độ rộng tối thiểu để chữ không bị cắt */
+  border: 1px solid #f0f0f0;
+  margin-top: 2px;
+}
+
+/* Từng dòng menu con */
+.styled-submenu-popup .ant-menu-item {
+  height: 55px !important;        /* Tăng chiều cao để chứa Icon đẹp hơn */
+  line-height: 55px !important;
+  margin-bottom: 4px !important;
+  border-radius: 8px !important;
+  color: #333 !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+  
+  /* Flexbox căn giữa Icon và Text */
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;           /* Khoảng cách giữa Icon và Text */
+}
+
+/* Hiệu ứng hover */
+.styled-submenu-popup .ant-menu-item:hover {
+  background-color: #e6f7ff !important;
+  color: #1890ff !important;
+  transform: translateX(5px);
+  font-weight: 600 !important;
+}
+
+/* --- XỬ LÝ ẢNH ICON (LOGO) --- */
+/* Quan trọng: Bắt buộc ảnh phải nằm gọn trong kích thước quy định */
+.styled-submenu-popup .ant-menu-item .ant-menu-item-icon {
+  min-width: 30px !important; 
+  width: 30px !important;
+  height: 30px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0 !important; /* Antd mặc định có margin, ta reset lại */
+}
+
+/* Style cho thẻ IMG bên trong */
+.styled-submenu-popup .ant-menu-item .ant-menu-item-icon img,
+.submenu-icon-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; /* Giữ tỷ lệ ảnh, không bị méo */
+  display: block;
+}
+
+/* Text bên cạnh */
+.submenu-text {
+  white-space: nowrap; /* Ngăn chữ bị xuống dòng */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ẩn mũi tên tam giác thừa */
+.ant-menu-submenu-title .ant-menu-title-content {
+  margin-right: 0 !important;
+}
+.styled-submenu-popup .ant-menu {
+  background-color: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  padding: 8px !important;
+  min-width: 280px !important; /* Tăng từ 220px -> 280px cho rộng rãi */
+  border: 1px solid #f0f0f0;
+  margin-top: 2px;
+}
+
+/* 2. Từng dòng menu: Tăng chiều cao */
+.styled-submenu-popup .ant-menu-item {
+  height: 70px !important;        /* Tăng từ 55px -> 70px */
+  line-height: 70px !important;
+  margin-bottom: 6px !important;
+  border-radius: 10px !important;
+  color: #333 !important;
+  font-weight: 600 !important;    /* Chữ đậm hơn chút cho cân đối với icon */
+  font-size: 16px !important;     /* Tăng cỡ chữ lên 1 xíu */
+  
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;
+}
+
+/* Hiệu ứng hover */
+.styled-submenu-popup .ant-menu-item:hover {
+  background-color: #e6f7ff !important;
+  color: #1890ff !important;
+  transform: translateX(5px);
+}
+
+/* 3. Khung chứa Icon: Tăng kích thước khung */
+.styled-submenu-popup .ant-menu-item .ant-menu-item-icon {
+  min-width: 45px !important;  /* Tăng từ 30px -> 45px */
+  width: 45px !important;      /* Tăng từ 30px -> 45px */
+  height: 45px !important;     /* Tăng từ 30px -> 45px */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0 !important;
+}
+
+/* 4. Thẻ IMG: Đảm bảo ảnh full khung mới */
+.styled-submenu-popup .ant-menu-item .ant-menu-item-icon img,
+.submenu-icon-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; /* Giữ nguyên tỷ lệ ảnh */
+  display: block;
+}
+
+/* Text bên cạnh */
+.submenu-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ẩn mũi tên tam giác thừa */
+.ant-menu-submenu-title .ant-menu-title-content {
+  margin-right: 0 !important;
+}
+.styled-submenu-popup .ant-menu-item .ant-menu-item-icon img,
+.submenu-icon-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; /* <-- NÊN ĐỔI THÀNH cover nếu muốn ảnh tròn đầy khung */
+  object-fit: cover !important;      /* Dùng cover sẽ đẹp hơn khi bo tròn */
+  display: block;
+  border-radius: 50% !important; 
+  background-color: transparent !important;    /* <-- THÊM DÒNG NÀY ĐỂ ẢNH TRÒN */
+}
+/* ====== Tablet ====== */
+@media (max-width: 992px) {
+  .text-home {
+    width: 90%;             
+    padding-left: 10px;
+  }
+
+  .text-home h1 {
+    font-size: 2.5rem;     
+  }
+
+  .text-home strong {
+    font-size: 2rem;
+  }
+
+  .text-home p {
+    font-size: 1rem;
+  }
+
+  .ques {
+    margin-left: 20% !important;      
+    font-size: 1.3rem;
+  }
+
+  .menu {
+    flex-wrap: wrap;
+    margin-left: 10% !important; 
+  }
+
+  #login_btn {
+    margin-left: 1%;
+    padding: 0.3rem 0.5rem;
+  }
+
+  #logo {
+    width: 40px;
+    height: 40px;
+    margin-top: 20%;
+  }
+}
+
+/* ====== Mobile ====== */
+@media (max-width: 600px) {
+  .text-home {
+    width: 95%;
+    padding-left: 5px;
+    height: auto;        
+  }
+
+  .text-home h1 {
+    font-size: 2rem;
+  }
+
+  .text-home strong {
+    font-size: 1.5rem;
+  }
+
+  .text-home p {
+    font-size: 0.95rem;
+  }
+
+  .ques {
+    margin-left: 5%;
+    width: 90%;
+    font-size: 1.1rem;
+    padding: 0 0.5rem;
+  }
+  
+  .menu {
+    flex-direction: column;
+    margin-left: 0 !important;
+    text-align: center;
+  }
+
+  #login_btn {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: auto;
+  }
+
+  #logo {
+    width: 35px;
+    height: 35px;
+    margin-top: 10%;
+  }
+
+  #find {
+    display: none;
+  }
+ .main-header {
+    transition: transform 0.3s ease-out;
+}
+
+/* 2. Trạng thái ẩn: Đẩy header lên khỏi màn hình */
+.main-header.header-hidden {
+    /* Dùng -100% là cách an toàn nhất vì nó độc lập với chiều cao Header */
+    transform: translateY(-100%); 
+}
+
+/* 3. Đảm bảo header nằm trên cùng */
+.ant-layout-header.main-header {
+    /* Sử dụng !important nếu cần để ghi đè CSS mặc định của Ant Design */
+    position: fixed !important;
+    top: 0 !important;
+    width: 100% !important;
+}
+
+}

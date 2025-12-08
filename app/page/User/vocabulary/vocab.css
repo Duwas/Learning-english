@@ -1,0 +1,75 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+.container{
+    margin-top: 50px;
+}/* --- vocab.css --- */
+
+/* 1. Sidebar Container */
+.sidebar-wrapper {
+  background-color: #ffffff;
+  border-radius: 0.5rem; /* Tương đương rounded-3 */
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); /* Tương đương shadow-sm */
+  padding: 1rem;
+  height: 100%;
+}
+
+/* 2. Topic Header (Menu Cha) */
+.topic-header {
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  user-select: none; /* Chống bôi đen text khi click liên tục */
+}
+
+.topic-header:hover {
+  background-color: #f8f9fa; /* Màu xám nhạt khi hover vào header */
+}
+
+.topic-title {
+  margin: 0;
+  font-weight: 700;
+  color: #0d6efd; /* Bootstrap Primary Blue */
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+/* 3. Submenu Container (Menu Con) */
+.submenu-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-left: 0.75rem; /* Thụt đầu dòng */
+  margin-left: 0.5rem;
+  border-left: 2px solid #e9ecef; /* Đường kẻ dọc mờ mờ nối các part */
+}
+
+/* 4. Part Item (Các Link Part) */
+.part-link {
+  display: block;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: #495057; /* Màu xám đậm */
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hiệu ứng Hover cho Part */
+.part-link:not(.active):hover {
+  background-color: #f1f3f5;
+  color: #000;
+  padding-left: 20px; /* Đẩy chữ sang phải nhẹ khi hover */
+}
+
+/* 5. Active State (Trạng thái đang chọn) */
+.part-link.active {
+  background-color: #ffc107 !important; /* Màu vàng Bootstrap (bg-warning) */
+  color: #212529 !important; /* Màu đen */
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}

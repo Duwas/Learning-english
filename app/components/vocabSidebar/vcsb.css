@@ -1,0 +1,77 @@
+*{
+  margin: 0;
+  padding: 0;
+}/* app/components/vocabSidebar/vocab.module.css */
+
+/* Khung bao ngoài */
+.sidebarWrapper {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0,5);
+  padding: 16px;
+  border: 1px solid #eaeaea;
+  height: fit-content;
+}
+
+/* Header của Topic (Menu cha) */
+.topicHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 4px;
+}
+
+.topicHeader:hover {
+  background-color: #f8f9fa;
+}
+
+.topicTitle {
+  margin: 0;
+  font-weight: 700;
+  color: #0d6efd; /* Màu xanh của Bootstrap */
+  text-transform: uppercase;
+  font-size: 0.95rem;
+}
+
+/* Container chứa các Part (Menu con) */
+.submenuContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 10px; /* Thụt vào một chút */
+  margin-top: 5px;
+  border-left: 2px solid #f0f0f0; /* Đường kẻ mờ bên trái */
+  margin-left: 10px;
+}
+
+/* Style cho từng link Part */
+.partLink {
+  display: block;
+  text-decoration: none !important; /* Bắt buộc bỏ gạch chân */
+  padding: 8px 16px;
+  border-radius: 50px; /* Bo tròn kiểu viên thuốc như hình mẫu */
+  color: #495057; /* Màu chữ xám đen mặc định */
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
+  background-color: transparent;
+}
+
+/* Khi di chuột vào link chưa chọn */
+.partLink:not(.active):hover {
+  background-color: #e9ecef;
+  color: #000;
+  transform: translateX(5px); /* Hiệu ứng trượt nhẹ sang phải */
+}
+
+/* --- TRẠNG THÁI ĐANG CHỌN (QUAN TRỌNG) --- */
+.active {
+  background-color: #ffc107 !important; /* Màu vàng cam */
+  color: #212529 !important; /* Màu chữ đen đậm */
+  font-weight: 700 !important;
+  box-shadow: 0 2px 5px rgba(255, 193, 7, 0.3);
+}

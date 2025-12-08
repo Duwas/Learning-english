@@ -1,0 +1,153 @@
+/* UserProfile.module.css */
+
+.user-profile-dashboard {
+  padding: 20px;
+  background-color: #f8f9fa; /* Màu nền nhẹ cho toàn bộ trang */
+}
+
+/* --- Profile Header --- */
+.profile-header {
+  /* Tông màu xám của nền các chỉ số */
+  background-color: white;
+}
+
+.profile-picture-container {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 3px solid white; /* Viền trắng nếu cần */
+}
+
+.camera-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: #38c172; /* Màu xanh lá cây */
+  color: white;
+  border-radius: 50%;
+  padding: 5px;
+  font-size: 10px;
+  cursor: pointer;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-name {
+  font-weight: bold;
+}
+
+.profile-contact-info span {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.profile-actions .btn-secondary-outline {
+    /* Tạo nút "Chia sẻ" có viền */
+    border: 1px solid #38c172;
+    color: #38c172;
+    background-color: transparent;
+}
+.profile-actions .btn-secondary-outline:hover {
+    background-color: #e6f6ec;
+}
+
+/* --- Statistics Cards --- */
+.statistics-row {
+  margin-top: 20px;
+}
+
+.stat-card {
+  background-color: #6c757d; /* Màu nền xám đậm cho thẻ thống kê */
+  color: white;
+  min-height: 80px;
+  padding: 15px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Tùy chỉnh màu cụ thể cho các thẻ (nếu muốn) */
+/* .statistics-row > div:nth-child(1) .stat-card { background-color: #dc3545; } */
+/* .statistics-row > div:nth-child(2) .stat-card { background-color: #ffc107; } */
+/* .statistics-row > div:nth-child(3) .stat-card { background-color: #0d6efd; } */
+/* .statistics-row > div:nth-child(4) .stat-card { background-color: #198754; } */
+
+
+/* --- Tab Navigation --- */
+.profile-tabs {
+  border-bottom: none;
+}
+
+.profile-tabs .nav-link {
+  color: #6c757d;
+  background-color: transparent;
+  border: none;
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+}
+
+.profile-tabs .nav-link.active {
+  color: white;
+  background-color: #38c172; /* Màu xanh lá cây */
+  border-color: #38c172;
+}
+
+/* Icon cho tab active */
+.profile-tabs .nav-link.active svg {
+    color: white;
+}
+
+/* --- Personal Info Detail --- */
+.personal-info-detail {
+  font-size: 0.95rem;
+}
+
+.info-group {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 8px !important;
+}
+
+.info-label {
+  font-weight: normal;
+  color: #6c757d;
+  flex: 1;
+}
+
+.info-value {
+  font-weight: bold;
+  color: #343a40;
+  flex: 1;
+}
+
+/* Tùy chỉnh nút "Chỉnh sửa" chính */
+.btn-success {
+    background-color: #38c172;
+    border-color: #38c172;
+}
+.btn-success:hover {
+    background-color: #2e9f5e;
+    border-color: #2e9f5e;
+}

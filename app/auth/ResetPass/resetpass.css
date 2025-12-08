@@ -1,0 +1,79 @@
+/* ChangePassword.css */
+.change-password-page {
+    background-color: #f5f5f5; /* Nền xám nhẹ giống Shopee/Lazada */
+    min-height: 80vh;
+}
+
+/* Sidebar Styles */
+.profile-sidebar .list-group-item {
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.profile-sidebar .list-group-item:hover {
+    background-color: #f8f9fa;
+    color: #ee4d2d; /* Màu cam chủ đạo hoặc màu brand của bạn */
+}
+
+.profile-sidebar .list-group-item.active {
+    background-color: transparent;
+    color: #ee4d2d;
+    font-weight: 600;
+}
+
+.profile-sidebar .list-group-item i {
+    font-size: 1.2rem;
+    width: 25px;
+    text-align: center;
+}
+
+/* Card Styles */
+.profile-card {
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,.13);
+    border-radius: 2px;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #efefef;
+}
+
+/* Form Styles */
+.change-password-form .form-label {
+    font-size: 14px;
+    color: #555555 !important;
+}
+
+.change-password-form .form-control {
+    font-size: 14px;
+    height: 40px;
+    border-radius: 2px;
+}
+
+.change-password-form .form-control:focus {
+    box-shadow: none;
+    border-color: #888;
+}
+
+.change-password-form .btn-primary {
+    /* Thay đổi màu này theo màu chủ đạo của web bạn */
+    background-color: #ee4d2d; 
+    border-color: #ee4d2d;
+    font-size: 14px;
+    border-radius: 2px;
+    min-width: 120px;
+}
+
+.change-password-form .btn-primary:hover {
+    background-color: #d73211;
+    border-color: #d73211;
+}
+
+.change-password-form .btn-link {
+    color: #555;
+    font-size: 14px;
+}

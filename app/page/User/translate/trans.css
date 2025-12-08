@@ -1,0 +1,101 @@
+/* Body nền */
+.translate-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+  background-color: #f0f2f5;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Card chính */
+.translate-card {
+  max-width: 800px;
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+  background-color: #ffffff;
+  padding: 32px;
+}
+
+/* Title */
+.translate-card h3 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Language selectors */
+.language-select {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Swap button */
+.swap-button {
+  background-color: #72cc19;
+  border: none;
+  color: white;
+  font-size: 18px;
+  border-radius: 8px;
+  padding: 0 12px;
+  transition: all 0.2s ease;
+}
+.swap-button:hover {
+  background-color: #62b015;
+}
+
+/* TextArea input */
+.translate-input {
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  padding: 12px;
+  font-size: 16px;
+  resize: none;
+  transition: all 0.2s ease;
+}
+.translate-input:focus {
+  outline: none;
+  border-color: #72cc19;
+  box-shadow: 0 0 0 3px rgba(114, 204, 25, 0.2);
+}
+
+/* Translate button */
+.translate-button {
+  background-color: #72cc19;
+  border: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px;
+  transition: all 0.2s ease;
+}
+.translate-button:hover {
+  background-color: #62b015 !important;
+}
+
+/* Output card */
+.translate-output {
+  margin-top: 24px;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.translate-output strong {
+  color: #111827;
+  font-size: 14px; 
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .translate-card {
+    padding: 20px;
+  }
+  .swap-button {
+    font-size: 16px;
+    padding: 0 8px;
+  }
+}
