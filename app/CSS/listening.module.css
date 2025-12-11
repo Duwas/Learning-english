@@ -1,0 +1,104 @@
+/* app/CSS/listening.module.css */
+
+/* ------------------------------------------------ */
+/* 1. CONFIGURATION (Local Variables) */
+/* ------------------------------------------------ */
+.listening-page {
+  --local-yellow-primary: #fcd504;
+  --local-title-color: #333;
+}
+
+/* ------------------------------------------------ */
+/* 2. HEADER/BANNER STYLES */
+/* ------------------------------------------------ */
+.header-banner {
+  background-color: var(--local-yellow-primary);
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-banner h1,
+.header-banner a {
+  color: var(--bs-body-color, #212529);
+}
+
+/* ------------------------------------------------ */
+/* 3. LESSON CARD STYLES */
+/* ------------------------------------------------ */
+.lesson-card {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  height: 100%;
+  background-color: #fff;
+  position: relative;
+}
+
+.lesson-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Title bar below image */
+.lesson-card-title-bar {
+  background-color: var(--local-yellow-primary);
+  text-align: center;
+  padding: 0.5rem 0.25rem;
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lesson-card-title {
+  color: var(--local-title-color);
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+/* ------------------------------------------------ */
+/* 4. OVERLAY */
+/* ------------------------------------------------ */
+.lesson-card-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Headset icon */
+.icon-headset {
+  background-color: var(--local-yellow-primary);
+  border-radius: 50%;
+  padding: 0.5rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Level Badge (A1/A2/B1) */
+.badge-level {
+  background-color: #fff;
+  color: var(--local-yellow-primary);
+  border: 2px solid var(--local-yellow-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

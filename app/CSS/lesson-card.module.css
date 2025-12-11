@@ -1,0 +1,86 @@
+
+.card-wrapper {
+  --local-yellow-primary: #fcd504; 
+  --local-card-border: #dee2e6;
+  --local-title-color: #333;
+}
+
+/* Style cho toàn bộ Card */
+.lesson-card {
+  /* Loại bỏ các style antd mặc định nếu cần */
+  border: 1px solid var(--local-card-border) !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%; /* Đảm bảo card cao bằng nhau trong LessonGrid */
+  cursor: pointer;
+}
+
+.lesson-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Style cho phần Cover (Image) */
+.lesson-card-cover {
+  position: relative;
+}
+
+/* Style cho Tag Level (A1, A2, B1) */
+.level-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  /* Override màu Antd mặc định (volcano) */
+  background-color: white !important; 
+  color: var(--local-yellow-primary) !important;
+  border: 2px solid var(--local-yellow-primary) !important;
+  border-radius: 50% !important;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.75rem !important;
+  padding: 0 !important; /* Loại bỏ padding mặc định của Antd Tag */
+  line-height: 1; /* Căn giữa text */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+/* Thêm biểu tượng tai nghe (dùng div giả lập) */
+.headset-icon {
+  position: absolute;
+  top: 50px; /* Vị trí dưới tag level */
+  right: 10px;
+  background-color: var(--local-yellow-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+/* Style cho phần Nội dung/Meta (thay thế cho thanh màu vàng) */
+.lesson-card-meta {
+  background-color: var(--local-yellow-primary);
+  text-align: center;
+  padding: 0.5rem 0.25rem;
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style cho tiêu đề (title) */
+.lesson-card-title {
+  color: var(--local-title-color);
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1.2;
+}

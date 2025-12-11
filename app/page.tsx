@@ -4,6 +4,7 @@ import MainHeader from "./components/layout/Header";
 import "./CSS/main-menu.css";
 import MainFooter from "./components/layout/Footer";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import "./globals.css";
 // import {Button} from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import LessonCard from "./components/courseItem/LessonCard";
@@ -15,7 +16,7 @@ const cardData = [
     title: "Grammar Lessons",
     text: "Study the grammar lessons that are typically included in each level: A1, A2, B1, B1+, B2. There are three or more exercises and an explanation in each lesson, and feedback for every single question!",
     buttonLabel: "Go to the lessons",
-    buttonLink: "/page/User/LessonGrammarCard",
+    buttonLink: "/User/LessonGrammarCard",
     colorClass: "blue",
   },
   {
@@ -23,7 +24,7 @@ const cardData = [
     title: "Vocabulary Lessons",
     text: "Boost your vocabulary with exercises tailored for each level: A1, A2, B1, B1+, B2. Every lesson features keywords, definitions, pictures and quizzes with personalized feedback to enhance your learning.",
     buttonLabel: "Go to the lessons",
-    buttonLink: "/page/User/LessonVocabCard",
+    buttonLink: "/User/LessonVocabCard",
     colorClass: "pink",
   },
   {
