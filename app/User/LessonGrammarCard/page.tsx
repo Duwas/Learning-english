@@ -8,6 +8,8 @@ import MainFooter from "@/app/components/layout/Footer";
 import grammarAPI from "@/app/services/api/TreeGrmAPI";
 import { useApi } from "@/app/hooks/useApi";
 import { useToast } from "@/app/hooks/useToast";
+import QuizModal from "@/app/components/quiz/page";
+
 import axios from "axios";
 
 interface LessonItem {
@@ -24,11 +26,11 @@ export default function GrammarLearnPage() {
   const { showToast } = useToast();
   const { callApi } = useApi(showToast);
   const searchParams = useSearchParams();
+  const [showQuiz, setShowQuiz] = useState(false);
 
-  // 1. Lấy Category ID (mặc định 1)
   const currentCategoryId = searchParams.get("part")
     ? Number(searchParams.get("part"))
-    : 1;
+    : 28;
 
   // --- STATE ---
   const [sidebarData, setSidebarData] = useState<GrmTopicData[]>([]);
@@ -54,13 +56,10 @@ export default function GrammarLearnPage() {
         const rawData = res.data || res;
         const safeData = Array.isArray(rawData) ? rawData : [];
 
-        const mappedData: GrmTopicData[] = safeData.map(
-          (group: any, index: number) => ({
-            topic_id: index + 1,
-            topic_name: group.title_group,
-            group_words: group.categories,
-          })
-        );
+        const mappedData: GrmTopicData[] = safeData.map((group: any) => ({
+          topic_id: group.topic_id,
+          topic_name: group.topic_name,
+        }));
 
         setSidebarData(mappedData);
       } catch (error) {
@@ -73,10 +72,6 @@ export default function GrammarLearnPage() {
 
     fetchSidebar();
   }, []);
-
-  // ==================================================================================
-  // 2. GỌI API BÀI HỌC (FIX LỖI FIND IS NOT A FUNCTION)
-  // ==================================================================================
   useEffect(() => {
     const fetchLessons = async () => {
       try {
@@ -120,17 +115,6 @@ export default function GrammarLearnPage() {
   const { topicName, categoryTitle } = useMemo(() => {
     if (!Array.isArray(sidebarData))
       return { topicName: "", categoryTitle: "" };
-
-    for (const topic of sidebarData) {
-      if (Array.isArray(topic.group_words)) {
-        const foundCat = (topic.group_words as any[]).find(
-          (c: any) => c.id === currentCategoryId
-        );
-        if (foundCat) {
-          return { topicName: topic.topic_name, categoryTitle: foundCat.title };
-        }
-      }
-    }
     return { topicName: "", categoryTitle: "" };
   }, [currentCategoryId, sidebarData]);
 
@@ -139,11 +123,22 @@ export default function GrammarLearnPage() {
       <MainHeader />
       <div className="container py-4" style={{ marginTop: "80px" }}>
         {/* === BREADCRUMB === */}
-        <div className="mb-4 border-bottom pb-2">
+        <div className="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
           <h5 className="text-primary fw-bold">
             <span className="text-muted fw-normal">Grammar » </span>
             {loadingSidebar ? "Đang tải..." : categoryTitle || "Danh mục"}
           </h5>
+          <button
+            onClick={() => setShowQuiz(true)}
+            className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+            style={{
+              backgroundColor: "#0d6efd",
+              border: "none",
+              transition: "transform 0.2s",
+            }}
+          >
+            Ôn tập
+          </button>
         </div>
 
         <div className="row" style={{ marginTop: "-20px" }}>
@@ -345,6 +340,14 @@ export default function GrammarLearnPage() {
           </div>
         </div>
       </div>
+
+      <QuizModal
+        isOpen={showQuiz}
+        onClose={() => setShowQuiz(false)}
+        groupId={-1}
+        grammarId={currentCategoryId}
+      />
+
       <MainFooter />
     </>
   );

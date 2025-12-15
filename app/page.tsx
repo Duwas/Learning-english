@@ -9,6 +9,7 @@ import "./globals.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import LessonCard from "./components/courseItem/LessonCard";
 import { useRouter } from "next/router";
+import IpaTable from "./components/IpaTable/IpaTable";
 
 const cardData = [
   {
@@ -26,38 +27,6 @@ const cardData = [
     buttonLabel: "Go to the lessons",
     buttonLink: "/User/LessonVocabCard",
     colorClass: "pink",
-  },
-  {
-    img: { src: "/img/Listening_bg.jpg" },
-    title: "Listening Lessons",
-    text: "Improve your listening skills by practicing with our video tests. There are tests for each level: A1, A2, B1, B1+, B2. You will be able to see the transcription of the audio after you submit your answers.",
-    buttonLabel: "Go to the lessons",
-    buttonLink: "/tests/listening",
-    colorClass: "yellow",
-  },
-  {
-    img: { src: "/img/reading_bg.jpg" },
-    title: "Reading Tests",
-    text: "Need to improve your reading skills? Work on our reading tests. There are reading tests for A1, A2, B1, B1+ and B2. You will find different types of texts and there are different types of questions in each test.",
-    buttonLabel: "Go to the tests",
-    buttonLink: "/tests/reading",
-    colorClass: "red", // Màu đỏ
-  },
-  {
-    img: { src: "/img/translate_bg.png" },
-    title: "Translation",
-    text: "In each of these tests you will find 15 multiple-choice questions about the different grammar lessons that you have studied for a specific level: A1, A2, B1, B1+ and B2. You will get feedback for every answer.",
-    buttonLabel: "Translate now",
-    buttonLink: "/tests/use-of-english",
-    colorClass: "orange", // Màu cam
-  },
-  {
-    img: { src: "/img/writing_bg.jpg" },
-    title: "Writing Lessons",
-    text: "Improve your writing with the exercises suggested in each lesson. Different types of texts for each level: A1, A2, B1, B1+, or B2. You will learn how to organise and connect the text in your compositions.",
-    buttonLabel: "Go to the lessons",
-    buttonLink: "/lessons/writing",
-    colorClass: "purple", // Màu tím
   },
 ];
 
@@ -92,7 +61,7 @@ export default function Home() {
       </div>
       {/* PHẦN HIỂN THỊ CÁC CARD MỚI */}
       <div className="container my-5">
-        <div className="row row-cols-1 row-cols-md-3 g-4">
+        <div className="row row-cols-1 row-cols-md-2 g-4">
           {cardData.map((data, index) => (
             <div className="col" key={index}>
               <LessonCard
@@ -106,6 +75,9 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </div>
+      <div className="container my-5">
+        <IpaTable />
       </div>
       <MainFooter />
     </>

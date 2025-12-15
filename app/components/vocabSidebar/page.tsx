@@ -24,7 +24,7 @@ const SingleTopic = ({
   topic: TopicData;
   activePartId: string | null;
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="mb-2">
@@ -48,7 +48,9 @@ const SingleTopic = ({
         >
           {topic.topic_name}
         </span>
-        <span style={{ fontSize: "12px", color: "#6c757d" }}>
+        <span
+          style={{ fontSize: "12px", color: "#6c757d", marginLeft: "auto" }}
+        >
           {isOpen ? <CaretDownOutlined /> : <CaretRightOutlined />}
         </span>
       </div>

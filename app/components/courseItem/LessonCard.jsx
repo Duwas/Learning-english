@@ -21,7 +21,7 @@ const LessonCard = ({ img, title, text, buttonLabel, buttonLink, colorClass }) =
     <div className="card shadow-sm h-100 overflow-hidden hover-lift rounded-3"> 
       
       {/* Phần Hình ảnh với Dải màu TOP */}
-      <div className="position-relative" style={{ height: '14.5rem' }}>
+      <div className="position-relative" style={{ height: '21rem' }}>
         
 
         <img

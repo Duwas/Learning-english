@@ -1,44 +1,92 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Layout, Menu, Button, Avatar } from "antd";
 import type { MenuProps } from "antd";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation"; // *** THÊM usePathname ***
 import { FaSignOutAlt } from "react-icons/fa";
+import "../../css/main-menu.css";
+import api from "@/app/services/api";
 import {
   AudioOutlined,
   ReadOutlined,
   EditOutlined,
   CustomerServiceOutlined,
   TranslationOutlined,
-  FontSizeOutlined,
+  BookOutlined,
+  FormOutlined,
 } from "@ant-design/icons";
-import "../../css/main-menu.css";
 
 type MenuItem = Required<MenuProps>["items"][number];
+
+interface Level {
+  id: number;
+  code: string;
+  name: string;
+}
+
+interface Skill {
+  skillId: number;
+  name: string;
+  levels: Level[];
+}
 
 const MainHeader = () => {
   const { Header } = Layout;
   const router = useRouter();
+  const pathname = usePathname(); // *** KHỞI TẠO PATHNAME ***
+
+  const [menuData, setMenuData] = useState<Skill[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
 
-  // --- Scroll Logic ---
-  const lastScrollYRef = React.useRef(0);
+  const lastScrollYRef = useRef(0);
   const [isHidden, setIsHidden] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // -------------------------------
+  // 📌 KIỂM TRA ĐƯỜNG DẪN CON
+  // -------------------------------
+  const isUserSubPage =
+    pathname && pathname.startsWith("/User/") && pathname !== "/User";
+
+  // -------------------------------
+  // 📌 FETCH MENU FROM BE (Giữ nguyên)
+  // -------------------------------
+  const fetchMenu = async () => {
+    try {
+      const res = await api.get("/topbar-controller/get-topbar");
+      setMenuData(res.data);
+    } catch (err) {
+      console.error("Lỗi load menu:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMenu();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY < lastScrollYRef.current) setIsHidden(false);
-      else if (currentScrollY > lastScrollYRef.current && currentScrollY > 100)
-        setIsHidden(true);
-      lastScrollYRef.current = currentScrollY;
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+      const current = window.scrollY;
 
-  // --- Auth Logic ---
+      // Logic ẩn/hiện (chạy cho mọi trang)
+      if (current < lastScrollYRef.current) setIsHidden(false);
+      else if (current > lastScrollYRef.current && current > 100)
+        setIsHidden(true);
+
+      setIsScrolled(current > 50);
+      lastScrollYRef.current = current;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []); // Dependency rỗng để cuộn luôn được lắng nghe
+
+  // -------------------------------
+  // 📌 LOGIN CHECK, NAVIGATE, ICONS, MAP COLOR, BUILD MENU (Giữ nguyên)
+  // -------------------------------
   useEffect(() => {
     const token = localStorage.getItem("token");
     setLoggedIn(!!token);
@@ -47,110 +95,119 @@ const MainHeader = () => {
   const handleSignOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setLoggedIn(false);
     router.push("/");
   };
 
-  // =======================================================
-  // 🚀 CẬP NHẬT: HÀM ĐIỀU HƯỚNG SANG DYNAMIC ROUTING
-  // =======================================================
-  const handleNavigate = (basePath: string, level?: string) => {
-    if (level) {
-      // Đẩy đến đường dẫn động: /page/User/listening/A1
-      router.push(`${basePath}/${level}`);
-    } else {
-      router.push(basePath);
+  const handleNavigate = (
+    skillName: string,
+    skillId: number,
+    levelId: string
+  ) => {
+    const path = skillName.toLowerCase().replace(/\s/g, "");
+    router.push(`/User/${path}?skill=${skillId}&level=${levelId}`);
+  };
+
+  const getIconForSkill = (name: string) => {
+    const style = { fontSize: 18 };
+    switch (name.toLowerCase()) {
+      case "listening":
+        return <CustomerServiceOutlined style={style} />;
+      case "reading":
+        return <ReadOutlined style={style} />;
+      case "writing":
+        return <EditOutlined style={style} />;
+      case "speaking":
+        return <AudioOutlined style={style} />;
+      case "vocabulary":
+        return <BookOutlined style={style} />;
+      case "grammar":
+        return <FormOutlined style={style} />;
+      case "translate":
+        return <TranslationOutlined style={style} />;
+      default:
+        return null;
     }
   };
 
-  // ===== 3. HÀM TẠO ICON CẤP ĐỘ BẰNG AVATAR (GIỮ NGUYÊN) =====
+  const mapColor = (code: string) => {
+    switch (code) {
+      case "A1":
+        return "#52c41a";
+      case "A2":
+        return "#1890ff";
+      case "B1":
+        return "#faad14";
+      case "B2":
+        return "#722ed1";
+      case "C1":
+        return "#eb2f96";
+      case "C2":
+        return "#fa541c";
+      default:
+        return "#555";
+    }
+  };
+
   const renderLevelAvatar = (text: string, color: string) => (
     <Avatar
       style={{
         backgroundColor: color,
-        verticalAlign: "middle",
         color: "#fff",
+        fontSize: 14,
         fontWeight: "bold",
-        fontSize: "14px",
         width: 36,
         height: 36,
         lineHeight: "36px",
         border: "2px solid rgba(255,255,255,0.8)",
-        boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
-        fontFamily: "Arial, sans-serif",
       }}
     >
       {text}
     </Avatar>
   );
 
-  // ===== 4. HÀM TẠO MENU CON (GIỮ NGUYÊN LOGIC, DÙNG handleNavigate ĐÃ CẬP NHẬT) =====
-  const getLevelItems = (basePath: string): MenuItem[] => [
-    {
-      key: `${basePath}-A1`,
-      label: <span className="submenu-text">Trình độ A1</span>,
-      icon: renderLevelAvatar("A1", "#52c41a"),
-      // Bây giờ sẽ gọi handleNavigate('/page/User/listening', 'A1') -> push('/page/User/listening/A1')
-      onClick: () => handleNavigate(basePath, "A1"),
-    },
-    {
-      key: `${basePath}-A2`,
-      label: <span className="submenu-text">Trình độ A2</span>,
-      icon: renderLevelAvatar("A2", "#1890ff"),
-      onClick: () => handleNavigate(basePath, "A2"),
-    },
-    {
-      key: `${basePath}-B1`,
-      label: <span className="submenu-text">Trình độ B1</span>,
-      icon: renderLevelAvatar("B1", "#faad14"),
-      onClick: () => handleNavigate(basePath, "B1"),
-    },
-  ];
+  const skillItems: MenuItem[] = menuData.map((skill) => ({
+    key: skill.skillId,
+    label: skill.name,
+    icon: getIconForSkill(skill.name),
 
-  // ===== 5. CẤU HÌNH MENU ITEMS (GIỮ NGUYÊN) =====
-  const items: MenuItem[] = [
-    {
-      key: "listening",
-      label: "Listening",
-      icon: <CustomerServiceOutlined style={{ fontSize: "18px" }} />,
-      popupClassName: "styled-submenu-popup",
-      children: getLevelItems("/User/listen"),
-    },
-    {
-      key: "reading",
-      label: "Reading",
-      icon: <ReadOutlined style={{ fontSize: "18px" }} />,
-      popupClassName: "styled-submenu-popup",
-      children: getLevelItems("/User/reading"),
-    },
-    {
-      key: "writing",
-      label: "Writing",
-      icon: <EditOutlined style={{ fontSize: "18px" }} />,
-      popupClassName: "styled-submenu-popup",
-      children: getLevelItems("/User/writing"),
-    },
-    {
-      key: "speaking",
-      label: "Speaking",
-      icon: <AudioOutlined style={{ fontSize: "18px" }} />,
-      popupClassName: "styled-submenu-popup",
-      children: getLevelItems("/User/speaking"),
-    },
-    {
-      key: "translate",
-      label: "Translate",
-      icon: <TranslationOutlined style={{ fontSize: "18px" }} />,
-      onClick: () => router.push("/User/translate"),
-    },
-  ];
+    children: skill.levels.map((lv) => ({
+      key: `${skill.skillId}-${lv.code}`,
+      label: `${lv.name} (${lv.code})`,
+      icon: renderLevelAvatar(lv.code, mapColor(lv.code)),
 
+      onClick: () => handleNavigate(skill.name, skill.skillId, lv.code),
+    })),
+  }));
+
+  const translateItem: MenuItem = {
+    key: "translate",
+    label: "Translate",
+    icon: getIconForSkill("translate"),
+    onClick: () => router.push("/User/translate"),
+  };
+
+  const items: MenuItem[] = [...skillItems, translateItem];
+
+  // -------------------------------
+  // 📌 LOGIC MÀU NỀN VÀ HIỆU ỨNG (ĐÃ SỬA)
+  // -------------------------------
+  let headerBackgroundColor;
+
+  if (isUserSubPage) {
+    // Nếu là trang con (/User/*): luôn có màu tối #001529
+    headerBackgroundColor = "#001529";
+  } else {
+    // Nếu là trang khác (trang chủ /): áp dụng hiệu ứng cuộn trong suốt
+    headerBackgroundColor = isScrolled ? "#001529" : "transparent";
+  }
+
+  // Transform luôn sử dụng isHidden (ẩn/hiện khi cuộn)
   const transformStyle = isHidden ? "translateY(-100%)" : "translateY(0)";
 
+  // -------------------------------
+  // 📌 RENDER UI
+  // -------------------------------
   return (
-    // =======================================================
-    // 🎨 CẤU TRÚC HTML VÀ CSS INLINE (GIỮ NGUYÊN)
-    // =======================================================
     <Header
       className={`main-header ${isHidden ? "header-hidden" : ""}`}
       style={{
@@ -158,20 +215,20 @@ const MainHeader = () => {
         alignItems: "center",
         justifyContent: "space-between",
         position: "fixed",
-        top: 0,
         width: "100%",
-        zIndex: 1000,
-        backgroundColor: "#001529",
-        transform: transformStyle,
-        transition: "transform 0.3s ease-out",
+        top: 0,
+        height: 64,
         padding: "0 30px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        zIndex: 1000,
+        backgroundColor: headerBackgroundColor,
+        transform: transformStyle, // Sử dụng transformStyle đã tính toán
+        transition: "0.3s",
       }}
     >
+      {/* LOGO */}
       <div
-        className="demo-logo"
-        style={{ cursor: "pointer", display: "flex", alignItems: "center" }}
         onClick={() => router.push("/")}
+        style={{ cursor: "pointer", display: "flex", alignItems: "center" }}
       >
         <img
           src="/img/Logo.png"
@@ -181,40 +238,28 @@ const MainHeader = () => {
             borderRadius: "50%",
             marginRight: 12,
           }}
-          alt="Logo"
         />
-        <span
-          className="text-white fw-bold fs-5"
-          style={{ letterSpacing: "1px" }}
-        >
-          doubleK-Book
-        </span>
+        <span className="text-white fw-bold fs-5">doubleK-Book</span>
       </div>
 
+      {/* MENU */}
       <Menu
         theme="dark"
         mode="horizontal"
         items={items}
         style={{
           flex: 1,
-          minWidth: 0,
           justifyContent: "center",
+          backgroundColor: "transparent",
           borderBottom: "none",
-          fontSize: "16px",
-          fontWeight: 500,
+          fontSize: 16,
         }}
-        triggerSubMenuAction="hover"
       />
 
+      {/* USER */}
       <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-        <i
-          id="find"
-          className="fa-solid fa-magnifying-glass"
-          style={{ color: "white", cursor: "pointer", fontSize: "18px" }}
-        ></i>
-
         {loggedIn ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+          <>
             <img
               src="/img/user_img.png"
               onClick={() => router.push("/page/User/userProfile")}
@@ -224,22 +269,18 @@ const MainHeader = () => {
                 borderRadius: "50%",
                 cursor: "pointer",
                 border: "2px solid #1890ff",
-                transition: "transform 0.2s",
               }}
-              className="user-avatar"
-              alt="User"
             />
             <FaSignOutAlt
+              style={{ color: "#ff4d4f", fontSize: 20, cursor: "pointer" }}
               onClick={handleSignOut}
-              style={{ color: "#ff4d4f", cursor: "pointer", fontSize: 20 }}
-              title="Đăng xuất"
             />
-          </div>
+          </>
         ) : (
           <Button
             type="primary"
+            style={{ borderRadius: 20, fontWeight: 600 }}
             onClick={() => router.push("/auth/login")}
-            style={{ borderRadius: "20px", fontWeight: "600" }}
           >
             Đăng nhập
           </Button>

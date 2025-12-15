@@ -156,12 +156,11 @@ export default function LearnPage() {
           </div>
         </div>
       </div>
-
-      {/* 4. CHÈN QUIZ MODAL VÀO CUỐI TRANG */}
       <QuizModal
         isOpen={showQuiz}
         onClose={() => setShowQuiz(false)}
         groupId={currentPart}
+        
       />
 
       <MainFooter />

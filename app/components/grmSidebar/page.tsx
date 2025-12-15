@@ -1,118 +1,89 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
+import React, { useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-export interface GrmPartItem { id: number; title: string; } 
-export interface GrmSidebarProps { data: GrmTopicData[]; } 
-export interface GrmTopicData { topic_id: number; topic_name: string; group_words: GrmPartItem[]; }
+export interface GrmSidebarProps {
+  data: GrmTopicData[];
+}
 
-// Component con: Hiển thị 1 Topic
-const SingleGrmTopic = ({ topic, activePartId }: { topic: GrmTopicData, activePartId: string | null }) => {
-  const [isOpen, setIsOpen] = useState(true);
+export interface GrmTopicData {
+  topic_id: number;
+  topic_name: string;
+}
+
+const SingleGrmTopic = ({
+  topic,
+  activePartId,
+}: {
+  topic: GrmTopicData;
+  activePartId: string | null;
+}) => {
+  const isActive = activePartId === String(topic.topic_id);
 
   return (
-    <div className="mb-2">
-
-      {/* HEADER TOPIC */}
-      <div 
-        className="d-flex align-items-center p-2 rounded"
-        onClick={() => setIsOpen(!isOpen)}
-        style={{ 
-          cursor: 'pointer',
-          userSelect: 'none',
-          backgroundColor: '#fff',
-          gap: '40px'
+    <div
+      className={`topic-item ${isActive ? "active" : ""}`}
+      style={{
+        marginBottom: "4px",
+      }}
+    >
+      <Link
+        href={`?part=${topic.topic_id}`}
+        className="topic-link"
+        style={{
+          display: "block",
+          padding: "12px 18px",
+          fontWeight: 600,
+          textDecoration: "none",
+          transition: "0.25s",
+          backgroundColor: isActive ? "#fff3cd" : "#fff",
+          color: isActive ? "#856404" : "#0d6efd",
+          borderLeft: isActive ? "4px solid #ffc107" : "4px solid transparent",
+          boxShadow: isActive ? "0 3px 6px rgba(0,0,0,0.2)" : "none",
+          
         }}
       >
-        <span style={{ fontWeight: 'bold', color: '#0d6efd', textTransform: 'uppercase' }}>
-          {topic.topic_name}
-        </span>
+        {topic.topic_name}
+      </Link>
 
-        <span style={{ fontSize: '12px', color: '#6c757d' }}>
-          {isOpen ? <CaretDownOutlined /> : <CaretRightOutlined />}
-        </span>
-      </div>
+      <style jsx>{`
+        .topic-link:hover {
+          background-color: #f8f9fa !important;
+        }
 
-      {/* DANH SÁCH PART CON */}
-      {isOpen && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '5px',
-            paddingLeft: '10px',
-            marginLeft: '10px',
-            borderLeft: '2px solid #d1cece',
-            marginTop: '5px'
-            // Đã bỏ max-height ở đây để nội dung tràn tự nhiên trong Sidebar cha
-          }}
-        >
-          {topic.group_words.map((part) => {
-            
-            const id = part.id;
-            const displayLabel = `${part.title}`;
-            const isActive = activePartId === id.toString();
-
-            return (
-              <Link
-                key={id}
-                href={`?part=${id}`}
-                className="part-item"
-                style={{
-                  display: 'block',
-                  textDecoration: 'none',
-                  padding: '8px 20px',
-                  borderRadius: '50px',
-                  fontSize: '0.95rem',
-                  transition: 'all 0.2s',
-                  
-                  backgroundColor: isActive ? '#fff3cd' : 'transparent',
-                  color: isActive ? '#856404' : '#495057',
-                  fontWeight: isActive ? '700' : '500',
-                  boxShadow: isActive ? '0 4px 6px rgba(0,0,0,0.2)' : 'none',
-                  borderLeft: isActive ? '4px solid #ffc107' : '4px solid transparent',
-                  transform: isActive ? 'translateX(5px)' : 'none'
-                }}
-              >
-                {displayLabel}
-              </Link>
-            );
-          })}
-        </div>
-      )}
+        .topic-item.active .topic-link:hover {
+          background-color: #fff3cd !important;
+          opacity: 0.9;
+        }
+      `}</style>
     </div>
   );
 };
 
-// Component chính
 export default function GrmSidebar({ data }: GrmSidebarProps) {
   const searchParams = useSearchParams();
-  const activePartId = searchParams.get('part');
+  const activePartId = searchParams.get("part");
 
   return (
     <div
-      className="sidebar-scroll-container" // Class cho scrollbar
+      className="sidebar-scroll-container"
       style={{
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
-        padding: '15px',
-        border: '1px solid #eee',
-
-        // --- CẤU HÌNH QUAN TRỌNG ĐỂ SCROLL SIDEBAR ---
-        position: 'sticky',           // Giúp sidebar đứng yên khi cuộn trang chính
-        top: '100px',                 // Cách mép trên màn hình 100px (để chừa chỗ cho Header)
-        maxHeight: 'calc(100vh - 120px)', // Chiều cao tối đa = Chiều cao màn hình - khoảng cách trên/dưới
-        overflowY: 'auto',            // Nếu nội dung dài hơn maxHeight -> hiện thanh cuộn dọc
-        paddingRight: '5px'           // Chừa chỗ cho thanh scrollbar
-        // ---------------------------------------------
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.6)",
+        padding: "15px",
+        border: "1px solid #eee",
+        position: "sticky",
+        top: "100px",
+        maxHeight: "calc(100vh - 120px)",
+        overflowY: "auto",
+        paddingRight: "5px",
       }}
     >
       {data.map((topic) => (
-        <SingleGrmTopic 
+        <SingleGrmTopic
           key={topic.topic_id}
           topic={topic}
           activePartId={activePartId}
@@ -120,28 +91,19 @@ export default function GrmSidebar({ data }: GrmSidebarProps) {
       ))}
 
       <style jsx>{`
-        .part-item:hover {
-          background-color: #f8f9fa !important;
-        }
-        .part-item[style*="background-color: #ffc107"]:hover {
-          background-color: #ffc107 !important;
-          opacity: 0.9;
-        }
-
-        /* --- TÙY CHỈNH THANH CUỘN (SCROLLBAR) --- */
         .sidebar-scroll-container::-webkit-scrollbar {
           width: 6px;
         }
         .sidebar-scroll-container::-webkit-scrollbar-track {
-          background: #f1f1f1; 
+          background: #f1f1f1;
           border-radius: 4px;
         }
         .sidebar-scroll-container::-webkit-scrollbar-thumb {
-          background: #c1c1c1; 
+          background: #c1c1c1;
           border-radius: 4px;
         }
         .sidebar-scroll-container::-webkit-scrollbar-thumb:hover {
-          background: #a8a8a8; 
+          background: #a8a8a8;
         }
       `}</style>
     </div>

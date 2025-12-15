@@ -1,0 +1,392 @@
+// FILE: /app/listening/test/page.tsx
+
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import MainHeader from "@/app/components/layout/Header";
+import MainFooter from "@/app/components/layout/Footer";
+import { Alert, Spin, Divider, Button, Modal, Tag } from "antd";
+// Đảm bảo RedoOutlined đã được import
+import {
+  SendOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  RedoOutlined,
+} from "@ant-design/icons";
+import { useEffect, useState, useCallback } from "react";
+import { AxiosError, AxiosResponse } from "axios";
+
+// Import services và component UI
+import api from "@/app/services/api";
+import flashAPI from "@/app/services/api/flashAPI";
+import ListeningComponent from "@/app/components/exerciseCard/exListen";
+
+import "bootstrap/dist/css/bootstrap.min.css";
+
+// --------------------------------------------------------------------------
+// INTERFACES
+// --------------------------------------------------------------------------
+interface Option {
+  optionId: number;
+  optionText: string;
+}
+interface QuestionNode {
+  questionId: number;
+  questionText: string;
+  options: Option[];
+}
+interface ExerciseData {
+  exerciseId: number;
+  topic: string;
+  title: string;
+  description: string;
+  audioUrl: string;
+  subQuestionNodes: QuestionNode[];
+}
+interface QuestionResult {
+  questionId: number;
+  selectedOptionId: number;
+  correct: boolean;
+  correctOptionId?: number;
+}
+interface SubmitResponse {
+  exerciseId: number;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  results: QuestionResult[];
+}
+interface Result {
+  score: number;
+  totalQuestions: number;
+  correctCount: number;
+  incorrectCount: number;
+}
+
+// --------------------------------------------------------------------------
+// INTERFACE MỚI CHO MODAL
+// --------------------------------------------------------------------------
+interface ResultModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  result: Result;
+  detailedResults: QuestionResult[];
+  questions: QuestionNode[];
+  onRedo: () => void; // 👈 HÀM LÀM LẠI
+}
+
+// --------------------------------------------------------------------------
+// COMPONENT MODAL HIỂN THỊ KẾT QUẢ
+// --------------------------------------------------------------------------
+const ResultModal = ({
+  isOpen,
+  onClose,
+  result,
+  detailedResults,
+  questions,
+  onRedo,
+}: ResultModalProps) => {
+  if (!result) return null;
+
+  const correctCount = result.correctCount;
+  const incorrectCount = result.totalQuestions - correctCount;
+
+  const getQuestionText = (qId: number) => {
+    const question = questions.find((q) => q.questionId === qId);
+    return question ? question.questionText : `Câu hỏi ID ${qId}`;
+  };
+
+  const getOptionText = (qId: number, oId: number) => {
+    const question = questions.find((q) => q.questionId === qId);
+    const option = question?.options.find((o) => o.optionId === oId);
+    return option ? option.optionText : "Không xác định";
+  };
+
+  return (
+    <Modal
+      title="🎯 Kết Quả Bài Làm"
+      open={isOpen}
+      onCancel={onClose}
+      footer={[
+        <Button key="close" onClick={onClose}>
+          Đóng
+        </Button>,
+        // 🎯 NÚT LÀM LẠI VỚI ICON VÀ HÀM onRedo
+        <Button key="redo" onClick={onRedo} type="primary" danger>
+          <RedoOutlined className="me-1" /> Làm lại bài tập
+        </Button>,
+      ]}
+      width={700}
+    >
+      <div className="text-center py-2">
+        <CheckCircleOutlined style={{ fontSize: "50px", color: "#52c41a" }} />
+        <h3 className="mt-2 mb-3 fw-bold">BÀI LÀM ĐÃ ĐƯỢC CHẤM</h3>
+
+        <div className="row justify-content-center mb-4">
+          <div className="col-4">
+            <div className="card p-3 shadow-sm border-0">
+              <div className="fs-1 fw-bold text-success">
+                {Math.round(result.score)}
+              </div>
+              <div className="text-muted">Điểm Số</div>
+            </div>
+          </div>
+          <div className="col-4">
+            <div className="card p-3 shadow-sm border-0">
+              <div className="fs-1 fw-bold text-primary">{correctCount}</div>
+              <div className="text-muted">Câu Đúng</div>
+            </div>
+          </div>
+          <div className="col-4">
+            <div className="card p-3 shadow-sm border-0">
+              <div className="fs-1 fw-bold text-danger">{incorrectCount}</div>
+              <div className="text-muted">Câu Sai</div>
+            </div>
+          </div>
+        </div>
+
+        <Divider>Lịch sử làm bài chi tiết</Divider>
+
+        <div
+          style={{ maxHeight: "300px", overflowY: "auto", textAlign: "left" }}
+        >
+          {detailedResults.map((res, index) => (
+            <Alert
+              key={res.questionId}
+              message={`Câu ${index + 1}: ${getQuestionText(res.questionId)}`}
+              description={
+                <div>
+                  <p className="m-0" style={{ color: "#00bfff" }}>
+                    Đáp án bạn chọn:
+                    <Tag
+                      color={res.correct ? "success" : "error"}
+                      className="ms-2"
+                    >
+                      {getOptionText(res.questionId, res.selectedOptionId)}
+                    </Tag>
+                    {res.correctOptionId && !res.correct && (
+                      <Tag color="green" className="ms-2">
+                        Đúng:{" "}
+                        {getOptionText(res.questionId, res.correctOptionId)}
+                      </Tag>
+                    )}
+                  </p>
+                </div>
+              }
+              type={res.correct ? "success" : "error"}
+              icon={
+                res.correct ? <CheckCircleOutlined /> : <CloseCircleOutlined />
+              }
+              className="mb-2"
+            />
+          ))}
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export default function ListeningTestPage() {
+  const searchParams = useSearchParams();
+  const topicId = searchParams.get("topicId");
+
+  const [exerciseData, setExerciseData] = useState<ExerciseData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // STATE QUẢN LÝ LOGIC NỘP BÀI
+  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [result, setResult] = useState<Result | null>(null);
+  const [detailedResults, setDetailedResults] = useState<QuestionResult[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 1. HÀM TẢI DỮ LIỆU BAN ĐẦU (ĐÃ GỘP)
+  const fetchExercise = useCallback(async (topicId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res: AxiosResponse<ExerciseData[]> = await api.get(
+        `/quiz-tree/getByTopic/${topicId}`
+      );
+      if (res.data && res.data.length > 0) {
+        setExerciseData(res.data[0]);
+      } else {
+        setError("Không có dữ liệu bài tập.");
+      }
+    } catch (err) {
+      console.error("API Error:", err);
+      setError("Lỗi khi tải nội dung bài kiểm tra từ server.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // 2. HÀM RESET TOÀN BỘ VÀ LÀM LẠI
+  const resetQuizAndFetch = () => {
+    if (!topicId) return;
+
+    // Reset tất cả các state liên quan đến kết quả
+    setIsSubmitted(false);
+    setResult(null);
+    setDetailedResults([]);
+    setUserAnswers({}); // Reset đáp án đã chọn
+    setIsModalOpen(false);
+
+    // Tải lại bài tập
+    fetchExercise(topicId);
+  };
+
+  // 3. EFFECT GỌI HÀM FETCH KHI TRANG TẢI LẦN ĐẦU
+  useEffect(() => {
+    if (topicId) {
+      fetchExercise(topicId);
+    } else {
+      setError("Không tìm thấy ID chủ đề (Topic ID).");
+      setLoading(false);
+    }
+  }, [topicId, fetchExercise]);
+
+  // 4. HÀM GỌI API SUBMIT VÀ XỬ LÝ KẾT QUẢ TỪ BE (Giữ nguyên)
+  const submitToBackend = async (
+    exerciseId: number,
+    answers: Record<number, number>
+  ) => {
+    const userAnswersArray = Object.entries(answers).map(([qId, oId]) => ({
+      questionId: parseInt(qId),
+      selectedOptionId: oId,
+    }));
+
+    const payload = [
+      {
+        exerciseId: exerciseId,
+        answers: userAnswersArray,
+      },
+    ];
+
+    setSubmitting(true);
+    try {
+      const response: AxiosResponse<SubmitResponse[]> =
+        await flashAPI.submitQuiz(payload);
+
+      if (response.data && response.data.length > 0) {
+        const beResult = response.data[0];
+
+        const newResult: Result = {
+          score: beResult.score,
+          totalQuestions: beResult.totalQuestions,
+          correctCount: beResult.correctCount,
+          incorrectCount: beResult.totalQuestions - beResult.correctCount,
+        };
+
+        setResult(newResult);
+        setDetailedResults(beResult.results);
+        setIsSubmitted(true);
+        setIsModalOpen(true);
+      } else {
+        throw new Error("Phản hồi từ BE không chứa dữ liệu kết quả chấm điểm.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi gửi kết quả lên server:", error);
+      setError("Lỗi: Không thể chấm điểm và lưu lịch sử. Vui lòng thử lại.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 5. HÀM XỬ LÝ CHỌN ĐÁP ÁN (Giữ nguyên)
+  const handleSelectOption = useCallback(
+    (questionId: number, value: number) => {
+      if (isSubmitted) return;
+      setUserAnswers((prevAnswers) => ({
+        ...prevAnswers,
+        [questionId]: value,
+      }));
+    },
+    [isSubmitted]
+  );
+
+  // 6. HÀM XỬ LÝ NỘP BÀI CUỐI CÙNG (Giữ nguyên)
+  const handleSubmitQuiz = () => {
+    if (!exerciseData || isSubmitted || submitting) return;
+
+    if (
+      Object.keys(userAnswers).length < exerciseData.subQuestionNodes.length
+    ) {
+      if (
+        !window.confirm(
+          `Bạn chưa trả lời hết các câu hỏi. Bạn có muốn nộp bài?`
+        )
+      ) {
+        return;
+      }
+    }
+
+    submitToBackend(exerciseData.exerciseId, userAnswers);
+  };
+
+  return (
+    <>
+      <MainHeader />
+      <div
+        style={{
+          marginTop: "4%",
+          minHeight: "100vh",
+          backgroundColor: "#f8f9fa",
+        }}
+      >
+        {/* HIỂN THỊ LOADING/ERROR */}
+        {loading && (
+          <div className="text-center py-5">
+            <Spin size="large" />
+            <p className="mt-2">Đang tải bài kiểm tra...</p>
+          </div>
+        )}
+        {error && (
+          <div className="container py-5">
+            <Alert message="Lỗi" description={error} type="error" showIcon />
+          </div>
+        )}
+
+        {/* HIỂN THỊ MODAL KẾT QUẢ */}
+        {isModalOpen && result && exerciseData && (
+          <ResultModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            result={result}
+            detailedResults={detailedResults}
+            questions={exerciseData.subQuestionNodes}
+            onRedo={resetQuizAndFetch} // 👈 GÁN HÀM RESET
+          />
+        )}
+
+        {/* HIỂN THỊ COMPONENT BÀI TẬP */}
+        {exerciseData && (
+          <ListeningComponent
+            exercise={exerciseData}
+            onSubmit={handleSubmitQuiz}
+            isSubmitted={isSubmitted}
+            userAnswers={userAnswers}
+            onSelectOption={handleSelectOption}
+            detailedResults={detailedResults}
+            submitting={submitting}
+          />
+        )}
+
+        {/* HIỂN THỊ THÔNG BÁO KHI KHÔNG CÓ DATA */}
+        {!loading && !error && !exerciseData && (
+          <div className="container py-5">
+            <Alert
+              message="Thông báo"
+              description="Không có nội dung để hiển thị."
+              type="info"
+              showIcon
+            />
+          </div>
+        )}
+      </div>
+      <MainFooter />
+    </>
+  );
+}
