@@ -1,4 +1,3 @@
-// FILE: /app/components/exerciseCard/exListen.tsx
 
 "use client";
 
@@ -11,9 +10,7 @@ import {
 } from "@ant-design/icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-// --------------------------------------------------------------------------
-// INTERFACES (Cần phải trùng khớp với file page.tsx)
-// --------------------------------------------------------------------------
+
 interface Option {
   optionId: number;
   optionText: string;
@@ -62,7 +59,6 @@ const ListeningComponent: React.FC<ListeningTestProps> = ({
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // --- Lấy kết quả chi tiết ---
   const getResultForQuestion = (
     questionId: number
   ): QuestionResult | undefined => {
@@ -86,19 +82,16 @@ const ListeningComponent: React.FC<ListeningTestProps> = ({
   const getOptionKey = (index: number): string =>
     String.fromCharCode(65 + index);
 
-  // Xử lý mất câu hỏi: Kiểm tra exerciseData và subQuestionNodes
   if (
     !exercise ||
     !exercise.subQuestionNodes ||
     exercise.subQuestionNodes.length === 0
   ) {
-    // Nếu dữ liệu được truyền vào mà không có câu hỏi, không render gì cả (để trang cha xử lý lỗi)
     return null;
   }
 
   return (
     <div>
-      {/* 1. Header Section */}
       <div
         className="container-fluid text-white"
         style={{

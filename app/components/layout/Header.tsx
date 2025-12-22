@@ -3,10 +3,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Layout, Menu, Button, Avatar } from "antd";
 import type { MenuProps } from "antd";
-import { useRouter, usePathname } from "next/navigation"; // *** THÊM usePathname ***
-import { FaSignOutAlt } from "react-icons/fa";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import "../../css/main-menu.css";
+// Import API
 import api from "@/app/services/api";
+import infoApi from "@/app/services/api/infoAPI";
+
 import {
   AudioOutlined,
   ReadOutlined,
@@ -15,6 +17,7 @@ import {
   TranslationOutlined,
   BookOutlined,
   FormOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -34,69 +37,95 @@ interface Skill {
 const MainHeader = () => {
   const { Header } = Layout;
   const router = useRouter();
-  const pathname = usePathname(); // *** KHỞI TẠO PATHNAME ***
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [menuData, setMenuData] = useState<Skill[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
 
   const lastScrollYRef = useRef(0);
   const [isHidden, setIsHidden] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
-  // -------------------------------
-  // 📌 KIỂM TRA ĐƯỜNG DẪN CON
-  // -------------------------------
   const isUserSubPage =
     pathname && pathname.startsWith("/User/") && pathname !== "/User";
 
-  // -------------------------------
-  // 📌 FETCH MENU FROM BE (Giữ nguyên)
-  // -------------------------------
-  const fetchMenu = async () => {
-    try {
-      const res = await api.get("/topbar-controller/get-topbar");
-      setMenuData(res.data);
-    } catch (err) {
-      console.error("Lỗi load menu:", err);
-    }
+  // --- STYLE CHUNG CHO LABEL MENU ---
+  // Định nghĩa size chữ thống nhất cho cả menu BE và Translate
+  const menuLabelStyle: React.CSSProperties = {
+    fontSize: "16px",
+    fontWeight: 500,
   };
 
+  // 1. Fetch Menu Data
   useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const res = await api.get("/topbar-controller/get-topbar");
+        setMenuData(res.data);
+      } catch (err) {
+        console.error("Lỗi load menu:", err);
+      }
+    };
     fetchMenu();
   }, []);
 
+  // 2. Handle Scroll Effect
   useEffect(() => {
     const handleScroll = () => {
       const current = window.scrollY;
-
-      // Logic ẩn/hiện (chạy cho mọi trang)
       if (current < lastScrollYRef.current) setIsHidden(false);
       else if (current > lastScrollYRef.current && current > 100)
         setIsHidden(true);
-
       setIsScrolled(current > 50);
       lastScrollYRef.current = current;
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []); // Dependency rỗng để cuộn luôn được lắng nghe
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  // -------------------------------
-  // 📌 LOGIN CHECK, NAVIGATE, ICONS, MAP COLOR, BUILD MENU (Giữ nguyên)
-  // -------------------------------
+  // 3. Logic: Check Login & Fetch User Avatar
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setLoggedIn(!!token);
-  }, [router]);
+    const checkLoginAndFetchAvatar = async () => {
+      const token = localStorage.getItem("token");
+      const storedUserStr = localStorage.getItem("user");
 
-  const handleSignOut = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/");
-  };
+      if (token && storedUserStr) {
+        setLoggedIn(true);
+        try {
+          const currentUser = JSON.parse(storedUserStr);
+          const userId = currentUser.id || currentUser.userId;
+          const res = await infoApi.getProfile(userId);
+          if (res?.data?.avatarUrl) {
+            setUserAvatar(res.data.avatarUrl);
+          }
+        } catch (error) {
+          console.error("Lỗi lấy avatar header:", error);
+        }
+      } else {
+        setLoggedIn(false);
+        setUserAvatar(null);
+      }
+    };
+    checkLoginAndFetchAvatar();
+  }, [pathname]);
+
+  // 4. Logic: Xác định Menu nào đang Active
+  useEffect(() => {
+    if (pathname?.includes("/User/translate")) {
+      setSelectedKeys(["translate"]);
+    } else {
+      const skillId = searchParams.get("skill");
+      const levelCode = searchParams.get("level");
+      if (skillId && levelCode) {
+        setSelectedKeys([`${skillId}-${levelCode}`]);
+      } else {
+        setSelectedKeys([]);
+      }
+    }
+  }, [pathname, searchParams]);
 
   const handleNavigate = (
     skillName: string,
@@ -108,7 +137,7 @@ const MainHeader = () => {
   };
 
   const getIconForSkill = (name: string) => {
-    const style = { fontSize: 18 };
+    const style = { fontSize: 18 }; // Icon size
     switch (name.toLowerCase()) {
       case "listening":
         return <CustomerServiceOutlined style={style} />;
@@ -153,139 +182,115 @@ const MainHeader = () => {
       style={{
         backgroundColor: color,
         color: "#fff",
-        fontSize: 14,
         fontWeight: "bold",
-        width: 36,
-        height: 36,
-        lineHeight: "36px",
-        border: "2px solid rgba(255,255,255,0.8)",
+        width: 30,
+        height: 30,
+        fontSize: 14,
+        lineHeight: "30px",
       }}
     >
       {text}
     </Avatar>
   );
 
+  // --- TẠO MENU ITEMS ---
   const skillItems: MenuItem[] = menuData.map((skill) => ({
-    key: skill.skillId,
-    label: skill.name,
+    key: String(skill.skillId),
+    // Áp dụng style chung cho tên Skill (Listening, Reading,...)
+    label: <span style={menuLabelStyle}>{skill.name}</span>,
     icon: getIconForSkill(skill.name),
-
     children: skill.levels.map((lv) => ({
       key: `${skill.skillId}-${lv.code}`,
-      label: `${lv.name} (${lv.code})`,
+      label: `${lv.name} (${lv.code})`, // Font size mục con giữ mặc định hoặc chỉnh riêng nếu muốn
       icon: renderLevelAvatar(lv.code, mapColor(lv.code)),
-
       onClick: () => handleNavigate(skill.name, skill.skillId, lv.code),
     })),
   }));
 
-  const translateItem: MenuItem = {
-    key: "translate",
-    label: "Translate",
-    icon: getIconForSkill("translate"),
-    onClick: () => router.push("/User/translate"),
-  };
+  const items: MenuItem[] = [
+    ...skillItems,
+    {
+      key: "translate",
+      // Áp dụng cùng style cho Translate
+      label: <span style={menuLabelStyle}>Translate</span>,
+      icon: getIconForSkill("translate"),
+      onClick: () => router.push("/User/translate"),
+    },
+  ];
 
-  const items: MenuItem[] = [...skillItems, translateItem];
+  const headerBackgroundColor = isUserSubPage
+    ? "#001529"
+    : isScrolled
+    ? "#001529"
+    : "transparent";
 
-  // -------------------------------
-  // 📌 LOGIC MÀU NỀN VÀ HIỆU ỨNG (ĐÃ SỬA)
-  // -------------------------------
-  let headerBackgroundColor;
-
-  if (isUserSubPage) {
-    // Nếu là trang con (/User/*): luôn có màu tối #001529
-    headerBackgroundColor = "#001529";
-  } else {
-    // Nếu là trang khác (trang chủ /): áp dụng hiệu ứng cuộn trong suốt
-    headerBackgroundColor = isScrolled ? "#001529" : "transparent";
-  }
-
-  // Transform luôn sử dụng isHidden (ẩn/hiện khi cuộn)
-  const transformStyle = isHidden ? "translateY(-100%)" : "translateY(0)";
-
-  // -------------------------------
-  // 📌 RENDER UI
-  // -------------------------------
   return (
     <Header
-      className={`main-header ${isHidden ? "header-hidden" : ""}`}
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
         position: "fixed",
         width: "100%",
         top: 0,
-        height: 64,
-        padding: "0 30px",
         zIndex: 1000,
         backgroundColor: headerBackgroundColor,
-        transform: transformStyle, // Sử dụng transformStyle đã tính toán
+        transform: isHidden ? "translateY(-100%)" : "translateY(0)",
         transition: "0.3s",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 30px",
       }}
     >
-      {/* LOGO */}
       <div
         onClick={() => router.push("/")}
-        style={{ cursor: "pointer", display: "flex", alignItems: "center" }}
+        style={{
+          borderRadius: "50%",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+        }}
       >
         <img
           src="/img/Logo.png"
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            marginRight: 12,
-          }}
+          style={{ borderRadius: "50%", cursor: "pointer" }}
+          width={40}
+          height={40}
+          alt="Logo"
         />
-        <span className="text-white fw-bold fs-5">doubleK-Book</span>
       </div>
 
-      {/* MENU */}
       <Menu
         theme="dark"
         mode="horizontal"
         items={items}
+        selectedKeys={selectedKeys}
         style={{
           flex: 1,
           justifyContent: "center",
-          backgroundColor: "transparent",
+          background: "transparent",
           borderBottom: "none",
-          fontSize: 16,
         }}
       />
 
-      {/* USER */}
-      <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-        {loggedIn ? (
-          <>
-            <img
-              src="/img/user_img.png"
-              onClick={() => router.push("/page/User/userProfile")}
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: "50%",
-                cursor: "pointer",
-                border: "2px solid #1890ff",
-              }}
-            />
-            <FaSignOutAlt
-              style={{ color: "#ff4d4f", fontSize: 20, cursor: "pointer" }}
-              onClick={handleSignOut}
-            />
-          </>
-        ) : (
-          <Button
-            type="primary"
-            style={{ borderRadius: 20, fontWeight: 600 }}
-            onClick={() => router.push("/auth/login")}
-          >
-            Đăng nhập
-          </Button>
-        )}
-      </div>
+      {loggedIn ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+          <Avatar
+            size={40}
+            src={userAvatar}
+            icon={<UserOutlined />}
+            style={{
+              cursor: "pointer",
+              border: "2px solid rgba(255,255,255,0.2)",
+              transition: "all 0.3s",
+            }}
+            onClick={() => router.push("/User/userProfile")}
+            className="header-user-avatar"
+          />
+        </div>
+      ) : (
+        <Button type="primary" onClick={() => router.push("/auth/login")}>
+          Đăng nhập
+        </Button>
+      )}
     </Header>
   );
 };

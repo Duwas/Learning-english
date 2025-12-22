@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -10,21 +8,45 @@ import {
   FaClipboardList,
   FaUserFriends,
   FaBook,
-  FaStar,
-  FaMicrophone,
   FaChartBar,
+  FaTrophy,
+  FaStar,
+  FaExclamationCircle,
 } from "react-icons/fa";
 import React, { useState } from "react";
-// Đảm bảo đường dẫn này đúng:
 import Sidebar from "../../../components/sidebar/page";
 
-// --- Constants ---
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
 const SIDEBAR_WIDTH = "240px";
 const HEADER_HEIGHT = "60px";
-const PRIMARY_ADMIN_COLOR = "#4a00e0"; // Màu tím đậm/Admin chủ đạo
+const PRIMARY_ADMIN_COLOR = "#4196e6ff";
 const SECONDARY_BG = "#f4f7f9";
 
-// --- Interfaces ---
+const chartData = [
+  { time: "00:00", visitors: 1 },
+  { time: "02:00", visitors: 0 },
+  { time: "04:00", visitors: 0 },
+  { time: "06:00", visitors: 2 },
+  { time: "08:00", visitors: 5 },
+  { time: "10:00", visitors: 8 },
+  { time: "12:00", visitors: 7 },
+  { time: "14:00", visitors: 9 },
+  { time: "16:00", visitors: 10 },
+  { time: "18:00", visitors: 12 },
+  { time: "20:00", visitors: 14 },
+  { time: "22:00", visitors: 6 },
+  { time: "23:59", visitors: 3 },
+];
+
 interface StatCardProps {
   value: string;
   label: string;
@@ -33,14 +55,23 @@ interface StatCardProps {
   iconBgClass: string;
 }
 
-interface ActivityItemProps {
-  name: string;
-  action: string;
-  time: string;
-  avatarBgClass: string;
+interface RankingItemProps {
+  title: string;
+  count: number;
+  totalUsers: number;
+  color: string;
 }
 
-// --- Header Component (Hoàn chỉnh) ---
+interface ScoreItemProps {
+  title: string;
+  score: number;
+}
+
+interface AlertItemProps {
+  title: string;
+  rate: string;
+}
+
 const Header = ({ onToggleSidebar }: { onToggleSidebar: () => void }) => (
   <nav
     className="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top"
@@ -90,7 +121,6 @@ const Header = ({ onToggleSidebar }: { onToggleSidebar: () => void }) => (
   </nav>
 );
 
-// --- StatCard Component (Hoàn chỉnh) ---
 const StatCard = ({
   value,
   label,
@@ -98,7 +128,7 @@ const StatCard = ({
   icon: Icon,
   iconBgClass,
 }: StatCardProps) => (
-  <div className="col-lg-3 col-md-6 mb-4">
+  <div className="col-lg-4 col-md-6 mb-3">
     <div className="card h-100 border-0 shadow-sm p-3 transition-shadow-hover">
       <div className="card-body d-flex justify-content-between align-items-center w-100 p-0">
         <div>
@@ -133,97 +163,116 @@ const StatCard = ({
   </div>
 );
 
-const ActivityItem = ({
-  name,
-  action,
-  time,
-  avatarBgClass,
-}: ActivityItemProps) => (
-  <div
-    className="d-flex align-items-center py-3 border-bottom-dashed"
-    style={{ fontSize: "0.85rem", borderBottom: "1px dashed #e9ecef" }}
-  >
-    <div
-      className={`rounded-circle text-white d-flex align-items-center justify-content-center fw-bold me-3 ${avatarBgClass}`}
-      style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}
-    >
-      {name.charAt(0)}
+const RankingItem = ({ title, count, totalUsers, color }: RankingItemProps) => {
+  const percentage = (count / totalUsers) * 100;
+  return (
+    <div className="mb-3">
+      <div className="d-flex justify-content-between mb-1">
+        <span className="fw-bold" style={{ fontSize: "0.9rem" }}>
+          {title}
+        </span>
+        <span
+          className="text-muted"
+          style={{ fontSize: "0.85rem" }}
+        >{`${count}/${totalUsers}`}</span>
+      </div>
+      <div className="progress" style={{ height: "6px" }}>
+        <div
+          className={`progress-bar ${color}`}
+          role="progressbar"
+          style={{ width: `${percentage}%` }}
+          aria-valuenow={percentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        ></div>
+      </div>
     </div>
+  );
+};
+
+const ScoreItem = ({ title, score }: ScoreItemProps) => (
+  <div
+    className="d-flex align-items-center justify-content-between py-2 border-bottom-dashed"
+    style={{ borderBottom: "1px dashed #e9ecef" }}
+  >
+    <span style={{ fontSize: "0.9rem", color: "#495057" }}>{title}</span>
+    <span className="badge bg-warning text-dark d-flex align-items-center">
+      {score} <FaStar className="ms-1" size={10} />
+    </span>
+  </div>
+);
+
+const AlertItem = ({ title, rate }: AlertItemProps) => (
+  <div className="d-flex align-items-center py-2">
+    <FaExclamationCircle className="text-danger me-2" />
     <div className="flex-grow-1">
-      <p className="mb-0" style={{ color: "#343a40", lineHeight: 1.4 }}>
-        <strong className="text-dark me-1" style={{ fontSize: "1rem" }}>
-          {name}
-        </strong>{" "}
-        {action}
-      </p>
-      <small className="text-muted" style={{ fontSize: "0.7rem" }}>
-        {time}
-      </small>
+      <div className="d-flex justify-content-between">
+        <span style={{ fontSize: "0.85rem", fontWeight: 500 }}>{title}</span>
+        <span className="text-danger fw-bold" style={{ fontSize: "0.85rem" }}>
+          {rate} sai
+        </span>
+      </div>
     </div>
   </div>
 );
 
-
 export default function OverviewPage() {
   const [showSidebar, setShowSidebar] = useState(true);
 
-  // Dữ liệu mẫu (Đã thêm một mục Speaking)
   const statsData: StatCardProps[] = [
     {
-      value: "1,234",
-      label: "Tổng số bài học",
-      change: "+12% so với tháng trước",
+      value: "12",
+      label: "tổng chủ đề",
+      change: "+2 mới",
       icon: FaBook,
       iconBgClass: "bg-info",
-    }, // bg-stat-blue => bg-info
+    },
     {
-      value: "8,456",
-      label: "Người dùng hoạt động",
-      change: "+23% so với tháng trước",
+      value: "14",
+      label: "Tổng người dùng",
+      change: "+100% full",
       icon: FaUserFriends,
       iconBgClass: "bg-success",
-    }, // bg-stat-green => bg-success
+    },
     {
-      value: "15,678",
-      label: "Bài kiểm tra",
-      change: "+8% so với tháng trước",
+      value: "50",
+      label: "Tổng bài học",
+      change: "+5 tuần này",
       icon: FaClipboardList,
       iconBgClass: "bg-primary",
-    }, // bg-stat-purple => bg-primary
-    {
-      value: "350",
-      label: "Bài Speaking đã chấm",
-      change: "+15% so với tháng trước",
-      icon: FaMicrophone,
-      iconBgClass: "bg-warning",
-    }, // Thêm Speaking
+    },
   ];
 
-  const activities: ActivityItemProps[] = [
+  const popularContent: RankingItemProps[] = [
     {
-      name: "Nguyễn Văn A",
-      action: "đã hoàn thành bài kiểm tra Grammar B1",
-      time: "5 phút trước",
-      avatarBgClass: "bg-success",
+      title: "Who is in your new class?",
+      count: 14,
+      totalUsers: 14,
+      color: "bg-success",
     },
     {
-      name: "Trần Thị B",
-      action: "đã thêm bài học mới Vocabulary A2",
-      time: "15 phút trước",
-      avatarBgClass: "bg-danger",
+      title: "Introducing Myself and Others",
+      count: 12,
+      totalUsers: 14,
+      color: "bg-info",
     },
     {
-      name: "Lê Văn C",
-      action: "đã cập nhật Listening B2",
-      time: "1 giờ trước",
-      avatarBgClass: "bg-info",
+      title: "Weekend Activities",
+      count: 10,
+      totalUsers: 14,
+      color: "bg-warning",
     },
-    {
-      name: "Phạm Thị D",
-      action: "đã nộp bài Speaking C1",
-      time: "2 giờ trước",
-      avatarBgClass: "bg-primary",
-    },
+  ];
+
+  const highScores: ScoreItemProps[] = [
+    { title: "Debating Environmental Solutions", score: 8.6 },
+    { title: "Healthy Living Habits", score: 7.5 },
+    { title: "Famous Festivals", score: 7 },
+  ];
+
+  const hardTopics: AlertItemProps[] = [
+    { title: "Giới từ & Mạo từ", rate: "45%" },
+    { title: "Câu bị động", rate: "38%" },
   ];
 
   return (
@@ -231,15 +280,8 @@ export default function OverviewPage() {
       <Head>
         <title>Quản lý nội dung - Overview</title>
       </Head>
-
-      {/* 1. SIDEBAR COMPONENT */}
-      {/* Giả định component Sidebar của bạn đã được thiết lập để có thể đóng/mở */}
       <Sidebar show={showSidebar} />
-
-      {/* 2. HEADER */}
       <Header onToggleSidebar={() => setShowSidebar(!showSidebar)} />
-
-      {/* 3. MAIN CONTENT */}
       <div
         className="content-wrapper"
         style={{
@@ -248,75 +290,123 @@ export default function OverviewPage() {
           width: showSidebar ? `calc(100% - ${SIDEBAR_WIDTH})` : "100%",
           transition: "margin-left 0.3s, width 0.3s",
           minHeight: "100vh",
-          backgroundColor: SECONDARY_BG, // Nền xám nhạt cho toàn bộ nội dung
+          backgroundColor: SECONDARY_BG,
         }}
       >
         <div className="container-fluid py-4">
           <div className="row px-3">
-            {/* Title Bar */}
             <div className="col-12 mb-4">
               <h2 className="fw-bold" style={{ color: "#343a40" }}>
                 Tổng quan Hệ thống
               </h2>
               <p className="text-muted">
-                Chào mừng trở lại! Xem hiệu suất và hoạt động gần đây của hệ
-                thống.
+                Dữ liệu thời gian thực từ 14 học viên và các học phần.
               </p>
             </div>
 
-            {/* A. STATS CARDS */}
             <div className="row">
               {statsData.map((stat, i) => (
                 <StatCard key={i} {...stat} />
               ))}
             </div>
 
-            {/* B. CHARTS & ACTIVITY */}
             <div className="row mt-3">
-              {/* B1. Thống kê Truy cập/Biểu đồ */}
               <div className="col-lg-8 mb-4">
                 <div className="card h-100 border-0 shadow-sm p-3">
                   <h3
                     className="card-header border-0 bg-white fw-bold mb-3"
                     style={{ color: "#343a40" }}
                   >
-                    <FaChartBar className="me-2 text-primary" /> Thống kê truy
-                    cập theo thời gian
+                    <FaChartBar className="me-2 text-primary" /> Lưu lượng truy
+                    cập (24h)
                   </h3>
                   <div
-                    className="card-body pt-0 d-flex flex-column justify-content-center align-items-center"
-                    style={{ minHeight: "350px" }}
+                    className="card-body pt-0"
+                    style={{ minHeight: "350px", width: "100%" }}
                   >
-                    {/* Placeholder cho Biểu đồ (có thể thay bằng react-chartjs-2) */}
-                    <div
-                      className="chart-placeholder bg-light rounded"
-                      style={{
-                        height: "300px",
-                        width: "95%",
-                        border: "1px dashed #ccc",
-                      }}
-                    >
-                      <p className="text-muted text-center pt-5">
-                        Khu vực biểu đồ sẽ hiển thị ở đây
-                      </p>
-                    </div>
+                    <ResponsiveContainer width="100%" height={350}>
+                      <AreaChart
+                        data={chartData}
+                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      >
+                        <defs>
+                          <linearGradient
+                            id="colorVisitors"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor={PRIMARY_ADMIN_COLOR}
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor={PRIMARY_ADMIN_COLOR}
+                              stopOpacity={0}
+                            />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="time" />
+                        <YAxis />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "#fff",
+                            borderRadius: "8px",
+                            border: "none",
+                            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="visitors"
+                          stroke={PRIMARY_ADMIN_COLOR}
+                          fillOpacity={1}
+                          fill="url(#colorVisitors)"
+                          strokeWidth={2}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>
 
-              {/* B2. Hoạt động Gần đây */}
               <div className="col-lg-4 mb-4">
-                <div className="card h-100 border-0 shadow-sm">
-                  <h3
-                    className="card-header border-0 bg-white fw-bold"
-                    style={{ color: "#343a40" }}
-                  >
-                    <FaClipboardList className="me-2 text-warning" /> Hoạt động
-                    gần đây
-                  </h3>
+                <div className="card border-0 shadow-sm mb-3">
+                  <div className="card-header border-0 bg-white fw-bold pt-3 pb-2">
+                    <FaTrophy className="me-2 text-warning" />
+                    Top bài học hoàn thành
+                  </div>
                   <div className="card-body pt-0">
-                    {activities.map((a, i) => (
-                      <ActivityItem key={i} {...a} />
+                    {popularContent.map((item, i) => (
+                      <RankingItem key={i} {...item} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="card border-0 shadow-sm mb-3">
+                  <div className="card-header border-0 bg-white fw-bold pt-3 pb-2">
+                    <FaStar className="me-2 text-warning" />
+                    Điểm trung bình cao nhất
+                  </div>
+                  <div className="card-body pt-0 pb-2">
+                    {highScores.map((item, i) => (
+                      <ScoreItem key={i} {...item} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="card border-0 shadow-sm">
+                  <div className="card-header border-0 bg-white fw-bold pt-3 pb-2">
+                    <FaExclamationCircle className="me-2 text-danger" />
+                    Chủ đề cần cải thiện (Tỉ lệ sai cao)
+                  </div>
+                  <div className="card-body pt-0 pb-2">
+                    {hardTopics.map((item, i) => (
+                      <AlertItem key={i} {...item} />
                     ))}
                   </div>
                 </div>

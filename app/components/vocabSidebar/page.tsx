@@ -55,7 +55,6 @@ const SingleTopic = ({
         </span>
       </div>
 
-      {/* DANH SÁCH PART CON */}
       {isOpen && (
         <div
           style={{
@@ -69,7 +68,6 @@ const SingleTopic = ({
           }}
         >
           {topic.group_words.map((part, index) => {
-            // --- LOGIC XỬ LÝ QUAN TRỌNG TẠI ĐÂY ---
             let id: number;
             let displayLabel: string;
 

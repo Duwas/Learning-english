@@ -33,9 +33,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const { Text, Title } = Typography;
 
-// --------------------------------------------------------------------------
-// INTERFACES
-// --------------------------------------------------------------------------
 interface SpeakingResultResponse {
   transcript: string;
   overall_score: number;

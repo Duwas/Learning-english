@@ -5,7 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/app/services/api";
 import WritingTopicCard from "@/app/components/TopicCard/writingpage";
-
+import MainHeader from "@/app/components/layout/Header";
+import MainFooter from "@/app/components/layout/Footer";
 const WRITING_COLOR = "#52c41a";
 
 const mockWritingTopics = [
@@ -58,7 +59,14 @@ export default function WritingPage() {
 
   return (
     <>
-      <div style={{ marginTop: "100px",backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+      <MainHeader />
+      <div
+        style={{
+          marginTop: "80px",
+          backgroundColor: "#f8f9fa",
+          minHeight: "100vh",
+        }}
+      >
         <div className="py-3 shadow" style={{ backgroundColor: WRITING_COLOR }}>
           <div className="container">
             <h1
@@ -123,6 +131,7 @@ export default function WritingPage() {
           )}
         </div>
       </div>
+      <MainFooter />
     </>
   );
 }

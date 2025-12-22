@@ -26,7 +26,6 @@ export default function LearnPage() {
     ? Number(searchParams.get("part"))
     : 1;
 
-  // --- 1. API LẤY SIDEBAR (SỬA LỖI KIỂM TRA MẢNG) ---
   useEffect(() => {
     const fetchSidebar = async () => {
       try {

@@ -7,6 +7,7 @@ const authApi = {
   resend_otp: (email) => api.post(`/auth/resend-otp"/ ${email}`),
   forgot_password: (data) => api.post("/auth/forgot-password", data),
   reset_password: (data) => api.post("/auth/reset-password", data),
+  getAll: () => api.get("/auth/all"),
 };
 
 export default authApi;

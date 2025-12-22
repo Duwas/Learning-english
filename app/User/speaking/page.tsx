@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import api from "@/app/services/api";
 import SpeakingTopicCard from "@/app/components/TopicCard/speakingpage";
 import "../../globals.css";
+import MainHeader from "@/app/components/layout/Header";
+import MainFooter from "@/app/components/layout/Footer";
 const SPEAKING_COLOR = "#ff6b81";
 const mockSpeakingTopics = [
   // Giữ lại mock data để tham chiếu, nhưng setTopics ban đầu sẽ là []
@@ -66,7 +68,14 @@ export default function SpeakPage() {
 
   return (
     <>
-      <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+      <MainHeader />
+      <div
+        style={{
+          marginTop: "4%",
+          backgroundColor: "#f8f9fa",
+          minHeight: "100vh",
+        }}
+      >
         <div
           className="py-3 shadow"
           style={{ backgroundColor: SPEAKING_COLOR }}
@@ -145,6 +154,7 @@ export default function SpeakPage() {
           )}
         </div>
       </div>
+      <MainFooter />
     </>
   );
 }

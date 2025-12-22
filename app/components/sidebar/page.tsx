@@ -12,42 +12,57 @@ import {
   FaAngleDown,
   FaAngleUp,
   FaLayerGroup,
+  FaBookOpen,
 } from "react-icons/fa";
 
-// Định nghĩa props cơ bản cho việc ẩn/hiện
 interface SidebarProps {
-  show?: boolean; // Sử dụng để điều khiển ẩn/hiện
+  show?: boolean;
 }
 
-const sidebarItems = [
+interface SidebarItem {
+  name: string;
+  icon: React.ElementType;
+  link: string;
+  children?: { name: string; link: string }[];
+}
+
+const sidebarItems: SidebarItem[] = [
   {
     name: "Tổng quan",
     icon: FaTachometerAlt,
-    link: "/page/Admin/Content/Overview",
+    link: "/admin/Content/Overview",
   },
   {
     name: "Grammar",
     icon: FaBook,
-    link: "#",
-    children: [
-      { name: "Ngữ pháp A1", link: "/admin/Content/Grammar/A1" },
-      { name: "Ngữ pháp A2", link: "/admin/Content/Grammar/A2" },
-      { name: "Ngữ pháp B1", link: "/admin/Content/ngu-phap-b1" },
-    ],
+    link: "/admin/Content/Grammar",
   },
   {
     name: "Vocabulary",
     icon: FaLanguage,
-    link: "#",
-    children: [
-      { name: "Từ vựng A1", link: "/admin/Content/tu-vung-a1" },
-      { name: "Từ vựng A2", link: "/admin/Content/tu-vung-a2" },
-      { name: "Từ vựng B1", link: "/admin/Content/tu-vung-b1" },
-    ],
+    // Bạn hãy thay đường dẫn này bằng route thực tế của trang Vocabulary
+    link: "/admin/Content/Vocabulary",
   },
-  { name: "4 Skills ", icon: FaLayerGroup, link: "/admin/Content/4skill" },
-  { name: "Người dùng", icon: FaUsers, link: "/page/Admin/users" },
-  { name: "Cài đặt", icon: FaCog, link: "/page/Admin/settings" },
+  {
+    name: "4 Skills",
+    icon: FaLayerGroup,
+    link: "/admin/Content/4skill",
+  },
+  {
+    name: "Excercises",
+    icon: FaBookOpen,
+    link: "/admin/Content/Excercise",
+  },
+  {
+    name: "Người dùng",
+    icon: FaUsers,
+    link: "/page/Admin/users",
+  },
+  {
+    name: "Cài đặt",
+    icon: FaCog,
+    link: "/page/Admin/settings",
+  },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ show = true }) => {
@@ -76,6 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({ show = true }) => {
       <ul className="nav nav-pills flex-column mb-auto">
         {sidebarItems.map((item) => (
           <li key={item.name} className="nav-item mb-4">
+            {/* Kiểm tra nếu item có children thì render dạng dropdown, ngược lại render dạng link thường */}
             {item.children ? (
               <>
                 <a
@@ -106,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({ show = true }) => {
                       <li key={child.name} className="mb-2">
                         <a
                           className="link-light rounded text-decoration-none py-2 d-block"
-                          href={child.link} // Dùng href thay vì onClick
+                          href={child.link}
                           style={{ cursor: "pointer" }}
                         >
                           {child.name}
@@ -117,9 +133,10 @@ const Sidebar: React.FC<SidebarProps> = ({ show = true }) => {
                 </div>
               </>
             ) : (
+              // Render link bình thường (như Grammar, Vocab, Overview...)
               <a
-                className="nav-link text-white"
-                href={item.link} // Dùng href thay vì onClick
+                className="nav-link text-white d-flex align-items-center"
+                href={item.link}
                 style={{ cursor: "pointer" }}
               >
                 <item.icon className="me-2" />

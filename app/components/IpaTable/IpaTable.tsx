@@ -1,7 +1,36 @@
 "use client";
 import React from "react";
 
-// ====================== DATA IPA ======================
+// ====================== CẤU HÌNH DATA ======================
+
+// Bảng map giúp trình duyệt đọc được các ký tự lạ
+// (Trình duyệt không biết đọc 'θ', nên ta bảo nó đọc từ 'thin' hoặc âm tương tự)
+const TTS_MAP: Record<string, string> = {
+  // Vowels
+  iː: "ee", // Kéo dài âm e
+  ɪ: "it", // Âm ngắn
+  e: "bed",
+  æ: "at",
+  ɑː: "car",
+  ɒ: "hot",
+  ɔː: "or",
+  ʊ: "u",
+  uː: "u",
+  ʌ: "up",
+  ɜː: "ơ",
+  ə: "ô",
+
+  // Consonants (Một số ký tự trình duyệt đọc được, một số thì không)
+  θ: "ee",
+  ð: "this",
+  ʃ: "she",
+  ʒ: "vision",
+  tʃ: "chair",
+  dʒ: "job",
+  ŋ: "sing",
+  j: "yes",
+};
+
 const IPA_TABLE = [
   {
     type: "Vowels",
@@ -51,42 +80,66 @@ const IPA_TABLE = [
   },
 ];
 
-// ====================== TTS FUNCTION ======================
+// ====================== XỬ LÝ GIỌNG NÓI ======================
+
 const speak = (text: string, voiceLang: string = "en-US") => {
   const synth = window.speechSynthesis;
   if (!synth) {
-    alert("Trình duyệt của bạn không hỗ trợ SpeechSynthesis.");
+    alert("Trình duyệt không hỗ trợ SpeechSynthesis.");
     return;
   }
-  synth.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
+
+  synth.cancel(); // Dừng âm thanh đang đọc dở (nếu có)
+
+  // KEY FIX: Kiểm tra xem text có nằm trong bảng map TTS_MAP không
+  // Nếu có thì đọc giá trị thay thế, nếu không thì đọc nguyên gốc
+  const textToSpeak = TTS_MAP[text] || text;
+
+  const utter = new SpeechSynthesisUtterance(textToSpeak);
   utter.lang = voiceLang;
-  utter.rate = 0.6;
+  utter.rate = 0.8; // Tốc độ đọc (0.8 là vừa phải để nghe rõ âm)
+
+  // Cố gắng chọn giọng chuẩn tiếng Anh (Google US hoặc Microsoft David/Zira)
   const voices = synth.getVoices();
-  if (voices && voices.length) {
-    const match = voices.find((v) =>
-      v.lang.toLowerCase().startsWith(voiceLang.slice(0, 2).toLowerCase())
-    );
-    if (match) utter.voice = match;
+  if (voices.length > 0) {
+    const preferredVoice =
+      voices.find(
+        (v) => v.lang === "en-US" && !v.name.includes("Google") // Ưu tiên giọng native system nếu có
+      ) || voices.find((v) => v.lang.startsWith("en"));
+
+    if (preferredVoice) utter.voice = preferredVoice;
   }
+
   synth.speak(utter);
 };
 
 // ====================== COMPONENT ======================
+
 export default function IpaTable() {
   return (
-    <div className="container my-5">
-      <h2 className="text-center mb-5">English IPA Chart</h2>
+    <div className="container my-5" style={{ fontFamily: "Arial, sans-serif" }}>
+      <h2 className="text-center mb-5" style={{ color: "#333" }}>
+        English IPA Chart
+      </h2>
 
       {IPA_TABLE.map((group) => (
         <div key={group.type} className="mb-5">
-          <h4 className="mb-3">{group.type}</h4>
+          <h4
+            className="mb-3"
+            style={{
+              borderBottom: "2px solid #0070f3",
+              display: "inline-block",
+              paddingBottom: "5px",
+            }}
+          >
+            {group.type}
+          </h4>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-              gap: "12px",
+              gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+              gap: "16px",
             }}
           >
             {group.items.map((item) => (
@@ -97,67 +150,101 @@ export default function IpaTable() {
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "12px",
-                  backgroundColor: "#fff",
-                  border: "1px solid #ccc",
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                  transition: "transform 0.2s, box-shadow 0.2s",
+                  padding: "16px",
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
+                  transition: "all 0.2s ease",
                   textAlign: "center",
                 }}
+                // Hiệu ứng hover đơn giản
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-3px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 12px rgba(0,0,0,0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 6px rgba(0,0,0,0.05)";
+                }}
               >
+                {/* Phần Symbol IPA */}
                 <div
                   style={{
-                    fontSize: "1.6rem",
-                    fontWeight: "600",
-                    marginBottom: "6px",
                     display: "flex",
                     alignItems: "center",
-                    gap: "6px",
+                    gap: "8px",
+                    marginBottom: "8px",
                   }}
                 >
-                  {item.symbol}
+                  <span
+                    style={{
+                      fontSize: "1.8rem",
+                      fontWeight: "bold",
+                      color: "#0070f3",
+                    }}
+                  >
+                    {item.symbol}
+                  </span>
                   <button
                     onClick={() => speak(item.symbol)}
+                    title="Listen to sound"
                     style={{
                       cursor: "pointer",
-                      padding: "2px 6px",
-                      fontSize: "0.8rem",
-                      borderRadius: "6px",
-                      border: "1px solid #aaa",
-                      background: "#f0f0f0",
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "50%",
+                      border: "none",
+                      backgroundColor: "#e7f5ff",
+                      color: "#0070f3",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.9rem",
                     }}
                   >
                     🔊
                   </button>
                 </div>
 
+                {/* Phần Ví dụ */}
                 <div
                   style={{
-                    fontSize: "0.85rem",
-                    color: "#555",
-                    marginBottom: "6px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     gap: "4px",
+                    width: "100%",
                   }}
                 >
-                  <span>{item.example}</span>
-                  <span style={{ color: "#888" }}>{item.exampleIpa}</span>
-                  <button
-                    onClick={() => speak(item.example)}
+                  <div
                     style={{
-                      cursor: "pointer",
-                      padding: "2px 6px",
-                      fontSize: "0.75rem",
-                      borderRadius: "6px",
-                      border: "1px solid #aaa",
-                      background: "#f0f0f0",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
                     }}
                   >
-                    🔊
-                  </button>
+                    <span style={{ fontSize: "1rem", fontWeight: "500" }}>
+                      {item.example}
+                    </span>
+                    <button
+                      onClick={() => speak(item.example)}
+                      title={`Listen to "${item.example}"`}
+                      style={{
+                        cursor: "pointer",
+                        border: "none",
+                        background: "transparent",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      🔈
+                    </button>
+                  </div>
+                  <span style={{ fontSize: "0.85rem", color: "#888" }}>
+                    {item.exampleIpa}
+                  </span>
                 </div>
               </div>
             ))}

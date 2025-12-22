@@ -23,9 +23,7 @@ import ListeningComponent from "@/app/components/exerciseCard/exListen";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
-// --------------------------------------------------------------------------
-// INTERFACES
-// --------------------------------------------------------------------------
+
 interface Option {
   optionId: number;
   optionText: string;
@@ -63,9 +61,6 @@ interface Result {
   incorrectCount: number;
 }
 
-// --------------------------------------------------------------------------
-// INTERFACE MỚI CHO MODAL
-// --------------------------------------------------------------------------
 interface ResultModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -75,9 +70,7 @@ interface ResultModalProps {
   onRedo: () => void; // 👈 HÀM LÀM LẠI
 }
 
-// --------------------------------------------------------------------------
-// COMPONENT MODAL HIỂN THỊ KẾT QUẢ
-// --------------------------------------------------------------------------
+
 const ResultModal = ({
   isOpen,
   onClose,
@@ -194,7 +187,6 @@ export default function ListeningTestPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // STATE QUẢN LÝ LOGIC NỘP BÀI
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
@@ -202,7 +194,6 @@ export default function ListeningTestPage() {
   const [submitting, setSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 1. HÀM TẢI DỮ LIỆU BAN ĐẦU (ĐÃ GỘP)
   const fetchExercise = useCallback(async (topicId: string) => {
     setLoading(true);
     setError(null);
@@ -223,22 +214,18 @@ export default function ListeningTestPage() {
     }
   }, []);
 
-  // 2. HÀM RESET TOÀN BỘ VÀ LÀM LẠI
   const resetQuizAndFetch = () => {
     if (!topicId) return;
 
-    // Reset tất cả các state liên quan đến kết quả
     setIsSubmitted(false);
     setResult(null);
     setDetailedResults([]);
-    setUserAnswers({}); // Reset đáp án đã chọn
+    setUserAnswers({}); 
     setIsModalOpen(false);
 
-    // Tải lại bài tập
     fetchExercise(topicId);
   };
 
-  // 3. EFFECT GỌI HÀM FETCH KHI TRANG TẢI LẦN ĐẦU
   useEffect(() => {
     if (topicId) {
       fetchExercise(topicId);
@@ -307,7 +294,6 @@ export default function ListeningTestPage() {
     [isSubmitted]
   );
 
-  // 6. HÀM XỬ LÝ NỘP BÀI CUỐI CÙNG (Giữ nguyên)
   const handleSubmitQuiz = () => {
     if (!exerciseData || isSubmitted || submitting) return;
 

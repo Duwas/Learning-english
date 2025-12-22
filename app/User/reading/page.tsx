@@ -5,7 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/app/services/api";
 import ReadingTopicCard from "@/app/components/TopicCard/readingpage";
-
+import { Main } from "next/document";
+import MainHeader from "@/app/components/layout/Header";
+import MainFooter from "@/app/components/layout/Footer";
 // Định nghĩa màu Xanh Lam Đậm chủ đạo
 const READING_COLOR = "#446acbff";
 
@@ -60,7 +62,14 @@ export default function ReadingPage() {
 
   return (
     <>
-      <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+      <MainHeader />
+      <div
+        style={{
+          marginTop: "4%",
+          backgroundColor: "#f8f9fa",
+          minHeight: "100vh",
+        }}
+      >
         {/* Tiêu đề chính (Màu XANH LAM ĐẬM chủ đạo) */}
         <div className="py-3 shadow" style={{ backgroundColor: READING_COLOR }}>
           <div className="container">
@@ -126,6 +135,7 @@ export default function ReadingPage() {
           )}
         </div>
       </div>
+      <MainFooter />
     </>
   );
 }
