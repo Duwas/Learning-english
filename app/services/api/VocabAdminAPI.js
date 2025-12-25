@@ -29,7 +29,32 @@ const VocabAdminAPI = {
   },
   deleteWord: (id) => {
     return api.delete(`/admin/vocabulary/deleteById/${id}`);
-  }
+  },
+
+  import: (file) => {
+    const formData = new FormData();
+    formData.append("file", file); 
+    return api.post('/admin/vocabulary/upload');
+  },
+
+  export: () => {
+  return api.post('/admin/vocabulary/export/xlsx', {}, { responseType: 'blob' })
+    .then((res) => {
+      // Tạo blob từ response
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'vocabulary.xlsx'); // tên file
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url); // giải phóng memory
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
 };
 
 export default VocabAdminAPI;

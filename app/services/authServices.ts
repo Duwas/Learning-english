@@ -23,9 +23,9 @@ export interface LoginResponse {
   user: User;
 }
 
-//const API_BASE = "https://nonvoluntary-dianoetically-marilynn.ngrok-free.dev/api"; 
+const API_BASE = "https://nonvoluntary-dianoetically-marilynn.ngrok-free.dev/api"; 
 
-const API_BASE = "https://192.168.89.5:8082/api"; 
+//const API_BASE = "https://192.168.89.5:8082/api"; 
 
 
 const authService = {

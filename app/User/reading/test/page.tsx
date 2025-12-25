@@ -20,10 +20,8 @@ import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import ProtectedRoute from "@/app/routes/ProtectedRoute";
 
-// --------------------------------------------------------------------------
-// INTERFACES (Đảm bảo đồng bộ với component UI)
-// --------------------------------------------------------------------------
 interface Option {
   optionId: number;
   optionText: string;
@@ -334,37 +332,39 @@ export default function ReadingTestPage() {
 
   return (
     <>
-      <MainHeader />
-      <div
-        style={{
-          marginTop: "4%",
-          minHeight: "100vh",
-          backgroundColor: "#f8f9fa",
-          paddingBottom: "50px",
-        }}
-      >
-        {isModalOpen && result && exerciseData && (
-          <ResultModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            result={result}
-            detailedResults={detailedResults}
-            questions={exerciseData.subQuestionNodes}
-            onRedo={resetQuizAndFetch}
-          />
-        )}
+      <ProtectedRoute>
+        <MainHeader />
+        <div
+          style={{
+            marginTop: "3.3%",
+            minHeight: "100vh",
+            backgroundColor: "#f8f9fa",
+            paddingBottom: "50px",
+          }}
+        >
+          {isModalOpen && result && exerciseData && (
+            <ResultModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              result={result}
+              detailedResults={detailedResults}
+              questions={exerciseData.subQuestionNodes}
+              onRedo={resetQuizAndFetch}
+            />
+          )}
 
-        <ReadingQuizComponent
-          exercise={exerciseData}
-          userAnswers={userAnswers}
-          isSubmitted={isSubmitted}
-          onSelectOption={handleSelectOption}
-          detailedResults={detailedResults}
-          onSubmit={handleSubmitQuiz}
-          submitting={submitting}
-        />
-      </div>
-      <MainFooter />
+          <ReadingQuizComponent
+            exercise={exerciseData}
+            userAnswers={userAnswers}
+            isSubmitted={isSubmitted}
+            onSelectOption={handleSelectOption}
+            detailedResults={detailedResults}
+            onSubmit={handleSubmitQuiz}
+            submitting={submitting}
+          />
+        </div>
+        <MainFooter />
+      </ProtectedRoute>
     </>
   );
 }

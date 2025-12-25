@@ -29,7 +29,6 @@ export default function Login() {
   const [isDialog, setIsDialog] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
-  // Nếu đã login → chuyển về home
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) router.push("/");
@@ -45,7 +44,7 @@ export default function Login() {
     try {
       const data = await callApi(
         () => authApi.login({ email, password }),
-        true,
+        false,
         true
       );
 
@@ -64,7 +63,7 @@ export default function Login() {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      router.push("/");
+      window.location.href = "/";
     } catch (err: any) {
       showToast(
         "error",
@@ -205,9 +204,11 @@ export default function Login() {
         onCancel={() => setIsDialog(false)}
         footer={null}
         width={380}
+        destroyOnClose
       >
         <div className="text-center">
           <h2 className="otp-title">Nhập mã OTP</h2>
+
           <input
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
@@ -215,7 +216,10 @@ export default function Login() {
             className={`otp-input ${otpError ? "otp-error" : ""}`}
             placeholder="Nhập 6 chữ số"
             inputMode="numeric"
+            pattern="[0-9]*"
+            aria-label="OTP"
           />
+
           {otpError && (
             <div className="otp-error-text">OTP phải gồm 6 chữ số</div>
           )}
@@ -227,12 +231,12 @@ export default function Login() {
           >
             Xác nhận
           </button>
-
           <button
             onClick={resendOtp}
             className="otp-btn-resend"
             disabled={timeLeft > 0}
             style={{ marginTop: 10 }}
+            aria-disabled={timeLeft > 0}
           >
             {timeLeft > 0 ? `Gửi lại (${timeLeft}s)` : "Gửi lại OTP"}
           </button>

@@ -56,12 +56,7 @@ const sidebarItems: SidebarItem[] = [
   {
     name: "Người dùng",
     icon: FaUsers,
-    link: "/page/Admin/users",
-  },
-  {
-    name: "Cài đặt",
-    icon: FaCog,
-    link: "/page/Admin/settings",
+    link: "/admin/Content/user",
   },
 ];
 

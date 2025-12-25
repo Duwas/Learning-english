@@ -30,6 +30,7 @@ import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import ProtectedRoute from "@/app/routes/ProtectedRoute";
 
 const { Text, Title } = Typography;
 
@@ -135,7 +136,6 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
         <div className="row row-cols-3 g-2 mb-4">
           {[
             { label: "Phát âm", key: "pronunciation_score", isDecimal: false },
-            { label: "Chính xác", key: "accuracy_score", isDecimal: false }, // 🎯 Chỉ nhân 100 cái này
             { label: "Ngữ pháp", key: "grammar_score", isDecimal: false },
             { label: "Từ vựng", key: "vocab_score", isDecimal: false },
             { label: "Mạch lạc", key: "coherence_score", isDecimal: false },
@@ -143,7 +143,6 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
           ].map(({ label, key, isDecimal }) => {
             const rawScore = result[key] as number;
 
-            // Xử lý giá trị hiển thị và giá trị để xác định màu (luôn là 0-100)
             const displayedScore = isDecimal
               ? Math.round(rawScore * 100)
               : rawScore;
@@ -305,28 +304,30 @@ export default function SpeakingTestPage() {
 
   return (
     <>
-      <MainHeader />
-      {/* Modal hiện kết quả */}
-      {isModalOpen && speakingResult && (
-        <SpeakingResultModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          result={speakingResult}
-          onRedo={resetQuizAndFetch}
-        />
-      )}
+      <ProtectedRoute>
+        <MainHeader />
+        {/* Modal hiện kết quả */}
+        {isModalOpen && speakingResult && (
+          <SpeakingResultModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            result={speakingResult}
+            onRedo={resetQuizAndFetch}
+          />
+        )}
 
-      <SpeakingComponent
-        exercise={exerciseData}
-        onSubmit={handleSubmitFile}
-        isSubmitting={isSubmitting}
-        fileToSubmit={fileToSubmit}
-        setFileToSubmit={
-          setFileToSubmit as Dispatch<SetStateAction<File | null>>
-        }
-        audioURLToPlay={null}
-      />
-   <MainFooter />
+        <SpeakingComponent
+          exercise={exerciseData}
+          onSubmit={handleSubmitFile}
+          isSubmitting={isSubmitting}
+          fileToSubmit={fileToSubmit}
+          setFileToSubmit={
+            setFileToSubmit as Dispatch<SetStateAction<File | null>>
+          }
+          audioURLToPlay={null}
+        />
+        <MainFooter />
+      </ProtectedRoute>
     </>
   );
 }

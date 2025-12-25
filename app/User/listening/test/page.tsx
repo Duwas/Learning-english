@@ -1,12 +1,10 @@
-// FILE: /app/listening/test/page.tsx
-
 "use client";
 
 import { useSearchParams } from "next/navigation";
 import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
 import { Alert, Spin, Divider, Button, Modal, Tag } from "antd";
-// Đảm bảo RedoOutlined đã được import
+
 import {
   SendOutlined,
   CheckCircleOutlined,
@@ -16,13 +14,12 @@ import {
 import { useEffect, useState, useCallback } from "react";
 import { AxiosError, AxiosResponse } from "axios";
 
-// Import services và component UI
 import api from "@/app/services/api";
 import flashAPI from "@/app/services/api/flashAPI";
 import ListeningComponent from "@/app/components/exerciseCard/exListen";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import ProtectedRoute from "@/app/routes/ProtectedRoute";
 
 interface Option {
   optionId: number;
@@ -67,9 +64,8 @@ interface ResultModalProps {
   result: Result;
   detailedResults: QuestionResult[];
   questions: QuestionNode[];
-  onRedo: () => void; // 👈 HÀM LÀM LẠI
+  onRedo: () => void;
 }
-
 
 const ResultModal = ({
   isOpen,
@@ -104,7 +100,7 @@ const ResultModal = ({
         <Button key="close" onClick={onClose}>
           Đóng
         </Button>,
-        // 🎯 NÚT LÀM LẠI VỚI ICON VÀ HÀM onRedo
+
         <Button key="redo" onClick={onRedo} type="primary" danger>
           <RedoOutlined className="me-1" /> Làm lại bài tập
         </Button>,
@@ -220,7 +216,7 @@ export default function ListeningTestPage() {
     setIsSubmitted(false);
     setResult(null);
     setDetailedResults([]);
-    setUserAnswers({}); 
+    setUserAnswers({});
     setIsModalOpen(false);
 
     fetchExercise(topicId);
@@ -235,7 +231,6 @@ export default function ListeningTestPage() {
     }
   }, [topicId, fetchExercise]);
 
-  // 4. HÀM GỌI API SUBMIT VÀ XỬ LÝ KẾT QUẢ TỪ BE (Giữ nguyên)
   const submitToBackend = async (
     exerciseId: number,
     answers: Record<number, number>
@@ -282,7 +277,6 @@ export default function ListeningTestPage() {
     }
   };
 
-  // 5. HÀM XỬ LÝ CHỌN ĐÁP ÁN (Giữ nguyên)
   const handleSelectOption = useCallback(
     (questionId: number, value: number) => {
       if (isSubmitted) return;
@@ -314,65 +308,67 @@ export default function ListeningTestPage() {
 
   return (
     <>
-      <MainHeader />
-      <div
-        style={{
-          marginTop: "4%",
-          minHeight: "100vh",
-          backgroundColor: "#f8f9fa",
-        }}
-      >
-        {/* HIỂN THỊ LOADING/ERROR */}
-        {loading && (
-          <div className="text-center py-5">
-            <Spin size="large" />
-            <p className="mt-2">Đang tải bài kiểm tra...</p>
-          </div>
-        )}
-        {error && (
-          <div className="container py-5">
-            <Alert message="Lỗi" description={error} type="error" showIcon />
-          </div>
-        )}
+      <ProtectedRoute>
+        <MainHeader />
+        <div
+          style={{
+            marginTop: "3.3%",
+            minHeight: "100vh",
+            backgroundColor: "#f8f9fa",
+          }}
+        >
+          {/* HIỂN THỊ LOADING/ERROR */}
+          {loading && (
+            <div className="text-center py-5">
+              <Spin size="large" />
+              <p className="mt-2">Đang tải bài kiểm tra...</p>
+            </div>
+          )}
+          {error && (
+            <div className="container py-5">
+              <Alert message="Lỗi" description={error} type="error" showIcon />
+            </div>
+          )}
 
-        {/* HIỂN THỊ MODAL KẾT QUẢ */}
-        {isModalOpen && result && exerciseData && (
-          <ResultModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            result={result}
-            detailedResults={detailedResults}
-            questions={exerciseData.subQuestionNodes}
-            onRedo={resetQuizAndFetch} // 👈 GÁN HÀM RESET
-          />
-        )}
-
-        {/* HIỂN THỊ COMPONENT BÀI TẬP */}
-        {exerciseData && (
-          <ListeningComponent
-            exercise={exerciseData}
-            onSubmit={handleSubmitQuiz}
-            isSubmitted={isSubmitted}
-            userAnswers={userAnswers}
-            onSelectOption={handleSelectOption}
-            detailedResults={detailedResults}
-            submitting={submitting}
-          />
-        )}
-
-        {/* HIỂN THỊ THÔNG BÁO KHI KHÔNG CÓ DATA */}
-        {!loading && !error && !exerciseData && (
-          <div className="container py-5">
-            <Alert
-              message="Thông báo"
-              description="Không có nội dung để hiển thị."
-              type="info"
-              showIcon
+          {/* HIỂN THỊ MODAL KẾT QUẢ */}
+          {isModalOpen && result && exerciseData && (
+            <ResultModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              result={result}
+              detailedResults={detailedResults}
+              questions={exerciseData.subQuestionNodes}
+              onRedo={resetQuizAndFetch}
             />
-          </div>
-        )}
-      </div>
-      <MainFooter />
+          )}
+
+          {/* HIỂN THỊ COMPONENT BÀI TẬP */}
+          {exerciseData && (
+            <ListeningComponent
+              exercise={exerciseData}
+              onSubmit={handleSubmitQuiz}
+              isSubmitted={isSubmitted}
+              userAnswers={userAnswers}
+              onSelectOption={handleSelectOption}
+              detailedResults={detailedResults}
+              submitting={submitting}
+            />
+          )}
+
+          {/* HIỂN THỊ THÔNG BÁO KHI KHÔNG CÓ DATA */}
+          {!loading && !error && !exerciseData && (
+            <div className="container py-5">
+              <Alert
+                message="Thông báo"
+                description="Không có nội dung để hiển thị."
+                type="info"
+                showIcon
+              />
+            </div>
+          )}
+        </div>
+        <MainFooter />
+      </ProtectedRoute>
     </>
   );
 }

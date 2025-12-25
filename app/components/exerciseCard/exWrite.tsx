@@ -28,7 +28,7 @@ interface WritingProps {
   isSubmitting: boolean;
 }
 
-const PRIMARY_COLOR = "#0056b3"; // Màu xanh dương
+const PRIMARY_COLOR = "#02162bff"; // Màu xanh dương
 
 const WritingComponent: React.FC<WritingProps> = ({
   exercise,

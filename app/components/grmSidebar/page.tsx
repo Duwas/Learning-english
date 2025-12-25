@@ -42,7 +42,6 @@ const SingleGrmTopic = ({
           color: isActive ? "#856404" : "#0d6efd",
           borderLeft: isActive ? "4px solid #ffc107" : "4px solid transparent",
           boxShadow: isActive ? "0 3px 6px rgba(0,0,0,0.2)" : "none",
-          
         }}
       >
         {topic.topic_name}

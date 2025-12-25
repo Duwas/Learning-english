@@ -75,8 +75,7 @@ const TopicCard: React.FC<TopicCardProps> = ({
         <div
           className="position-absolute"
           style={{ bottom: "3rem", left: "0.5rem", zIndex: 10 }}
-        >
-        </div>
+        ></div>
 
         {/* Text Overlay (Nền vàng) */}
         <div

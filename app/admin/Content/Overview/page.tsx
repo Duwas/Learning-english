@@ -13,8 +13,11 @@ import {
   FaStar,
   FaExclamationCircle,
 } from "react-icons/fa";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../../components/sidebar/page";
+import api from "@/app/services/api";
+
+import dashboardAPI from "@/app/services/api/dashboard";
 
 import {
   AreaChart,
@@ -48,7 +51,7 @@ const chartData = [
 ];
 
 interface StatCardProps {
-  value: string;
+  value: string | number;
   label: string;
   change: string;
   icon: React.ElementType;
@@ -219,23 +222,44 @@ const AlertItem = ({ title, rate }: AlertItemProps) => (
 export default function OverviewPage() {
   const [showSidebar, setShowSidebar] = useState(true);
 
+  const [stats, setStats] = useState({
+    userCount: 0,
+    exerciseCount: 0,
+    topicCount: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await dashboardAPI.getstatus();
+        if (response.data) {
+          setStats(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   const statsData: StatCardProps[] = [
     {
-      value: "12",
-      label: "tổng chủ đề",
+      value: stats.topicCount,
+      label: "Tổng chủ đề",
       change: "+2 mới",
       icon: FaBook,
       iconBgClass: "bg-info",
     },
     {
-      value: "14",
+      value: stats.userCount,
       label: "Tổng người dùng",
       change: "+100% full",
       icon: FaUserFriends,
       iconBgClass: "bg-success",
     },
     {
-      value: "50",
+      value: stats.exerciseCount,
       label: "Tổng bài học",
       change: "+5 tuần này",
       icon: FaClipboardList,
@@ -300,7 +324,8 @@ export default function OverviewPage() {
                 Tổng quan Hệ thống
               </h2>
               <p className="text-muted">
-                Dữ liệu thời gian thực từ 14 học viên và các học phần.
+                Dữ liệu thời gian thực từ {stats.userCount} học viên và các học
+                phần.
               </p>
             </div>
 

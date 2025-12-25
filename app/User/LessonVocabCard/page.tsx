@@ -11,7 +11,8 @@ import { useApi } from "@/app/hooks/useApi";
 import { useToast } from "@/app/hooks/useToast";
 import flashAPI from "@/app/services/api/flashAPI";
 import { motion, AnimatePresence } from "framer-motion";
-import QuizModal from "@/app/components/quiz/page"; 
+import QuizModal from "@/app/components/quiz/page";
+import ProtectedRoute from "@/app/routes/ProtectedRoute";
 
 export default function LearnPage() {
   const [data, setData] = useState<VocabCardData[]>([]);
@@ -30,14 +31,14 @@ export default function LearnPage() {
     const fetchSidebar = async () => {
       try {
         const res = await flashAPI.getTreeVocabulary();
-        
+
         const rawData = res.data || res;
         const treeData = Array.isArray(rawData) ? rawData : [];
-        
+
         setSidebarData(treeData);
       } catch (error) {
         console.error("Lỗi lấy sidebar:", error);
-        setSidebarData([]); 
+        setSidebarData([]);
       }
     };
     fetchSidebar();
@@ -77,92 +78,92 @@ export default function LearnPage() {
     });
 
     if (foundTopic) return foundTopic.topic_name;
-    
+
     // Nếu có dữ liệu nhưng không tìm thấy part, lấy tên topic đầu tiên làm mặc định
     return sidebarData[0]?.topic_name || "Unknown Topic";
   }, [currentPart, sidebarData]);
 
   return (
     <>
-      <MainHeader />
+      <ProtectedRoute>
+        <MainHeader />
 
-      <div className="container py-4" style={{ marginTop: "50px" }}>
-        
-        {/* HEADER VỚI NÚT ÔN TẬP */}
-        <div className="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
-          <h5 className="text-primary fw-bold mb-0">
-            <span className="text-muted fw-normal">Flashcard » </span>
-            Topic: {currentTopicName}
-          </h5>
+        <div className="container py-4" style={{ marginTop: "50px" }}>
+          {/* HEADER VỚI NÚT ÔN TẬP */}
+          <div className="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
+            <h5 className="text-primary fw-bold mb-0">
+              <span className="text-muted fw-normal">Flashcard » </span>
+              Topic: {currentTopicName}
+            </h5>
 
-          <button
-            onClick={() => setShowQuiz(true)}
-            className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
-            style={{
-              backgroundColor: "#0d6efd",
-              border: "none",
-              transition: "transform 0.2s",
-            }}
-          >
-            Ôn tập Part {currentPart}
-          </button>
-        </div>
-
-        <div className="row align-items-start" style={{ marginTop: "-10px" }}>
-          {/* SIDEBAR TRÁI */}
-          <div className="col-md-3 mb-4">
-            <PartSidebar data={sidebarData} />
-          </div>
-
-          {/* CONTENT PHẢI (FLASHCARD) */}
-          <div className="col-md-9">
-            <div
-              className="card shadow-sm border-0"
+            <button
+              onClick={() => setShowQuiz(true)}
+              className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
               style={{
-                minHeight: "500px",
-                position: "sticky",
-                top: "100px",
-                zIndex: 1,
-                overflow: "hidden",
+                backgroundColor: "#0d6efd",
+                border: "none",
+                transition: "transform 0.2s",
               }}
             >
-              <div className="card-body bg-light rounded pt-5">
-                <div className="d-flex flex-column align-items-center">
-                  <div
-                    className="w-100 d-flex justify-content-center"
-                    style={{ marginBottom: "50px" }}
-                  >
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentPart}
-                        initial={{ x: 50, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -50, opacity: 0 }}
-                        transition={{ duration: 1, ease: "easeInOut" }}
-                        style={{
-                          width: "100%",
-                          display: "flex",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <FlashCard data={data} imageUrl="/img/Vocab_FC.jpg" />
-                      </motion.div>
-                    </AnimatePresence>
+              Ôn tập Part {currentPart}
+            </button>
+          </div>
+
+          <div className="row align-items-start" style={{ marginTop: "-10px" }}>
+            {/* SIDEBAR TRÁI */}
+            <div className="col-md-3 mb-4">
+              <PartSidebar data={sidebarData} />
+            </div>
+
+            {/* CONTENT PHẢI (FLASHCARD) */}
+            <div className="col-md-9">
+              <div
+                className="card shadow-sm border-0"
+                style={{
+                  minHeight: "500px",
+                  position: "sticky",
+                  top: "100px",
+                  zIndex: 1,
+                  overflow: "hidden",
+                }}
+              >
+                <div className="card-body bg-light rounded pt-5">
+                  <div className="d-flex flex-column align-items-center">
+                    <div
+                      className="w-100 d-flex justify-content-center"
+                      style={{ marginBottom: "50px" }}
+                    >
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={currentPart}
+                          initial={{ x: 50, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          exit={{ x: -50, opacity: 0 }}
+                          transition={{ duration: 1, ease: "easeInOut" }}
+                          style={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <FlashCard data={data} imageUrl="/img/Vocab_FC.jpg" />
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <QuizModal
-        isOpen={showQuiz}
-        onClose={() => setShowQuiz(false)}
-        groupId={currentPart}
-        
-      />
+        <QuizModal
+          isOpen={showQuiz}
+          onClose={() => setShowQuiz(false)}
+          groupId={currentPart}
+        />
 
-      <MainFooter />
+        <MainFooter />
+      </ProtectedRoute>
     </>
   );
 }

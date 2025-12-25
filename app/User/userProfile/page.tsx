@@ -185,7 +185,7 @@ export default function UserProfile() {
   const handleLogoutProcess = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    router.push("/auth/login"); // Chuyển về trang đăng nhập
+    window.location.href = "/auth/login"; // Chuyển về trang đăng nhập
   };
   const handleLogout = () => {
     setOpenLogout(true);
@@ -279,14 +279,12 @@ export default function UserProfile() {
       // 2. Đóng modal form nhập liệu
       setIsPassModalOpen(false);
 
-      // 3. Hiển thị Popup (Modal) thông báo thành công
       Modal.success({
         title: "Đổi mật khẩu thành công!",
         content:
           "Mật khẩu của bạn đã được cập nhật. Vui lòng đăng nhập lại để tiếp tục.",
         okText: "Đăng nhập lại",
         onOk: () => {
-          // Khi bấm OK -> Tự động đăng xuất
           handleLogoutProcess();
         },
       });
@@ -416,16 +414,7 @@ export default function UserProfile() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="col-md-4 text-md-end mt-3 mt-md-0">
-                <Button
-                  style={styles.grayBtn}
-                  size="large"
-                  icon={<ShareAltOutlined />}
-                >
-                  Chia sẻ
-                </Button>
-                {/* NÚT ĐĂNG XUẤT */}
                 <Button
                   danger
                   size="large"
@@ -450,7 +439,6 @@ export default function UserProfile() {
                 >
                   Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
                 </Modal>
-                ;
               </div>
             </div>
           </div>

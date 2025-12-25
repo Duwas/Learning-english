@@ -28,6 +28,7 @@ import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import ProtectedRoute from "@/app/routes/ProtectedRoute";
 
 const { Text } = Typography;
 
@@ -281,27 +282,29 @@ export default function WritingTestPage() {
 
   return (
     <>
-      <MainHeader />
+      <ProtectedRoute>
+        <MainHeader />
 
-      {/* Modal hiện kết quả */}
-      {isModalOpen && writingResult && (
-        <WritingResultModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          result={writingResult}
-          onRedo={resetQuizAndFetch}
+        {/* Modal hiện kết quả */}
+        {isModalOpen && writingResult && (
+          <WritingResultModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            result={writingResult}
+            onRedo={resetQuizAndFetch}
+          />
+        )}
+
+        <WritingComponent
+          exercise={exerciseData}
+          transcript={transcript}
+          setTranscript={setTranscript}
+          onSubmit={handleSubmitWriting}
+          isSubmitting={isSubmitting}
         />
-      )}
 
-      <WritingComponent
-        exercise={exerciseData}
-        transcript={transcript}
-        setTranscript={setTranscript}
-        onSubmit={handleSubmitWriting}
-        isSubmitting={isSubmitting}
-      />
-
-      <MainFooter />
+        <MainFooter />
+      </ProtectedRoute>
     </>
   );
 }

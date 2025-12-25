@@ -53,7 +53,6 @@ const MainHeader = () => {
     pathname && pathname.startsWith("/User/") && pathname !== "/User";
 
   // --- STYLE CHUNG CHO LABEL MENU ---
-  // Định nghĩa size chữ thống nhất cho cả menu BE và Translate
   const menuLabelStyle: React.CSSProperties = {
     fontSize: "16px",
     fontWeight: 500,
@@ -86,31 +85,48 @@ const MainHeader = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 3. Logic: Check Login & Fetch User Avatar
+  // 3. Logic: Check Login & Fetch User Avatar (CẬP NHẬT LOGIC)
   useEffect(() => {
     const checkLoginAndFetchAvatar = async () => {
       const token = localStorage.getItem("token");
       const storedUserStr = localStorage.getItem("user");
 
-      if (token && storedUserStr) {
-        setLoggedIn(true);
-        try {
-          const currentUser = JSON.parse(storedUserStr);
-          const userId = currentUser.id || currentUser.userId;
-          const res = await infoApi.getProfile(userId);
-          if (res?.data?.avatarUrl) {
-            setUserAvatar(res.data.avatarUrl);
-          }
-        } catch (error) {
-          console.error("Lỗi lấy avatar header:", error);
-        }
-      } else {
+      // Nếu không có token hoặc user -> Set trạng thái chưa đăng nhập
+      if (!token || !storedUserStr) {
         setLoggedIn(false);
         setUserAvatar(null);
+        // Đảm bảo sạch sẽ storage nếu thiếu 1 trong 2
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        return;
+      }
+
+      // Nếu có token, set tạm là loggedIn để UI phản hồi nhanh
+      setLoggedIn(true);
+
+      try {
+        const currentUser = JSON.parse(storedUserStr);
+        const userId = currentUser.id || currentUser.userId;
+
+        // Gọi API để lấy Avatar mới nhất
+        const res = await infoApi.getProfile(userId);
+        if (res?.data?.avatarUrl) {
+          setUserAvatar(res.data.avatarUrl);
+        }
+      } catch (error) {
+        console.error("Phiên đăng nhập hết hạn hoặc lỗi API:", error);
+
+        // QUAN TRỌNG: Nếu gọi API thất bại (thường là 401 Unauthorized)
+        // -> Coi như hết hạn, xóa token và chuyển về nút Đăng nhập
+        setLoggedIn(false);
+        setUserAvatar(null);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
     };
+
     checkLoginAndFetchAvatar();
-  }, [pathname]);
+  }, [pathname]); // Chạy lại mỗi khi đổi trang
 
   // 4. Logic: Xác định Menu nào đang Active
   useEffect(() => {
@@ -137,7 +153,7 @@ const MainHeader = () => {
   };
 
   const getIconForSkill = (name: string) => {
-    const style = { fontSize: 18 }; // Icon size
+    const style = { fontSize: 18 };
     switch (name.toLowerCase()) {
       case "listening":
         return <CustomerServiceOutlined style={style} />;
@@ -193,15 +209,13 @@ const MainHeader = () => {
     </Avatar>
   );
 
-  // --- TẠO MENU ITEMS ---
   const skillItems: MenuItem[] = menuData.map((skill) => ({
     key: String(skill.skillId),
-    // Áp dụng style chung cho tên Skill (Listening, Reading,...)
     label: <span style={menuLabelStyle}>{skill.name}</span>,
     icon: getIconForSkill(skill.name),
     children: skill.levels.map((lv) => ({
       key: `${skill.skillId}-${lv.code}`,
-      label: `${lv.name} (${lv.code})`, // Font size mục con giữ mặc định hoặc chỉnh riêng nếu muốn
+      label: `${lv.name} (${lv.code})`,
       icon: renderLevelAvatar(lv.code, mapColor(lv.code)),
       onClick: () => handleNavigate(skill.name, skill.skillId, lv.code),
     })),
@@ -211,7 +225,6 @@ const MainHeader = () => {
     ...skillItems,
     {
       key: "translate",
-      // Áp dụng cùng style cho Translate
       label: <span style={menuLabelStyle}>Translate</span>,
       icon: getIconForSkill("translate"),
       onClick: () => router.push("/User/translate"),

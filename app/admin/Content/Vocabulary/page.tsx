@@ -1,5 +1,8 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { ImportOutlined, ExportOutlined } from "@ant-design/icons";
+import api from "@/app/services/api";
+
 import {
   Table,
   Button,
@@ -15,6 +18,7 @@ import {
   Collapse,
   Tag,
   Select,
+  Typography,
 } from "antd";
 import {
   FaPlus,
@@ -30,9 +34,10 @@ import {
 } from "react-icons/fa";
 import Sidebar from "@/app/components/sidebar/page";
 import VocabAdminAPI from "@/app/services/api/VocabAdminAPI";
+import { topicService } from "@/app/services/api/topicService";
 
 const POS_OPTIONS = [
-  { value: "n", label: "Danh từ (Noun)" },
+  { value: "noun", label: "Danh từ (Noun)" },
   { value: "verb", label: "Động từ (Verb)" },
   { value: "adjective", label: "Tính từ (Adjective)" },
   { value: "adverb", label: "Trạng từ (Adverb)" },
@@ -67,28 +72,35 @@ const { TextArea } = Input;
 const { Panel } = Collapse;
 
 export default function AdminVocabularyPage() {
-  // --- STATE ---
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- STATE DATA ---
   const [treeData, setTreeData] = useState<TopicItem[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<{
     id: number;
     name: string;
     topicId: number;
   } | null>(null);
-
   const [words, setWords] = useState<VocabItem[]>([]);
+
   const [showSidebar, setShowSidebar] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({ current: 1, pageSize: 8 });
-
   const [loadingTree, setLoadingTree] = useState(false);
   const [loadingWords, setLoadingWords] = useState(false);
+
+  // --- STATE MODAL WORD ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VocabItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [form] = Form.useForm();
+  // --- STATE MODAL TOPIC (NEW) ---
+  const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
+  const [submittingTopic, setSubmittingTopic] = useState(false);
 
-  // --- FETCH DATA ---
+  const [form] = Form.useForm();
+  const [topicForm] = Form.useForm();
+
   const fetchTreeData = async () => {
     try {
       setLoadingTree(true);
@@ -96,14 +108,10 @@ export default function AdminVocabularyPage() {
       const safeData = Array.isArray(data) ? data : [];
       setTreeData(safeData);
 
-      // --- LOGIC MỚI: TỰ ĐỘNG CHỌN GROUP ĐẦU TIÊN ---
-      // Nếu chưa chọn group nào và dữ liệu trả về có topic
       if (!selectedGroup && safeData.length > 0) {
-        // Tìm topic đầu tiên có chứa ít nhất 1 group_words
         const validTopic = safeData.find(
           (t) => t.group_words && t.group_words.length > 0
         );
-
         if (validTopic) {
           const firstGroupId = validTopic.group_words[0];
           setSelectedGroup({
@@ -113,7 +121,6 @@ export default function AdminVocabularyPage() {
           });
         }
       }
-      // ------------------------------------------------
     } catch (error) {
       console.error(error);
       message.error("Lỗi tải danh mục");
@@ -122,6 +129,7 @@ export default function AdminVocabularyPage() {
     }
   };
 
+  // 2. Fetch Words
   const fetchWords = async (groupId: number) => {
     try {
       setLoadingWords(true);
@@ -130,7 +138,6 @@ export default function AdminVocabularyPage() {
       setPagination((prev) => ({ ...prev, current: 1 }));
     } catch (error) {
       console.error(error);
-      message.error("Lỗi tải từ vựng");
       setWords([]);
     } finally {
       setLoadingWords(false);
@@ -147,7 +154,7 @@ export default function AdminVocabularyPage() {
     }
   }, [selectedGroup]);
 
-  // Filter Topics
+  // Filter Topics Search
   const filteredTreeData = useMemo(() => {
     if (!searchTerm) return treeData;
     const lowerSearch = searchTerm.toLowerCase();
@@ -160,7 +167,6 @@ export default function AdminVocabularyPage() {
       );
   }, [treeData, searchTerm]);
 
-  // --- HANDLERS ---
   const openCreateModal = () => {
     setEditingItem(null);
     form.resetFields();
@@ -173,12 +179,11 @@ export default function AdminVocabularyPage() {
     setIsModalOpen(true);
   };
 
-  const handleCreateOrUpdate = async (values: any) => {
+  const handleCreateOrUpdateWord = async (values: any) => {
     if (!selectedGroup) return message.warning("Chưa chọn bài học!");
 
     try {
       setSubmitting(true);
-
       const payload = {
         word: values.word,
         pron: values.pron,
@@ -186,7 +191,6 @@ export default function AdminVocabularyPage() {
         exampleEn: values.exampleEn,
         exampleVn: values.exampleVn || "",
         pos: values.pos || "",
-
         topicId: selectedGroup.topicId,
         groupWord: selectedGroup.id,
         v2: "",
@@ -195,10 +199,10 @@ export default function AdminVocabularyPage() {
 
       if (editingItem) {
         await VocabAdminAPI.updateWord(editingItem.id, payload);
-        message.success("Cập nhật thành công!");
+        message.success("Cập nhật từ vựng thành công!");
       } else {
         await VocabAdminAPI.createWord(payload);
-        message.success("Thêm mới thành công!");
+        message.success("Thêm từ vựng thành công!");
       }
 
       setIsModalOpen(false);
@@ -207,23 +211,62 @@ export default function AdminVocabularyPage() {
       fetchWords(selectedGroup.id);
     } catch (error) {
       console.error(error);
-      message.error("Có lỗi xảy ra!");
+      message.error("Có lỗi xảy ra khi lưu từ vựng!");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDeleteWord = async (id: number) => {
     try {
       await VocabAdminAPI.deleteWord(id);
-      message.success("Xóa thành công!");
+      message.success("Đã xóa từ vựng!");
       if (selectedGroup) fetchWords(selectedGroup.id);
     } catch (error) {
-      message.error("Không thể xóa!");
+      message.error("Không thể xóa từ vựng này!");
     }
   };
 
-  // --- COLUMN CONFIG ---
+  const handleAddTopic = async (values: any) => {
+    try {
+      setSubmittingTopic(true);
+      await topicService.create({
+        skillId: 1,
+        levelId: null,
+        name: values.topic_name,
+        description: values.description || "Grammar Topic",
+        imageFile: null,
+      });
+
+      message.success("Thêm chủ đề thành công!");
+      setIsTopicModalOpen(false);
+      topicForm.resetFields();
+      fetchTreeData(); 
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi khi thêm chủ đề!");
+    } finally {
+      setSubmittingTopic(false);
+    }
+  };
+
+  const handleDeleteTopic = async (topicId: number) => {
+    try {
+      await topicService.deleteTopic(topicId);
+      message.success("Đã xóa chủ đề!");
+      fetchTreeData();
+
+      // Nếu đang chọn topic vừa xóa -> reset
+      if (selectedGroup?.topicId === topicId) {
+        setSelectedGroup(null);
+        setWords([]);
+      }
+    } catch (error) {
+      console.error(error);
+      message.error("Xóa chủ đề thất bại!");
+    }
+  };
+
   const columns = [
     {
       title: "STT",
@@ -242,8 +285,15 @@ export default function AdminVocabularyPage() {
     {
       title: "Loại từ",
       dataIndex: "pos",
-      width: 100,
-      render: (text: string) => (text ? <Tag color="blue">{text}</Tag> : "-"),
+      width: 150,
+      render: (text: string) => {
+        const posOption = POS_OPTIONS.find((opt) => opt.value === text);
+        return text ? (
+          <Tag color="blue">{posOption ? posOption.label : text}</Tag>
+        ) : (
+          "-"
+        );
+      },
     },
     {
       title: "Phiên âm",
@@ -304,7 +354,7 @@ export default function AdminVocabularyPage() {
           />
           <Popconfirm
             title="Xóa?"
-            onConfirm={() => handleDelete(record.id)}
+            onConfirm={() => handleDeleteWord(record.id)}
             okButtonProps={{ danger: true }}
           >
             <Button type="text" className="text-danger" icon={<FaTrash />} />
@@ -313,6 +363,74 @@ export default function AdminVocabularyPage() {
       ),
     },
   ];
+
+  // const handleExportCSV = async () => {
+  //   try {
+  //     const res = await api.post(
+  //       "/admin/vocabulary/export/csv",
+  //       {},
+  //       { responseType: "blob" }
+  //     );
+  //     const url = window.URL.createObjectURL(new Blob([res.data]));
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     link.setAttribute("download", "vocabulary.csv");
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     link.remove();
+  //     window.URL.revokeObjectURL(url);
+  //     message.success("Xuất CSV thành công!");
+  //   } catch (err) {
+  //     console.error(err);
+  //     message.error("Xuất CSV thất bại!");
+  //   }
+  // };
+
+  const handleExportXLSX = async () => {
+    try {
+      const res = await api.get("/admin/vocabulary/export/xlsx", {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "vocabulary.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      message.success("Xuất XLSX thành công!");
+    } catch (err) {
+      console.error(err);
+      message.error("Xuất XLSX thất bại!");
+    }
+  };
+
+  const handleImportCSV = (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    api
+      .post("/admin/vocabulary/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(() => {
+        message.success("Nhập CSV thành công!");
+      })
+      .catch((err) => {
+        console.error(err);
+        message.error("Nhập CSV thất bại!");
+      });
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImportCSV(file);
+  };
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f0f2f5" }}>
@@ -343,6 +461,7 @@ export default function AdminVocabularyPage() {
               Quản lý <span style={{ color: "#76ce2b" }}>Vocabulary</span>
             </h4>
           </div>
+
           <Button
             icon={<FaSync />}
             onClick={() => {
@@ -357,7 +476,7 @@ export default function AdminVocabularyPage() {
         {/* Body */}
         <div className="p-4 flex-grow-1">
           <div className="row h-100">
-            {/* Sidebar Trái */}
+            {/* Sidebar Trái (Danh mục Topic) */}
             <div className="col-md-3 mb-4">
               <Card
                 className="shadow-sm border-0 h-100"
@@ -369,9 +488,30 @@ export default function AdminVocabularyPage() {
                 }}
               >
                 <div className="p-3 border-bottom bg-light">
-                  <h6 className="fw-bold mb-2 text-secondary">
-                    <FaFolderOpen className="me-2" /> DANH MỤC
-                  </h6>
+                  {/* Tiêu đề & Nút Thêm Topic */}
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h6 className="fw-bold m-0 text-secondary">
+                      <FaFolderOpen className="me-2" /> DANH MỤC
+                    </h6>
+                    <Tooltip title="Thêm chủ đề mới">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<FaPlus size={12} />}
+                        className="d-flex align-items-center justify-content-center"
+                        style={{
+                          width: 28,
+                          height: 28,
+                          backgroundColor: "#f6ffed",
+                          border: "1px solid #76ce2b",
+                          color: "#76ce2b",
+                          borderRadius: "50%",
+                        }}
+                        onClick={() => setIsTopicModalOpen(true)}
+                      />
+                    </Tooltip>
+                  </div>
+
                   <Input
                     prefix={<FaSearch className="text-muted" />}
                     placeholder="Tìm topic..."
@@ -396,10 +536,36 @@ export default function AdminVocabularyPage() {
                       {filteredTreeData.map((topic) => (
                         <Panel
                           header={
-                            <span className="fw-bold text-dark">
-                              <FaFolder className="me-2 text-warning" />{" "}
-                              {topic.topic_name}
-                            </span>
+                            <div className="d-flex justify-content-between align-items-center w-100 pe-3">
+                              <span
+                                className="fw-bold text-dark text-truncate"
+                                style={{ maxWidth: "180px" }}
+                              >
+                                <FaFolder className="me-2 text-warning" />{" "}
+                                {topic.topic_name}
+                              </span>
+                              {/* Nút Xóa Topic */}
+                              <Popconfirm
+                                title="Xóa chủ đề này?"
+                                description="Hành động này sẽ xóa cả các từ vựng bên trong."
+                                onConfirm={(e) => {
+                                  e?.stopPropagation();
+                                  handleDeleteTopic(topic.topic_id);
+                                }}
+                                onCancel={(e) => e?.stopPropagation()}
+                                okText="Xóa"
+                                cancelText="Hủy"
+                                okButtonProps={{ danger: true }}
+                              >
+                                <Button
+                                  type="text"
+                                  size="small"
+                                  className="text-secondary opacity-50 hover-opacity-100"
+                                  icon={<FaTrash size={12} />}
+                                  onClick={(e) => e.stopPropagation()} // Chặn sự kiện click vào panel
+                                />
+                              </Popconfirm>
+                            </div>
                           }
                           key={topic.topic_id}
                         >
@@ -454,25 +620,50 @@ export default function AdminVocabularyPage() {
               </Card>
             </div>
 
-            {/* Content Phải */}
+            {/* Content Phải (Danh sách từ vựng) */}
             <div className="col-md-9 mb-4">
               <Card className="shadow-sm border-0 h-100">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="d-flex align-items-center mb-4">
                   <h5 className="m-0 fw-bold text-primary">
                     {selectedGroup ? selectedGroup.name : "Chưa chọn bài học"}
                   </h5>
-                  <Button
-                    type="primary"
-                    icon={<FaPlus />}
-                    onClick={openCreateModal}
-                    disabled={!selectedGroup}
-                    style={{
-                      backgroundColor: "#76ce2b",
-                      borderColor: "#76ce2b",
-                    }}
-                  >
-                    Thêm từ mới
-                  </Button>
+                  <div className="d-flex gap-2 ms-auto">
+                    <div>
+                      <input
+                        type="file"
+                        accept=".csv, .xlsx"
+                        ref={fileInputRef}
+                        style={{ display: "none" }}
+                        onChange={handleFileChange}
+                      />
+                      <Button
+                        type="primary"
+                        icon={<ImportOutlined />}
+                        onClick={handleImportClick}
+                      >
+                        Nhập file CSV
+                      </Button>
+                    </div>
+                    <Button
+                      type="primary"
+                      icon={<ExportOutlined />}
+                      onClick={handleExportXLSX}
+                    >
+                      Xuất file CSV
+                    </Button>
+                    <Button
+                      type="primary"
+                      icon={<FaPlus />}
+                      onClick={openCreateModal}
+                      disabled={!selectedGroup}
+                      style={{
+                        backgroundColor: "#76ce2b",
+                        borderColor: "#76ce2b",
+                      }}
+                    >
+                      Thêm từ mới
+                    </Button>
+                  </div>
                 </div>
                 <Table
                   columns={columns}
@@ -500,7 +691,7 @@ export default function AdminVocabularyPage() {
         </div>
       </div>
 
-      {/* Modal Form */}
+      {/* Modal Form: Thêm/Sửa Từ Vựng */}
       <Modal
         title={
           <div className="fs-5 fw-bold">
@@ -516,7 +707,7 @@ export default function AdminVocabularyPage() {
         <Form
           form={form}
           layout="vertical"
-          onFinish={handleCreateOrUpdate}
+          onFinish={handleCreateOrUpdateWord}
           className="mt-3"
         >
           <div className="row">
@@ -581,6 +772,45 @@ export default function AdminVocabularyPage() {
               style={{ backgroundColor: "#76ce2b", borderColor: "#76ce2b" }}
             >
               {editingItem ? "Lưu thay đổi" : "Tạo mới"}
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* Modal Form: Thêm Topic (Mới) */}
+      <Modal
+        title="Thêm Chủ Đề Mới"
+        open={isTopicModalOpen}
+        onCancel={() => setIsTopicModalOpen(false)}
+        footer={null}
+        centered
+        width={400}
+      >
+        <Form
+          form={topicForm}
+          layout="vertical"
+          onFinish={handleAddTopic}
+          className="mt-3"
+        >
+          <Form.Item
+            name="topic_name"
+            label="Tên chủ đề"
+            rules={[{ required: true, message: "Vui lòng nhập tên chủ đề!" }]}
+          >
+            <Input placeholder="Ví dụ: Animals, Food..." />
+          </Form.Item>
+          <Form.Item name="description" label="Mô tả (Tùy chọn)">
+            <Input placeholder="Mô tả ngắn gọn" />
+          </Form.Item>
+          <div className="d-flex justify-content-end gap-2 mt-4">
+            <Button onClick={() => setIsTopicModalOpen(false)}>Hủy</Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={submittingTopic}
+              style={{ backgroundColor: "#76ce2b", borderColor: "#76ce2b" }}
+            >
+              Thêm
             </Button>
           </div>
         </Form>

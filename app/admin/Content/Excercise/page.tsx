@@ -9,7 +9,6 @@ import {
   Tag,
   Typography,
   Tooltip,
-  Badge,
   message,
   Select,
   Row,
@@ -38,16 +37,17 @@ import {
   AppstoreAddOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  ImportOutlined,
+  ExportOutlined,
 } from "@ant-design/icons";
 import Sidebar from "@/app/components/sidebar/page";
 
 // --- IMPORT SERVICES ---
 import { exerciseService } from "@/app/services/api/adminExAPI";
 import { topicService } from "@/app/services/api/topicService";
-import topbarApi from "@/app/services/api/topbar";
 import type { TableColumnsType, UploadFile } from "antd";
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { Option: SelectOption } = Select;
 const SIDEBAR_WIDTH = 240;
 
@@ -71,7 +71,7 @@ interface OptionType {
   id: number;
   optionText: string;
   isCorrect: boolean;
-  questionId: number;
+  question: number;
 }
 
 interface ExerciseType {
@@ -93,6 +93,8 @@ export default function ExerciseManagementPage() {
   // --- STATE CHUNG ---
   const [loadingMenu, setLoadingMenu] = useState(false);
   const [menuData, setMenuData] = useState<any[]>([]);
+  const [menuDataLevel, setMenuDataLevel] = useState<any[]>([]);
+
   const [topicsList, setTopicsList] = useState<any[]>([]);
 
   const [selectedSkillId, setSelectedSkillId] = useState<number | null>(null);
@@ -122,6 +124,10 @@ export default function ExerciseManagementPage() {
   const [editingQuestion, setEditingQuestion] = useState<QuestionType | null>(
     null
   );
+  // Lưu danh sách options tạm thời khi đang edit câu hỏi để map vào form A,B,C,D
+  const [editingQuestionOptions, setEditingQuestionOptions] = useState<
+    OptionType[]
+  >([]);
   const [qForm] = Form.useForm();
 
   // --- STATE MODAL OPTION (Quản lý riêng lẻ) ---
@@ -130,25 +136,19 @@ export default function ExerciseManagementPage() {
     useState<QuestionType | null>(null);
   const [optionList, setOptionList] = useState<OptionType[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
+  // State edit 1 option cụ thể
+  const [editingOption, setEditingOption] = useState<OptionType | null>(null);
   const [optionForm] = Form.useForm();
-  const handleDeleteExercise = async (id: number) => {
-    try {
-      await exerciseService.deleteById(id);
-      message.success("Đã xóa bài tập thành công!");
 
-      fetchExercises();
-    } catch (error) {
-      console.error(error);
-      message.error("Xóa bài tập thất bại. Vui lòng thử lại.");
-    }
-  };
   // 1. INIT DATA
   useEffect(() => {
     const fetchMenu = async () => {
       setLoadingMenu(true);
       try {
-        const res = await topbarApi.getAll();
+        const res = await topicService.getAllSkills();
         setMenuData(res.data || []);
+        const resLevel = await topicService.getAllLevels();
+        setMenuDataLevel(resLevel.data || []);
       } catch (e) {
         console.error(e);
       } finally {
@@ -157,12 +157,6 @@ export default function ExerciseManagementPage() {
     };
     fetchMenu();
   }, []);
-
-  const currentLevels = React.useMemo(() => {
-    if (!selectedSkillId) return [];
-    const skill = menuData.find((s) => s.skillId === selectedSkillId);
-    return skill ? skill.levels : [];
-  }, [selectedSkillId, menuData]);
 
   // 2. LOAD TOPICS
   useEffect(() => {
@@ -173,10 +167,15 @@ export default function ExerciseManagementPage() {
         return;
       }
       try {
-        const res = await topicService.getBySkillAndLevel(
-          selectedSkillId,
-          selectedLevelId
-        );
+        let res;
+        if (selectedSkillId === 1 || selectedSkillId === 2) {
+          res = await topicService.getBySkill(selectedSkillId);
+        } else {
+          res = await topicService.getBySkillAndLevel(
+            selectedSkillId,
+            selectedLevelId
+          );
+        }
         const data = Array.isArray(res.data)
           ? res.data
           : res.data?.content || [];
@@ -197,7 +196,7 @@ export default function ExerciseManagementPage() {
     setLoadingExercises(true);
     setHasSearched(true);
     try {
-      const res = await exerciseService.getExercisesByTopic(selectedTopicId);
+      const res = await exerciseService.getExercisesByTopic1(selectedTopicId);
       let rawData = [];
       if (Array.isArray(res.data)) rawData = res.data;
       else if (res.data?.data && Array.isArray(res.data.data))
@@ -207,7 +206,7 @@ export default function ExerciseManagementPage() {
         ...item,
         id: item.id || item.exerciseId,
         exerciseId: item.exerciseId || item.id,
-        topicId: item.topicId || selectedTopicId, // Lưu topicId vào state để dùng sau này
+        topicId: item.topicId || selectedTopicId,
         questions: [],
         isLoadingQuestions: false,
       }));
@@ -220,7 +219,7 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // --- HANDLERS BÀI TẬP ---
+  // --- HANDLERS BÀI TẬP (EXERCISE) ---
   const handleOpenModal = (record?: ExerciseType) => {
     form.resetFields();
     setFileListAudio([]);
@@ -234,12 +233,6 @@ export default function ExerciseManagementPage() {
         groupWord: record.groupWord,
         topicId: record.topicId || selectedTopicId,
       });
-    } else {
-      setEditingExercise(null);
-      form.setFieldsValue({
-        topicId: selectedTopicId,
-        type: selectedSkillId ? (selectedSkillId === 1 ? 1 : 2) : 1,
-      });
     }
     setIsModalOpen(true);
   };
@@ -249,22 +242,28 @@ export default function ExerciseManagementPage() {
     try {
       const params: ExerciseParams = {
         title: values.title,
-        type: values.type,
-        groupWord: values.groupWord || 0,
-        topicId: values.topicId,
-        description: values.description,
+        type: Number(values.type), // ép number
+        groupWord: values.groupWord ? Number(values.groupWord) : 0,
+        topicId: Number(selectedTopicId), // ép number
+        description: values.description ?? "",
       };
-      const imgFile = fileListImage[0]?.originFileObj;
-      const audFile = fileListAudio[0]?.originFileObj;
 
-      if (editingExercise) {
-        const id = editingExercise.id || editingExercise.exerciseId;
-        await exerciseService.update(id, params, imgFile, audFile);
+      const imgFile = fileListImage?.[0]?.originFileObj || null;
+      const audFile = fileListAudio?.[0]?.originFileObj || null;
+
+      if (editingExercise?.id) {
+        await exerciseService.update(
+          editingExercise.id,
+          params,
+          imgFile,
+          audFile
+        );
         message.success("Cập nhật bài tập thành công!");
       } else {
         await exerciseService.create(params, imgFile, audFile);
         message.success("Tạo bài tập mới thành công!");
       }
+
       setIsModalOpen(false);
       fetchExercises();
     } catch (e) {
@@ -275,165 +274,114 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // --- HANDLERS CÂU HỎI & OPTION ---
-
-  const handleExpandRow = async (expanded: boolean, record: ExerciseType) => {
-    if (expanded) {
-      const newExercises = [...exercises];
-      const index = newExercises.findIndex(
-        (e) => (e.id || e.exerciseId) === (record.id || record.exerciseId)
-      );
-      if (index === -1) return;
-
-      newExercises[index].isLoadingQuestions = true;
-      setExercises(newExercises);
-
-      try {
-        const exId = record.id || record.exerciseId;
-        const res = await exerciseService.getQuestionsByExerciseId(exId);
-        const questions = Array.isArray(res.data)
-          ? res.data
-          : res.data?.content || [];
-
-        const updatedExercises = [...exercises];
-        updatedExercises[index].questions = questions;
-        updatedExercises[index].questionCount = questions.length;
-        updatedExercises[index].isLoadingQuestions = false;
-        setExercises(updatedExercises);
-      } catch (error) {
-        console.error(error);
-        const updatedExercises = [...exercises];
-        updatedExercises[index].isLoadingQuestions = false;
-        setExercises(updatedExercises);
-      }
+  const handleDeleteExercise = async (id: number) => {
+    try {
+      await exerciseService.deleteById(id);
+      message.success("Đã xóa bài tập thành công!");
+      fetchExercises();
+    } catch (error) {
+      console.error(error);
+      message.error("Xóa bài tập thất bại.");
     }
   };
 
+  // --- HANDLERS CÂU HỎI (QUESTION) ---
+
+  // Mở rộng dòng để load câu hỏi
+  const handleExpandRow = async (expanded: boolean, record: ExerciseType) => {
+    if (expanded) {
+      await reloadQuestions(record.id || record.exerciseId);
+    }
+  };
+
+  // Hàm reload câu hỏi cho 1 bài tập cụ thể (dùng sau khi thêm/sửa/xóa câu hỏi)
   const reloadQuestions = async (exerciseId: number) => {
-    const index = exercises.findIndex(
-      (e) => (e.id || e.exerciseId) === exerciseId
+    // Cập nhật trạng thái loading
+    setExercises((prev) =>
+      prev.map((e) =>
+        (e.id || e.exerciseId) === exerciseId
+          ? { ...e, isLoadingQuestions: true }
+          : e
+      )
     );
-    if (index === -1) return;
+
     try {
       const res = await exerciseService.getQuestionsByExerciseId(exerciseId);
       const questions = Array.isArray(res.data)
         ? res.data
         : res.data?.content || [];
-      const updatedExercises = [...exercises];
-      updatedExercises[index].questions = questions;
-      updatedExercises[index].questionCount = questions.length;
-      setExercises(updatedExercises);
-    } catch (e) {
-      console.error(e);
+
+      setExercises((prev) =>
+        prev.map((e) =>
+          (e.id || e.exerciseId) === exerciseId
+            ? {
+                ...e,
+                questions: questions,
+                questionCount: questions.length,
+                isLoadingQuestions: false,
+              }
+            : e
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      setExercises((prev) =>
+        prev.map((e) =>
+          (e.id || e.exerciseId) === exerciseId
+            ? { ...e, isLoadingQuestions: false }
+            : e
+        )
+      );
     }
   };
 
+  // Mở Modal Thêm/Sửa câu hỏi
   const handleOpenQModal = (exerciseId: number, question?: QuestionType) => {
-    qForm.resetFields();
     setCurrentExerciseId(exerciseId);
+    setEditingQuestion(question || null);
+
+    qForm.resetFields(); // ❗ quan trọng
 
     if (question) {
-      setEditingQuestion(question);
       qForm.setFieldsValue({
         questionText: question.questionText,
-        vocabularyId: question.vocabularyId,
-        questionType: question.questionType,
-      });
-    } else {
-      setEditingQuestion(null);
-      qForm.setFieldsValue({
-        questionType: "multiple_choice",
-        correctAnswer: "A",
+        vocabularyId: question.vocabularyId ?? null,
       });
     }
+
     setIsQModalOpen(true);
   };
 
-  // *** HÀM QUAN TRỌNG: TẠO CÂU HỎI + ĐÁP ÁN ***
   const handleSaveQuestion = async (values: any) => {
     if (!currentExerciseId) {
-      message.error("Lỗi: Không tìm thấy bài tập.");
-      return;
-    }
-
-    // 1. TÌM EXERCISE ĐANG CHỈNH SỬA ĐỂ LẤY TOPIC ID
-    const currentEx = exercises.find(
-      (e) => e.id === currentExerciseId || e.exerciseId === currentExerciseId
-    );
-
-    // Fallback: Nếu không tìm thấy trong list (hiếm), dùng selectedTopicId đang filter
-    const topicIdToUse = currentEx?.topicId || selectedTopicId;
-
-    if (!topicIdToUse) {
-      message.error(
-        "Lỗi: Không xác định được Topic ID. Vui lòng kiểm tra lại bài tập."
-      );
+      message.error("Không tìm thấy bài tập");
       return;
     }
 
     setIsQSubmitting(true);
 
     try {
-      // B1: Chuẩn bị payload câu hỏi (có topicId)
-      const questionPayload = {
-        topicId: topicIdToUse, // <--- Lấy từ bài tập đang sửa
+      const payload = {
         exerciseId: currentExerciseId,
-        vocabularyId: values.vocabularyId || 0,
+        vocabularyId: values.vocabularyId || null,
         questionText: values.questionText,
       };
 
-      let questionId = 0;
-
       if (editingQuestion) {
-        await exerciseService.updateQuestion(
-          editingQuestion.id,
-          questionPayload
-        );
-        questionId = editingQuestion.id;
+        // UPDATE
+        await exerciseService.updateQuestion(editingQuestion.id, payload);
         message.success("Cập nhật câu hỏi thành công");
       } else {
-        const resQ = await exerciseService.createQuestion(questionPayload);
-        // Lấy ID từ response (resQ.data.id hoặc resQ.data)
-        questionId =
-          resQ.data?.id ||
-          resQ.data?.questionId ||
-          (typeof resQ.data === "number" ? resQ.data : 0);
-
-        if (questionId) {
-          const optionsData = [
-            { text: values.optionA, label: "A" },
-            { text: values.optionB, label: "B" },
-            { text: values.optionC, label: "C" },
-            { text: values.optionD, label: "D" },
-          ];
-
-          // Tạo 4 đáp án
-          for (const opt of optionsData) {
-            if (opt.text) {
-              await exerciseService.createOption({
-                questionId: questionId,
-                optionText: opt.text,
-                isCorrect: values.correctAnswer === opt.label,
-              });
-            }
-          }
-          message.success("Thêm câu hỏi và đáp án thành công!");
-        } else {
-          message.warning(
-            "Tạo câu hỏi xong nhưng không lấy được ID để tạo đáp án."
-          );
-        }
+        // CREATE
+        await exerciseService.createQuestion(payload);
+        message.success("Thêm câu hỏi thành công");
       }
 
       setIsQModalOpen(false);
       await reloadQuestions(currentExerciseId);
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
-      if (error.response) {
-        message.error(`Lỗi Server: ${error.response.status}`);
-      } else {
-        message.error("Lỗi khi lưu dữ liệu");
-      }
+      message.error("Lỗi khi lưu câu hỏi");
     } finally {
       setIsQSubmitting(false);
     }
@@ -452,63 +400,82 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // --- HANDLERS RIÊNG CHO MODAL QUẢN LÝ ĐÁP ÁN (NẾU CẦN SỬA LẺ) ---
-  const handleOpenOptionModal = async (question: QuestionType) => {
-    setCurrentQuestionForOption(question);
-    setIsOptionModalOpen(true);
-    setOptionList([]);
-    optionForm.resetFields();
+  // --- HANDLERS OPTIONS (Quản lý danh sách đáp án riêng lẻ) ---
+  const fetchOptions = async (questionId: number) => {
     setLoadingOptions(true);
     try {
-      const res = await exerciseService.getOptionsByQuestionId(question.id);
+      const res = await exerciseService.getOptionsByQuestionId(questionId);
       const data = Array.isArray(res.data) ? res.data : res.data?.content || [];
       setOptionList(data);
     } catch (e) {
-      message.error("Không tải được đáp án");
+      console.error(e);
     } finally {
       setLoadingOptions(false);
     }
   };
 
-  const handleSaveOption = async (values: any) => {
+  const handleOpenOptionModal = (question: QuestionType) => {
+    setCurrentQuestionForOption(question);
+    setIsOptionModalOpen(true);
+    setOptionList([]);
+    setEditingOption(null);
+    optionForm.resetFields();
+    fetchOptions(question.id);
+  };
+
+  // THÊM
+  const handleCreateOption = async (values: any) => {
     if (!currentQuestionForOption) return;
+
     try {
       await exerciseService.createOption({
-        questionId: currentQuestionForOption.id,
-        optionText: values.optionText,
-        isCorrect: values.isCorrect || false,
+        questionId: currentQuestionForOption!.id,
+        optionText: values.optionText, // ĐÚNG TÊN FIELD
+        isCorrect: values.isCorrect ?? false,
       });
-      message.success("Đã thêm đáp án");
-      optionForm.resetFields();
 
-      const res = await exerciseService.getOptionsByQuestionId(
-        currentQuestionForOption.id
-      );
-      setOptionList(
-        Array.isArray(res.data) ? res.data : res.data?.content || []
-      );
-    } catch (e) {
-      message.error("Lỗi thêm đáp án");
+      message.success("Thêm đáp án thành công");
+      form.resetFields();
+      fetchOptions(currentQuestionForOption.id);
+    } catch (err) {
+      message.error("Thêm đáp án thất bại");
+    }
+  };
+
+  // SỬA
+  const handleUpdateOption = async (values: any) => {
+    if (!editingOption) return;
+    if (!currentQuestionForOption) return;
+
+    try {
+      await exerciseService.updateOptions(editingOption.id, {
+        questionId: editingOption.question,
+        optionText: values.optionText,
+        isCorrect: values.isCorrect ?? false,
+      });
+
+      message.success("Cập nhật đáp án thành công");
+      setEditingOption(null);
+      form.resetFields();
+      fetchOptions(currentQuestionForOption.id);
+    } catch (err) {
+      message.error("Cập nhật đáp án thất bại");
     }
   };
 
   const handleDeleteOption = async (optionId: number) => {
     if (!currentQuestionForOption) return;
+
     try {
       await exerciseService.deleteOption(optionId);
       message.success("Đã xóa đáp án");
-      const res = await exerciseService.getOptionsByQuestionId(
-        currentQuestionForOption.id
-      );
-      setOptionList(
-        Array.isArray(res.data) ? res.data : res.data?.content || []
-      );
+      fetchOptions(currentQuestionForOption.id);
     } catch (e) {
       message.error("Lỗi xóa đáp án");
     }
   };
 
-  // --- TABLE COLUMNS ---
+  // --- COLUMNS ---
   const columns: TableColumnsType<ExerciseType> = [
     {
       title: "Thông tin bài tập",
@@ -540,23 +507,24 @@ export default function ExerciseManagementPage() {
       ),
     },
     {
-      title: "Số câu",
-      dataIndex: "questionCount",
-      width: 100,
-      align: "center",
-      render: (c, r) => {
-        const displayCount =
-          r.questions && r.questions.length > 0 ? r.questions.length : c || 0;
-        return displayCount > 0 ? (
-          <Badge count={displayCount} showZero color="#52c41a" />
-        ) : (
-          <Tag>Trống</Tag>
-        );
-      },
+      title: "Loại bài",
+      dataIndex: "type",
+      width: 150,
+      render: (t) => (
+        <Tag>
+          {t === 0
+            ? "Trắc nghiệm 1 đáp án"
+            : t === 4
+            ? "Nghe & Trả lời"
+            : t === 6
+            ? "Viết đoạn văn"
+            : "Khác"}
+        </Tag>
+      ),
     },
     {
       title: "Hành động",
-      width: 120, // Tăng độ rộng để chứa 2 nút
+      width: 120,
       align: "center",
       render: (_, r) => (
         <Space>
@@ -566,10 +534,9 @@ export default function ExerciseManagementPage() {
               onClick={() => handleOpenModal(r)}
             />
           </Tooltip>
-
           <Popconfirm
             title="Xóa bài tập?"
-            description="Hành động này sẽ xóa cả các câu hỏi bên trong."
+            description="Xóa bài tập sẽ xóa luôn các câu hỏi bên trong."
             onConfirm={() => handleDeleteExercise(r.id || r.exerciseId)}
             okText="Xóa"
             cancelText="Hủy"
@@ -594,18 +561,12 @@ export default function ExerciseManagementPage() {
       render: (text) => <Text style={{ fontSize: 13 }}>{text}</Text>,
     },
     {
-      title: "Loại câu",
-      dataIndex: "questionType",
-      width: 130,
-      render: (t) => <Tag>{t === "multiple_choice" ? "Trắc nghiệm" : t}</Tag>,
-    },
-    {
       title: "Thao tác",
-      width: 120,
+      width: 140,
       align: "right",
-      render: (_, qRecord) => (
+      render: (t, qRecord) => (
         <Space size="small">
-          <Tooltip title="Xem/Sửa đáp án">
+          <Tooltip title="Quản lý chi tiết đáp án">
             <Button
               type="dashed"
               size="small"
@@ -613,15 +574,17 @@ export default function ExerciseManagementPage() {
               onClick={() => handleOpenOptionModal(qRecord)}
             />
           </Tooltip>
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined />}
-            className="text-primary"
-            onClick={() => handleOpenQModal(exerciseId, qRecord)}
-          />
+          <Tooltip title="Sửa nội dung câu hỏi & 4 đáp án nhanh">
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              className="text-primary"
+              onClick={() => handleOpenQModal(exerciseId, qRecord)}
+            />
+          </Tooltip>
           <Popconfirm
-            title="Xóa câu hỏi này?"
+            title="Xóa câu hỏi?"
             onConfirm={() => handleDeleteQuestion(qRecord.id, exerciseId)}
             okText="Xóa"
             cancelText="Hủy"
@@ -629,38 +592,6 @@ export default function ExerciseManagementPage() {
             <Button type="text" size="small" icon={<DeleteOutlined />} danger />
           </Popconfirm>
         </Space>
-      ),
-    },
-  ];
-
-  const optionColumns: TableColumnsType<OptionType> = [
-    { title: "Nội dung", dataIndex: "optionText", key: "optionText" },
-    {
-      title: "Đúng/Sai",
-      dataIndex: "isCorrect",
-      key: "isCorrect",
-      width: 100,
-      align: "center",
-      render: (isCorrect) =>
-        isCorrect ? (
-          <Tag color="success" icon={<CheckCircleOutlined />}>
-            Đúng
-          </Tag>
-        ) : (
-          <Tag color="error" icon={<CloseCircleOutlined />}>
-            Sai
-          </Tag>
-        ),
-    },
-    {
-      title: "Xóa",
-      key: "action",
-      width: 60,
-      align: "center",
-      render: (_, r) => (
-        <Popconfirm title="Xóa?" onConfirm={() => handleDeleteOption(r.id)}>
-          <Button size="small" type="text" danger icon={<DeleteOutlined />} />
-        </Popconfirm>
       ),
     },
   ];
@@ -680,6 +611,7 @@ export default function ExerciseManagementPage() {
           Quản lý kho bài tập
         </Title>
 
+        {/* --- FILTER SECTION --- */}
         <Card className="mb-4 shadow-sm">
           <Row gutter={16}>
             <Col span={6}>
@@ -689,12 +621,13 @@ export default function ExerciseManagementPage() {
                 placeholder="Chọn Skill"
                 value={selectedSkillId}
                 onChange={(v) => {
+                  setExercises([]);
                   setSelectedSkillId(v);
                   setSelectedLevelId(null);
                 }}
               >
                 {menuData.map((s) => (
-                  <SelectOption key={s.skillId} value={s.skillId}>
+                  <SelectOption key={s.id} value={s.id}>
                     {s.name}
                   </SelectOption>
                 ))}
@@ -709,7 +642,7 @@ export default function ExerciseManagementPage() {
                 disabled={!selectedSkillId}
                 onChange={(v) => setSelectedLevelId(v)}
               >
-                {currentLevels.map((l: any) => (
+                {menuDataLevel.map((l: any) => (
                   <SelectOption key={l.id} value={l.id}>
                     {l.name} ({l.code})
                   </SelectOption>
@@ -749,21 +682,36 @@ export default function ExerciseManagementPage() {
           </Row>
         </Card>
 
+        {/* --- EXERCISE TABLE --- */}
         {hasSearched && (
           <Card bordered={false} className="shadow-sm">
-            <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="d-flex align-items-center mb-3">
               <span style={{ fontSize: "14px", fontWeight: 600 }}>
-                Kết quả tìm kiếm {exercises.length} bài tập
+                Kết quả tìm kiếm: {exercises.length} bài tập
               </span>
-              {exercises.length === 0 && (
+              <div className="d-flex gap-2 ms-auto">
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
                   onClick={() => handleOpenModal()}
                 >
+                  Xuất file CSV
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<ExportOutlined />}
+                  onClick={() => handleOpenModal()}
+                >
+                  Nhập file CSV
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<ImportOutlined />}
+                  onClick={() => handleOpenModal()}
+                >
                   Tạo bài tập mới
                 </Button>
-              )}
+              </div>
             </div>
 
             <Table
@@ -773,6 +721,16 @@ export default function ExerciseManagementPage() {
               loading={loadingExercises}
               pagination={false}
               expandable={{
+                expandIcon: ({ expanded, onExpand, record }) =>
+                  record.type === 0 ? (
+                    <Button
+                      type="text"
+                      size="small"
+                      onClick={(e) => onExpand(record, e)}
+                    >
+                      {expanded ? "-" : "+"}
+                    </Button>
+                  ) : null,
                 onExpand: handleExpandRow,
                 expandedRowRender: (record) => {
                   const exId = record.id || record.exerciseId;
@@ -825,6 +783,7 @@ export default function ExerciseManagementPage() {
           </Card>
         )}
 
+        {/* --- MODAL EXERCISE --- */}
         <Modal
           title={editingExercise ? "Cập nhật bài tập" : "Tạo bài tập mới"}
           open={isModalOpen}
@@ -845,37 +804,26 @@ export default function ExerciseManagementPage() {
               </Col>
               <Col span={12}>
                 <Form.Item
-                  name="topicId"
-                  label="Topic ID"
-                  rules={[{ required: true }]}
-                >
-                  <InputNumber
-                    style={{ width: "100%" }}
-                    disabled={!!selectedTopicId && !editingExercise}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item
                   name="type"
                   label="Loại bài (Type ID)"
                   rules={[{ required: true }]}
                 >
                   <Select>
-                    <SelectOption value={1}>1 - Listening</SelectOption>
-                    <SelectOption value={2}>2 - Speaking</SelectOption>
-                    <SelectOption value={3}>3 - Reading</SelectOption>
-                    <SelectOption value={4}>4 - Writing</SelectOption>
+                    <SelectOption value={0}>
+                      Trắc nghiệm chọn 1 đáp án
+                    </SelectOption>
+                    <SelectOption value={4}>Nói</SelectOption>
+                    <SelectOption value={6}>Viết đoạn văn</SelectOption>
                   </Select>
                 </Form.Item>
               </Col>
-              <Col span={12}>
-                <Form.Item name="groupWord" label="Group Word ID">
-                  <InputNumber style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
+              {selectedSkillId === 0 && (
+                <Col span={12}>
+                  <Form.Item name="groupWord" label="Group Word ID">
+                    <InputNumber style={{ width: "100%" }} />
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
             <Form.Item name="description" label="Mô tả / Hướng dẫn">
               <Input.TextArea rows={3} />
@@ -923,6 +871,7 @@ export default function ExerciseManagementPage() {
           </Form>
         </Modal>
 
+        {/* --- MODAL QUESTION (EDIT/CREATE) --- */}
         <Modal
           title={editingQuestion ? "Sửa câu hỏi" : "Thêm câu hỏi trắc nghiệm"}
           open={isQModalOpen}
@@ -939,105 +888,6 @@ export default function ExerciseManagementPage() {
             >
               <Input.TextArea rows={3} />
             </Form.Item>
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item name="vocabularyId" label="Vocabulary ID">
-                  <InputNumber style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name="questionType" label="Loại câu hỏi">
-                  <Select>
-                    <SelectOption value="multiple_choice">
-                      Trắc nghiệm
-                    </SelectOption>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-
-            {!editingQuestion && (
-              <>
-                <Divider orientation="left" style={{ margin: "10px 0" }}>
-                  Nhập 4 đáp án & Chọn đáp án đúng
-                </Divider>
-                <Form.Item
-                  name="correctAnswer"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn đáp án đúng" },
-                  ]}
-                >
-                  <Radio.Group style={{ width: "100%" }}>
-                    <Space direction="vertical" style={{ width: "100%" }}>
-                      <Row align="middle" gutter={8}>
-                        <Col flex="30px">
-                          <Radio value="A">A.</Radio>
-                        </Col>
-                        <Col flex="auto">
-                          <Form.Item
-                            name="optionA"
-                            noStyle
-                            rules={[
-                              { required: true, message: "Nhập đáp án A" },
-                            ]}
-                          >
-                            <Input placeholder="Đáp án A" />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                      <Row align="middle" gutter={8}>
-                        <Col flex="30px">
-                          <Radio value="B">B.</Radio>
-                        </Col>
-                        <Col flex="auto">
-                          <Form.Item
-                            name="optionB"
-                            noStyle
-                            rules={[
-                              { required: true, message: "Nhập đáp án B" },
-                            ]}
-                          >
-                            <Input placeholder="Đáp án B" />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                      <Row align="middle" gutter={8}>
-                        <Col flex="30px">
-                          <Radio value="C">C.</Radio>
-                        </Col>
-                        <Col flex="auto">
-                          <Form.Item
-                            name="optionC"
-                            noStyle
-                            rules={[
-                              { required: true, message: "Nhập đáp án C" },
-                            ]}
-                          >
-                            <Input placeholder="Đáp án C" />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                      <Row align="middle" gutter={8}>
-                        <Col flex="30px">
-                          <Radio value="D">D.</Radio>
-                        </Col>
-                        <Col flex="auto">
-                          <Form.Item
-                            name="optionD"
-                            noStyle
-                            rules={[
-                              { required: true, message: "Nhập đáp án D" },
-                            ]}
-                          >
-                            <Input placeholder="Đáp án D" />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                    </Space>
-                  </Radio.Group>
-                </Form.Item>
-              </>
-            )}
 
             <div className="text-end mt-3">
               <Button onClick={() => setIsQModalOpen(false)} className="me-2">
@@ -1049,62 +899,129 @@ export default function ExerciseManagementPage() {
                 loading={isQSubmitting}
                 icon={<SaveOutlined />}
               >
-                {editingQuestion ? "Cập nhật" : "Tạo câu hỏi & Đáp án"}
+                {editingQuestion ? "Cập nhật câu hỏi" : "Tạo câu hỏi"}
               </Button>
             </div>
           </Form>
         </Modal>
 
+        {/* --- MODAL OPTION (MANAGE LIST) --- */}
         <Modal
-          title={`Quản lý đáp án`}
+          title="Quản lý chi tiết đáp án"
           open={isOptionModalOpen}
-          onCancel={() => setIsOptionModalOpen(false)}
+          onCancel={() => {
+            setIsOptionModalOpen(false);
+            setEditingOption(null);
+            form.resetFields();
+          }}
           footer={null}
-          width={600}
+          width={700}
         >
+          {/* FORM thêm / sửa */}
           <Card
             size="small"
             style={{
               marginBottom: 16,
-              background: "#f6ffed",
-              border: "1px solid #b7eb8f",
+              background: editingOption ? "#e6f7ff" : "#f6ffed",
+              border: editingOption ? "1px solid #91d5ff" : "1px solid #b7eb8f",
             }}
           >
-            <Form form={optionForm} layout="inline" onFinish={handleSaveOption}>
+            <div
+              className="mb-2 fw-bold"
+              style={{ color: editingOption ? "#1890ff" : "#52c41a" }}
+            >
+              {editingOption
+                ? `Đang sửa đáp án ID: ${editingOption.id}`
+                : "Thêm đáp án mới"}
+            </div>
+
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={editingOption ? handleUpdateOption : handleCreateOption}
+            >
               <Form.Item
                 name="optionText"
-                rules={[{ required: true, message: "Nhập đáp án" }]}
-                style={{ flex: 1 }}
+                label="Nội dung đáp án"
+                rules={[{ required: true, message: "Nhập nội dung đáp án" }]}
               >
-                <Input
-                  placeholder="Đáp án (A, B...)"
-                  prefix={<PlusOutlined className="text-muted" />}
-                />
+                <Input />
               </Form.Item>
-              <Form.Item name="isCorrect" valuePropName="checked">
-                <Switch
-                  checkedChildren="Đúng"
-                  unCheckedChildren="Sai"
-                  defaultChecked={false}
-                />
+
+              <Form.Item
+                name="isCorrect"
+                label="Đáp án đúng"
+                valuePropName="checked"
+              >
+                <Switch />
               </Form.Item>
-              <Form.Item>
+
+              <Space>
                 <Button type="primary" htmlType="submit">
-                  Thêm
+                  {editingOption ? "Cập nhật" : "Thêm mới"}
                 </Button>
-              </Form.Item>
+                {editingOption && (
+                  <Button
+                    onClick={() => {
+                      setEditingOption(null);
+                      form.resetFields();
+                    }}
+                  >
+                    Huỷ sửa
+                  </Button>
+                )}
+              </Space>
             </Form>
           </Card>
+
+          {/* DANH SÁCH */}
           <Divider orientation="left" plain>
-            Danh sách đáp án hiện tại
+            Danh sách đáp án
           </Divider>
+
           <Table
             rowKey="id"
             loading={loadingOptions}
             dataSource={optionList}
-            columns={optionColumns}
             pagination={false}
             size="small"
+            columns={[
+              {
+                title: "Nội dung",
+                dataIndex: "optionText",
+              },
+              {
+                title: "Đúng",
+                dataIndex: "isCorrect",
+                width: 80,
+                render: (v) => (v ? "✔" : ""),
+              },
+              {
+                title: "Hành động",
+                width: 140,
+                render: (_, record) => (
+                  <Space>
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        setEditingOption(record);
+                        form.setFieldsValue(record);
+                      }}
+                    >
+                      Sửa
+                    </Button>
+                    <Popconfirm
+                      title="Xoá đáp án?"
+                      onConfirm={() => handleDeleteOption(record.id)}
+                    >
+                      <Button danger size="small">
+                        Xoá
+                      </Button>
+                    </Popconfirm>
+                  </Space>
+                ),
+              },
+            ]}
             locale={{
               emptyText: (
                 <Empty

@@ -42,7 +42,6 @@ const { confirm } = Modal;
 const SIDEBAR_WIDTH = 240;
 const HEADER_HEIGHT = 64;
 
-// --- CẤU HÌNH DOMAIN ẢNH ---
 const API_DOMAIN = "https://nonvoluntary-dianoetically-marilynn.ngrok-free.dev";
 
 // ---------------- INTERFACES ----------------
@@ -188,10 +187,13 @@ export default function SkillManagementPage() {
       return;
     }
 
+    // Bỏ .originFileObj đi
     const fileToUpload =
-      fileList.length > 0 ? (fileList[0].originFileObj as File) : null;
+      fileList.length > 0 ? (fileList[0] as unknown as File) : null;
+    console.log(fileToUpload);
 
     setIsSubmitting(true);
+
     try {
       if (editingTopic) {
         // Update
@@ -358,7 +360,6 @@ export default function SkillManagementPage() {
       title: "Thao tác",
       width: 120,
       align: "center" as const,
-      // Record vẫn chứa ID thật để phục vụ xóa/sửa
       render: (_: any, record: Topic) => (
         <Space>
           <Button
@@ -428,7 +429,7 @@ export default function SkillManagementPage() {
             size="large"
             onClick={handleOpenCreate}
           >
-            Thêm bài tập
+            Thêm chủ đề
           </Button>
         </div>
 
@@ -478,7 +479,7 @@ export default function SkillManagementPage() {
 
           <div className="d-flex justify-content-between mb-3 align-items-center">
             <Search
-              placeholder="Tìm kiếm bài tập..."
+              placeholder="Tìm kiếm chủ đề..."
               style={{ width: 350 }}
               enterButton={<SearchOutlined />}
               size="middle"
@@ -487,13 +488,13 @@ export default function SkillManagementPage() {
             />
             <span style={{ fontSize: "16px" }}>
               {/* Hiển thị số lượng dựa trên danh sách đã lọc */}
-              Tổng: <b>{filteredTopics.length}</b> bài tập
+              Tổng: <b>{filteredTopics.length}</b> chủ đề
             </span>
           </div>
 
           <Table
             columns={columns}
-            dataSource={filteredTopics} // Dùng danh sách đã lọc để hiển thị
+            dataSource={filteredTopics}
             rowKey="id"
             pagination={{ pageSize: 8 }}
             loading={loadingTopics}
@@ -502,12 +503,11 @@ export default function SkillManagementPage() {
         </div>
       </div>
 
-      {/* --- MODAL (THÊM / SỬA) --- */}
       <Modal
         title={
           editingTopic
-            ? "Cập Nhật Bài Tập"
-            : `Thêm Bài Tập Mới (${activeSkillKey.toUpperCase()} - ${activeLevelKey})`
+            ? "Cập Nhật chủ đề"
+            : `Thêm Chủ đề mới (${activeSkillKey.toUpperCase()} - ${activeLevelKey})`
         }
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
@@ -516,7 +516,7 @@ export default function SkillManagementPage() {
       >
         <Form form={form} layout="vertical" onFinish={handleSave}>
           <Form.Item
-            label="Tên bài tập"
+            label="Tên chủ đề"
             name="name"
             rules={[{ required: true, message: "Vui lòng nhập tên bài tập!" }]}
           >

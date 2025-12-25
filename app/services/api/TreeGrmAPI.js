@@ -8,13 +8,10 @@ const GrmAPI = {
   getGrammarByCategory: (id) => {
     return api.get(`/admin/grammarItem/getByTopic/${id}`);
   },
-  // --- CREATE ---
   createGrammar: (data) => {
-    // data: { topicId, title, structure, explanation, example, tip, imageUrl }
     return api.post('/admin/grammarItem/create', data); 
   },
 
-  // --- UPDATE ---
   updateGrammar: (id, data) => {
     return api.put(`/admin/grammarItem/update/${id}`, data);
   },
