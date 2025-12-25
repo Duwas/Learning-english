@@ -1,12 +1,12 @@
 'use client';
-import { useContext } from "react"; // ✅ thêm dòng này
+import { useContext } from "react"; 
 import { LoadingContext } from "@/app/context/LoadingContext";
 import { handleApiError } from "@/app/services/handleAPIErr";
 import { useAuthDialog } from "@/app/context/AuthDialogContext";
 
 export const useApi = (showToast, showLoading = true) => {
   
-  const { setLoading } = useContext(LoadingContext); // dùng useContext
+  const { setLoading } = useContext(LoadingContext); 
   const { showDialog } = useAuthDialog();
 
   const callApi = async (apiFunc, opShowToast = true, skipAuth = false) => {

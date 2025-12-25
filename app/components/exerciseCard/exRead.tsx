@@ -1,4 +1,4 @@
-// FILE: /app/components/exerciseCard/exReadingQuiz.tsx
+
 
 "use client";
 
@@ -11,9 +11,9 @@ import {
 } from "@ant-design/icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-// --------------------------------------------------------------------------
-// INTERFACES (Đảm bảo đồng bộ với Page.tsx)
-// --------------------------------------------------------------------------
+
+
+
 interface Option {
   optionId: number;
   optionText: string;
@@ -47,7 +47,7 @@ interface ReadingQuizProps {
   submitting: boolean;
 }
 
-const PRIMARY_COLOR = "#28a745"; // Xanh lá cây
+const PRIMARY_COLOR = "#28a745"; 
 const FIXED_HEIGHT = "60vh";
 
 const ReadingQuizComponent: React.FC<ReadingQuizProps> = ({

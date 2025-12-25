@@ -1,4 +1,3 @@
-// FILE: /app/admin/4skills/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -44,7 +43,6 @@ const HEADER_HEIGHT = 64;
 
 const API_DOMAIN = "https://nonvoluntary-dianoetically-marilynn.ngrok-free.dev";
 
-// ---------------- INTERFACES ----------------
 interface Level {
   id: number;
   code: string;
@@ -66,23 +64,18 @@ interface Topic {
   imageUrl: string | null;
 }
 
-// ---------------- COMPONENT CHÍNH ----------------
 export default function SkillManagementPage() {
-  // --- State UI ---
   const [showSidebar, setShowSidebar] = useState(true);
   const [activeSkillKey, setActiveSkillKey] = useState("listening");
   const [activeLevelKey, setActiveLevelKey] = useState("");
 
-  // --- State Data ---
   const [skillsData, setSkillsData] = useState<Skill[]>([]);
   const [topicsData, setTopicsData] = useState<Topic[]>([]);
-  const [searchText, setSearchText] = useState(""); // State cho ô tìm kiếm
+  const [searchText, setSearchText] = useState("");
 
-  // --- State Loading ---
   const [loadingSkills, setLoadingSkills] = useState(true);
   const [loadingTopics, setLoadingTopics] = useState(false);
 
-  // --- State Modal ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -90,7 +83,6 @@ export default function SkillManagementPage() {
 
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
 
-  // 1. Fetch Menu Skills
   useEffect(() => {
     const fetchMenu = async () => {
       setLoadingSkills(true);
@@ -120,7 +112,6 @@ export default function SkillManagementPage() {
     fetchMenu();
   }, []);
 
-  // 2. Fetch Topics
   const fetchTopics = async () => {
     if (skillsData.length === 0 || !activeSkillKey || !activeLevelKey) return;
 
@@ -146,15 +137,12 @@ export default function SkillManagementPage() {
     }
   };
 
-  // Trigger fetch khi user đổi Tab
   useEffect(() => {
     fetchTopics();
-    // Reset search text khi đổi tab để tránh nhầm lẫn
+
     setSearchText("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSkillKey, activeLevelKey, skillsData]);
 
-  // --- HÀM MỞ MODAL THÊM ---
   const handleOpenCreate = () => {
     setEditingTopic(null);
     form.resetFields();
@@ -162,7 +150,6 @@ export default function SkillManagementPage() {
     setIsModalOpen(true);
   };
 
-  // --- HÀM MỞ MODAL SỬA ---
   const handleEdit = (record: Topic) => {
     setEditingTopic(record);
     form.setFieldsValue({
@@ -173,7 +160,6 @@ export default function SkillManagementPage() {
     setIsModalOpen(true);
   };
 
-  // --- HÀM LƯU (CREATE/UPDATE) ---
   const handleSave = async (values: any) => {
     const currentSkillObj = skillsData.find(
       (s) => s.name.toLowerCase() === activeSkillKey
@@ -187,7 +173,6 @@ export default function SkillManagementPage() {
       return;
     }
 
-    // Bỏ .originFileObj đi
     const fileToUpload =
       fileList.length > 0 ? (fileList[0] as unknown as File) : null;
     console.log(fileToUpload);
@@ -196,7 +181,6 @@ export default function SkillManagementPage() {
 
     try {
       if (editingTopic) {
-        // Update
         await topicService.update(editingTopic.id, {
           skillId: currentSkillObj.skillId,
           levelId: currentLevelObj.id,
@@ -206,7 +190,6 @@ export default function SkillManagementPage() {
         });
         message.success("Cập nhật thành công!");
       } else {
-        // Create
         await topicService.create({
           skillId: currentSkillObj.skillId,
           levelId: currentLevelObj.id,
@@ -231,7 +214,6 @@ export default function SkillManagementPage() {
     }
   };
 
-  // --- HÀM XÓA ---
   const handleDelete = async (id: number) => {
     try {
       await topicService.deleteTopic(id);
@@ -284,7 +266,6 @@ export default function SkillManagementPage() {
       label: lv.code,
     })) || [];
 
-  // --- LOGIC LỌC DỮ LIỆU (SEARCH) ---
   const filteredTopics = topicsData.filter((item) => {
     const value = searchText.toLowerCase();
     return (
@@ -293,15 +274,13 @@ export default function SkillManagementPage() {
     );
   });
 
-  // --- CẤU HÌNH CỘT BẢNG ---
   const columns = [
     {
-      // THAY THẾ CỘT ID BẰNG CỘT STT
       title: "STT",
       key: "stt",
       width: 60,
       align: "center" as const,
-      // Render index + 1: Tự động tính toán lại khi mảng filteredTopics thay đổi
+
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
@@ -375,7 +354,7 @@ export default function SkillManagementPage() {
             okText="Xóa"
             cancelText="Hủy"
             okType="danger"
-            onConfirm={() => handleDelete(record.id)} // ID thật vẫn được dùng ở đây
+            onConfirm={() => handleDelete(record.id)}
           >
             <Button icon={<DeleteOutlined />} size="small" danger />
           </Popconfirm>
@@ -483,7 +462,6 @@ export default function SkillManagementPage() {
               style={{ width: 350 }}
               enterButton={<SearchOutlined />}
               size="middle"
-              // Cập nhật state tìm kiếm khi gõ
               onChange={(e) => setSearchText(e.target.value)}
             />
             <span style={{ fontSize: "16px" }}>

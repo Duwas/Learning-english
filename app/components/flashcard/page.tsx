@@ -6,7 +6,7 @@ import {
   RightCircleFilled,
   LeftCircleFilled,
 } from "@ant-design/icons";
-// 1. Import Framer Motion
+
 import { motion, AnimatePresence } from "framer-motion";
 
 export type VocabCardData = {
@@ -25,10 +25,9 @@ interface FlashCardProps {
   imageUrl: string;
 }
 
-// 2. Cấu hình hiệu ứng Slide
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 300 : -300, // Next: vào từ phải, Prev: vào từ trái
+    x: direction > 0 ? 300 : -300,
     opacity: 0,
     scale: 0.8,
   }),
@@ -38,7 +37,7 @@ const slideVariants = {
     scale: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? 300 : -300, // Next: ra bên trái, Prev: ra bên phải
+    x: direction < 0 ? 300 : -300,
     opacity: 0,
     scale: 0.8,
   }),
@@ -47,12 +46,11 @@ const slideVariants = {
 export default function FlashCard({ data, imageUrl }: FlashCardProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  // 3. Thêm state hướng chuyển động
+
   const [direction, setDirection] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Reset về thẻ đầu khi data thay đổi (ví dụ đổi Topic)
   useEffect(() => {
     setCurrentIndex(0);
     setDirection(0);
@@ -73,7 +71,6 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
     if (audioRef.current && currentCard.audioUrl) {
       audioRef.current.play();
     } else {
-      // Fallback: Web Speech API
       const utterance = new SpeechSynthesisUtterance(currentCard.word);
       utterance.lang = "en-US";
       utterance.rate = 0.8;
@@ -81,19 +78,17 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
     }
   };
 
-  // 4. Cập nhật hàm Next (Bỏ setTimeout vì Framer Motion lo việc này mượt hơn)
   const handleNext = () => {
     if (currentIndex < totalCards - 1) {
-      setDirection(1); // Hướng sang phải
-      setIsFlipped(false); // Reset lật
-      setCurrentIndex(currentIndex + 1); // Cập nhật index ngay lập tức
+      setDirection(1);
+      setIsFlipped(false);
+      setCurrentIndex(currentIndex + 1);
     }
   };
 
-  // 5. Cập nhật hàm Prev
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setDirection(-1); // Hướng sang trái
+      setDirection(-1);
       setIsFlipped(false);
       setCurrentIndex(currentIndex - 1);
     }
@@ -101,7 +96,6 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
 
   return (
     <div className="flashcard-wrapper">
-      {/* KHUNG THẺ CHÍNH (Được bọc bởi AnimatePresence) */}
       <div
         style={{
           position: "relative",
@@ -113,7 +107,7 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
       >
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
-            key={currentIndex} // Quan trọng: Key đổi -> Animation chạy
+            key={currentIndex}
             custom={direction}
             variants={slideVariants}
             initial="enter"
@@ -126,13 +120,11 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
             style={{
               width: "100%",
               height: "100%",
-              position: "absolute", // Để các thẻ chồng lên nhau khi trượt
+              position: "absolute",
             }}
           >
-            {/* GIỮ NGUYÊN CODE CARD CŨ CỦA BẠN BÊN TRONG NÀY */}
             <div className={`flip-card ${isFlipped ? "flipped" : ""}`}>
               <div className="flip-card-inner">
-                {/* === MẶT TRƯỚC === */}
                 <div className="flip-card-front card shadow-lg rounded-4 border-0">
                   <div className="card-header-img">
                     <img src={imageUrl} alt="Vocabulary Header" />
@@ -161,7 +153,6 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
                   </div>
                 </div>
 
-                {/* === MẶT SAU === */}
                 <div className="flip-card-back card shadow-lg rounded-4 border-0">
                   <div className="card-header-img ">
                     <img src={imageUrl} alt="Header" />
@@ -202,12 +193,10 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
                 </div>
               </div>
             </div>
-            {/* KẾT THÚC CODE CARD CŨ */}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* THANH ĐIỀU HƯỚNG */}
       <div
         style={{
           marginLeft: "160px",
@@ -241,7 +230,6 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
           <RightCircleFilled style={{ fontSize: "42px", color: "#0d6efd" }} />
         </span>
       </div>
-      {/* --- CSS --- */}
       <style jsx>{`
         .flashcard-container {
           perspective: 1000px;
@@ -255,12 +243,11 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
           width: 150px;
         }
 
-        /* 1. Định kích thước thẻ tại đây */
         .flip-card {
           background-color: transparent;
           width: 210%;
-          max-width: 300px; /* Độ rộng tối đa */
-          height: 620px; /* Chiều cao cố định: Cần cao để chứa ảnh to */
+          max-width: 300px;
+          height: 620px;
           margin: 0 auto;
         }
 
@@ -281,7 +268,6 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
           transform: rotateY(180deg);
         }
 
-        /* 2. Mặt trước/sau: BẮT BUỘC width/height 100% để khớp trục xoay */
         .flip-card-front,
         .flip-card-back {
           position: absolute;
@@ -294,25 +280,24 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
           overflow: hidden;
           background: #fff;
           display: flex;
-          flex-direction: column; /* Xếp dọc các phần tử con */
+          flex-direction: column;
         }
 
         .flip-card-back {
           transform: rotateY(180deg);
         }
 
-        /* 3. Phần Ảnh Header */
         .card-header-img {
-          height: 220px; /* Chiều cao cố định cho ảnh */
+          height: 220px;
           width: 100%;
           position: relative;
           background-color: #e0f2fe;
-          flex-shrink: 0; /* Không bị co lại */
+          flex-shrink: 0;
         }
         .card-header-img img {
           width: 100%;
           height: 100%;
-          object-fit: cover; /* Cắt ảnh đẹp, ko bị méo */
+          object-fit: cover;
         }
 
         .vocab-badge {
@@ -331,13 +316,12 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
           z-index: 5;
         }
 
-        /* 4. Phần Nội dung chính (Body) */
         .card-body-content {
-          flex-grow: 1; /* Chiếm hết khoảng trống còn lại */
+          flex-grow: 1;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center; /* Căn giữa nội dung theo chiều dọc */
+          justify-content: center;
           padding: 20px;
         }
         .card-body {
@@ -345,18 +329,16 @@ export default function FlashCard({ data, imageUrl }: FlashCardProps) {
           justify-content: center;
         }
 
-        /* 5. Phần Nút Turn (Footer) */
         .card-footer-action {
           padding-bottom: 30px;
           padding-top: 10px;
           background: #fff;
-          flex-shrink: 0; /* Không bị co lại */
+          flex-shrink: 0;
         }
         .text-muted {
           margin-bottom: 20px !important;
         }
 
-        /* Các style chi tiết khác */
         .audio-btn {
           width: 55px;
           height: 55px;

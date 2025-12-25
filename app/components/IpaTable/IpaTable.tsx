@@ -1,14 +1,9 @@
 "use client";
 import React from "react";
 
-// ====================== CẤU HÌNH DATA ======================
-
-// Bảng map giúp trình duyệt đọc được các ký tự lạ
-// (Trình duyệt không biết đọc 'θ', nên ta bảo nó đọc từ 'thin' hoặc âm tương tự)
 const TTS_MAP: Record<string, string> = {
-  // Vowels
-  iː: "ee", // Kéo dài âm e
-  ɪ: "it", // Âm ngắn
+  iː: "ee",
+  ɪ: "it",
   e: "bed",
   æ: "at",
   ɑː: "car",
@@ -20,7 +15,6 @@ const TTS_MAP: Record<string, string> = {
   ɜː: "ơ",
   ə: "ô",
 
-  // Consonants (Một số ký tự trình duyệt đọc được, một số thì không)
   θ: "ee",
   ð: "this",
   ʃ: "she",
@@ -80,8 +74,6 @@ const IPA_TABLE = [
   },
 ];
 
-// ====================== XỬ LÝ GIỌNG NÓI ======================
-
 const speak = (text: string, voiceLang: string = "en-US") => {
   const synth = window.speechSynthesis;
   if (!synth) {
@@ -89,31 +81,25 @@ const speak = (text: string, voiceLang: string = "en-US") => {
     return;
   }
 
-  synth.cancel(); // Dừng âm thanh đang đọc dở (nếu có)
+  synth.cancel();
 
-  // KEY FIX: Kiểm tra xem text có nằm trong bảng map TTS_MAP không
-  // Nếu có thì đọc giá trị thay thế, nếu không thì đọc nguyên gốc
   const textToSpeak = TTS_MAP[text] || text;
 
   const utter = new SpeechSynthesisUtterance(textToSpeak);
   utter.lang = voiceLang;
-  utter.rate = 0.8; // Tốc độ đọc (0.8 là vừa phải để nghe rõ âm)
+  utter.rate = 0.8;
 
-  // Cố gắng chọn giọng chuẩn tiếng Anh (Google US hoặc Microsoft David/Zira)
   const voices = synth.getVoices();
   if (voices.length > 0) {
     const preferredVoice =
-      voices.find(
-        (v) => v.lang === "en-US" && !v.name.includes("Google") // Ưu tiên giọng native system nếu có
-      ) || voices.find((v) => v.lang.startsWith("en"));
+      voices.find((v) => v.lang === "en-US" && !v.name.includes("Google")) ||
+      voices.find((v) => v.lang.startsWith("en"));
 
     if (preferredVoice) utter.voice = preferredVoice;
   }
 
   synth.speak(utter);
 };
-
-// ====================== COMPONENT ======================
 
 export default function IpaTable() {
   return (
@@ -158,7 +144,6 @@ export default function IpaTable() {
                   transition: "all 0.2s ease",
                   textAlign: "center",
                 }}
-                // Hiệu ứng hover đơn giản
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-3px)";
                   e.currentTarget.style.boxShadow =

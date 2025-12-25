@@ -42,7 +42,7 @@ import {
 } from "@ant-design/icons";
 import Sidebar from "@/app/components/sidebar/page";
 
-// --- IMPORT SERVICES ---
+
 import { exerciseService } from "@/app/services/api/adminExAPI";
 import { topicService } from "@/app/services/api/topicService";
 import type { TableColumnsType, UploadFile } from "antd";
@@ -51,7 +51,7 @@ const { Title, Text } = Typography;
 const { Option: SelectOption } = Select;
 const SIDEBAR_WIDTH = 240;
 
-// --- INTERFACES ---
+
 interface ExerciseParams {
   topicId?: number;
   groupWord?: number;
@@ -90,7 +90,7 @@ interface ExerciseType {
 }
 
 export default function ExerciseManagementPage() {
-  // --- STATE CHUNG ---
+  
   const [loadingMenu, setLoadingMenu] = useState(false);
   const [menuData, setMenuData] = useState<any[]>([]);
   const [menuDataLevel, setMenuDataLevel] = useState<any[]>([]);
@@ -105,7 +105,7 @@ export default function ExerciseManagementPage() {
   const [exercises, setExercises] = useState<ExerciseType[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // --- STATE MODAL BÀI TẬP ---
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingExercise, setEditingExercise] = useState<ExerciseType | null>(
@@ -115,7 +115,7 @@ export default function ExerciseManagementPage() {
   const [fileListAudio, setFileListAudio] = useState<UploadFile[]>([]);
   const [fileListImage, setFileListImage] = useState<UploadFile[]>([]);
 
-  // --- STATE MODAL CÂU HỎI (QUESTION + 4 OPTIONS) ---
+  
   const [isQModalOpen, setIsQModalOpen] = useState(false);
   const [isQSubmitting, setIsQSubmitting] = useState(false);
   const [currentExerciseId, setCurrentExerciseId] = useState<number | null>(
@@ -124,23 +124,23 @@ export default function ExerciseManagementPage() {
   const [editingQuestion, setEditingQuestion] = useState<QuestionType | null>(
     null
   );
-  // Lưu danh sách options tạm thời khi đang edit câu hỏi để map vào form A,B,C,D
+  
   const [editingQuestionOptions, setEditingQuestionOptions] = useState<
     OptionType[]
   >([]);
   const [qForm] = Form.useForm();
 
-  // --- STATE MODAL OPTION (Quản lý riêng lẻ) ---
+  
   const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
   const [currentQuestionForOption, setCurrentQuestionForOption] =
     useState<QuestionType | null>(null);
   const [optionList, setOptionList] = useState<OptionType[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
-  // State edit 1 option cụ thể
+  
   const [editingOption, setEditingOption] = useState<OptionType | null>(null);
   const [optionForm] = Form.useForm();
 
-  // 1. INIT DATA
+  
   useEffect(() => {
     const fetchMenu = async () => {
       setLoadingMenu(true);
@@ -158,7 +158,7 @@ export default function ExerciseManagementPage() {
     fetchMenu();
   }, []);
 
-  // 2. LOAD TOPICS
+  
   useEffect(() => {
     const fetchTopics = async () => {
       if (!selectedSkillId || !selectedLevelId) {
@@ -187,7 +187,7 @@ export default function ExerciseManagementPage() {
     fetchTopics();
   }, [selectedSkillId, selectedLevelId]);
 
-  // 3. FETCH EXERCISES
+  
   const fetchExercises = async () => {
     if (!selectedTopicId) {
       message.warning("Vui lòng chọn chủ đề!");
@@ -219,7 +219,7 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // --- HANDLERS BÀI TẬP (EXERCISE) ---
+  
   const handleOpenModal = (record?: ExerciseType) => {
     form.resetFields();
     setFileListAudio([]);
@@ -242,9 +242,9 @@ export default function ExerciseManagementPage() {
     try {
       const params: ExerciseParams = {
         title: values.title,
-        type: Number(values.type), // ép number
+        type: Number(values.type), 
         groupWord: values.groupWord ? Number(values.groupWord) : 0,
-        topicId: Number(selectedTopicId), // ép number
+        topicId: Number(selectedTopicId), 
         description: values.description ?? "",
       };
 
@@ -285,18 +285,18 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // --- HANDLERS CÂU HỎI (QUESTION) ---
+  
 
-  // Mở rộng dòng để load câu hỏi
+  
   const handleExpandRow = async (expanded: boolean, record: ExerciseType) => {
     if (expanded) {
       await reloadQuestions(record.id || record.exerciseId);
     }
   };
 
-  // Hàm reload câu hỏi cho 1 bài tập cụ thể (dùng sau khi thêm/sửa/xóa câu hỏi)
+  
   const reloadQuestions = async (exerciseId: number) => {
-    // Cập nhật trạng thái loading
+    
     setExercises((prev) =>
       prev.map((e) =>
         (e.id || e.exerciseId) === exerciseId
@@ -335,12 +335,12 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // Mở Modal Thêm/Sửa câu hỏi
+  
   const handleOpenQModal = (exerciseId: number, question?: QuestionType) => {
     setCurrentExerciseId(exerciseId);
     setEditingQuestion(question || null);
 
-    qForm.resetFields(); // ❗ quan trọng
+    qForm.resetFields(); 
 
     if (question) {
       qForm.setFieldsValue({
@@ -368,11 +368,11 @@ export default function ExerciseManagementPage() {
       };
 
       if (editingQuestion) {
-        // UPDATE
+        
         await exerciseService.updateQuestion(editingQuestion.id, payload);
         message.success("Cập nhật câu hỏi thành công");
       } else {
-        // CREATE
+        
         await exerciseService.createQuestion(payload);
         message.success("Thêm câu hỏi thành công");
       }
@@ -400,7 +400,7 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // --- HANDLERS OPTIONS (Quản lý danh sách đáp án riêng lẻ) ---
+  
   const fetchOptions = async (questionId: number) => {
     setLoadingOptions(true);
     try {
@@ -423,14 +423,14 @@ export default function ExerciseManagementPage() {
     fetchOptions(question.id);
   };
 
-  // THÊM
+  
   const handleCreateOption = async (values: any) => {
     if (!currentQuestionForOption) return;
 
     try {
       await exerciseService.createOption({
         questionId: currentQuestionForOption!.id,
-        optionText: values.optionText, // ĐÚNG TÊN FIELD
+        optionText: values.optionText, 
         isCorrect: values.isCorrect ?? false,
       });
 
@@ -442,7 +442,7 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // SỬA
+  
   const handleUpdateOption = async (values: any) => {
     if (!editingOption) return;
     if (!currentQuestionForOption) return;
@@ -475,7 +475,7 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  // --- COLUMNS ---
+  
   const columns: TableColumnsType<ExerciseType> = [
     {
       title: "Thông tin bài tập",
@@ -870,8 +870,6 @@ export default function ExerciseManagementPage() {
             </div>
           </Form>
         </Modal>
-
-        {/* --- MODAL QUESTION (EDIT/CREATE) --- */}
         <Modal
           title={editingQuestion ? "Sửa câu hỏi" : "Thêm câu hỏi trắc nghiệm"}
           open={isQModalOpen}
@@ -904,8 +902,6 @@ export default function ExerciseManagementPage() {
             </div>
           </Form>
         </Modal>
-
-        {/* --- MODAL OPTION (MANAGE LIST) --- */}
         <Modal
           title="Quản lý chi tiết đáp án"
           open={isOptionModalOpen}
@@ -917,7 +913,6 @@ export default function ExerciseManagementPage() {
           footer={null}
           width={700}
         >
-          {/* FORM thêm / sửa */}
           <Card
             size="small"
             style={{
@@ -973,8 +968,6 @@ export default function ExerciseManagementPage() {
               </Space>
             </Form>
           </Card>
-
-          {/* DANH SÁCH */}
           <Divider orientation="left" plain>
             Danh sách đáp án
           </Divider>

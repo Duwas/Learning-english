@@ -1,4 +1,3 @@
-// app/listen/page.tsx (Sử dụng Bootstrap Grid)
 "use client";
 
 import { useSearchParams } from "next/navigation";
@@ -8,12 +7,7 @@ import TopicCard from "@/app/components/TopicCard/listenpage";
 import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
 
-// Dữ liệu giả định để hiển thị UI
-const mockTopics = [
-{
-  
-}
-];
+const mockTopics = [{}];
 
 export default function ListenPage() {
   const searchParams = useSearchParams();
@@ -38,7 +32,6 @@ export default function ListenPage() {
     api
       .get(`/admin/topic/get-by-skill-level/${skill}/${levelNumber}`)
       .then((res) => {
-        // Cập nhật topics bằng dữ liệu thực từ API
         setTopics(res.data);
       })
       .catch((err) => console.error("API Error:", err))
@@ -50,12 +43,11 @@ export default function ListenPage() {
       <MainHeader />
       <div
         style={{
-          marginTop: "4%",
+          marginTop: "3.3%",
           backgroundColor: "#f8f9fa",
           minHeight: "100vh",
         }}
       >
-        {/* Tiêu đề chính (Màu vàng của ảnh mẫu) */}
         <div className="bg-warning py-3 shadow">
           <div className="container">
             <h1
@@ -96,7 +88,6 @@ export default function ListenPage() {
               Không có bài kiểm tra nào.
             </p>
           ) : (
-            // Bố cục 3 cột cố định (row-cols-3)
             <div className="row row-cols-3 g-4">
               {topics.map((t) => (
                 <div key={t.id} className="col">
@@ -105,7 +96,7 @@ export default function ListenPage() {
                     name={t.name}
                     description={t.description || "Topic Name"}
                     level={level}
-                    imageUrl={t.imageUrl} // Truyền dữ liệu ảnh từ API
+                    imageUrl={t.imageUrl}
                   />
                 </div>
               ))}

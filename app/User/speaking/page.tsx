@@ -1,4 +1,3 @@
-// app/User/speak/page.tsx (Sử dụng dữ liệu API)
 "use client";
 
 import { useSearchParams } from "next/navigation";
@@ -10,7 +9,6 @@ import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
 const SPEAKING_COLOR = "#ff6b81";
 const mockSpeakingTopics = [
-  // Giữ lại mock data để tham chiếu, nhưng setTopics ban đầu sẽ là []
   {
     id: 1,
     name: "Introduce yourself",
@@ -39,7 +37,6 @@ export default function SpeakPage() {
   const skill = searchParams.get("skill") || "Speaking";
   const level = searchParams.get("level") || "A1";
 
-  // *** SỬA: Bắt đầu với mảng rỗng [] để đợi dữ liệu API ***
   const [topics, setTopics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -71,7 +68,7 @@ export default function SpeakPage() {
       <MainHeader />
       <div
         style={{
-          marginTop: "4%",
+          marginTop: "3.3%",
           backgroundColor: "#f8f9fa",
           minHeight: "100vh",
         }}
@@ -106,8 +103,7 @@ export default function SpeakPage() {
 
                 {/* MỤC ACTIVE (Nền Hồng) */}
                 <li
-                  className="breadcrumb-item active" // Giữ lại class active của Bootstrap
-                  // Áp dụng style màu hồng cho nền của chữ và màu chữ trắng (như trong tiêu đề chính)
+                  className="breadcrumb-item active"
                   style={{
                     backgroundColor: SPEAKING_COLOR,
                     color: "white",
@@ -137,7 +133,6 @@ export default function SpeakPage() {
               Không có bài kiểm tra nào.
             </p>
           ) : (
-            // Bố cục 3 cột cố định (row-cols-3)
             <div className="row row-cols-3 g-4">
               {topics.map((t) => (
                 <div key={t.id} className="col">
@@ -146,7 +141,7 @@ export default function SpeakPage() {
                     name={t.name}
                     description={t.description || "Topic Name"}
                     level={level}
-                    imageUrl={t.imageUrl} // Dùng ảnh từ API
+                    imageUrl={t.imageUrl}
                   />
                 </div>
               ))}

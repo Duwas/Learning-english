@@ -43,7 +43,7 @@ interface ListeningTestProps {
   submitting: boolean;
 }
 
-// --------------------------------------------------------------------------
+
 
 const ListeningComponent: React.FC<ListeningTestProps> = ({
   exercise,
@@ -206,7 +206,7 @@ const ListeningComponent: React.FC<ListeningTestProps> = ({
                           const isSelectedByUser =
                             userAnswers[questionKey] === option.optionId;
 
-                          // LOGIC HIỂN THỊ KẾT QUẢ SAU KHI NỘP BÀI
+                          
                           let backgroundColor = "white";
                           let borderColor = "#ccc";
                           let labelColor = "#6c757d";
@@ -280,7 +280,6 @@ const ListeningComponent: React.FC<ListeningTestProps> = ({
           </div>
         </div>
 
-        {/* 5. NÚT NỘP BÀI */}
         <div className="row my-5">
           <div className="col-lg-8 offset-lg-2 text-center">
             <Button

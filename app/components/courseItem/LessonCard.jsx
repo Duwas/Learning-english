@@ -1,9 +1,9 @@
-// components/LessonCard.js (CODE ĐÃ SỬA ĐỂ CÀI ĐẶT CLASS CHO BUTTON)
+
 import React from 'react';
 
 const LessonCard = ({ img, title, text, buttonLabel, buttonLink, colorClass }) => {
   
-  // DỮ LIỆU MÀU CHỈ DÙNG CHO PHẦN STYLE INLINE CỦA CÁC THÀNH PHẦN KHÁC
+  
   const getCustomColors = (color) => {
     if (color === 'blue') return { headerBg: '#007bff', headerText: 'white', stripeBg: '#007bff', titleText: '#007bff', btnClass: 'color-blue' };
     if (color === 'pink') return { headerBg: '#FF69B4', headerText: 'white', stripeBg: '#FF69B4', titleText: '#FF69B4', btnClass: 'color-pink' };
@@ -20,7 +20,6 @@ const LessonCard = ({ img, title, text, buttonLabel, buttonLink, colorClass }) =
   return (
     <div className="card shadow-sm h-100 overflow-hidden hover-lift rounded-3"> 
       
-      {/* Phần Hình ảnh với Dải màu TOP */}
       <div className="position-relative" style={{ height: '21rem' }}>
         
 
@@ -33,10 +32,7 @@ const LessonCard = ({ img, title, text, buttonLabel, buttonLink, colorClass }) =
         
         <div className="position-absolute bottom-0 w-100" style={{ backgroundColor: colors.stripeBg, height: '0.5rem' }}></div>
       </div>
-      
-      {/* Phần Nội dung và Nút */}
       <div className="card-body d-flex flex-column">
-        
         {/* Tiêu đề chính */}
         <h5 className="card-title fw-bold mb-2" style={{ color: colors.titleText }}>
           {title}

@@ -32,7 +32,6 @@ export default function GrammarLearnPage() {
     ? Number(searchParams.get("part"))
     : 28;
 
-  // --- STATE ---
   const [sidebarData, setSidebarData] = useState<GrmTopicData[]>([]);
   const [categoryLessons, setCategoryLessons] = useState<LessonItem[]>([]);
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
@@ -52,7 +51,6 @@ export default function GrammarLearnPage() {
 
         console.log(res);
 
-        // Kiểm tra an toàn dữ liệu trả về
         const rawData = res.data || res;
         const safeData = Array.isArray(rawData) ? rawData : [];
 
@@ -82,7 +80,6 @@ export default function GrammarLearnPage() {
           true
         );
 
-        // Kiểm tra an toàn dữ liệu trả về
         const rawData = res.data || res;
         const safeData = Array.isArray(rawData) ? rawData : [];
         console.log(res);
@@ -105,13 +102,11 @@ export default function GrammarLearnPage() {
     fetchLessons();
   }, [currentCategoryId]);
 
-  // Tìm bài học đang active (FIX LỖI FIND)
   const currentLesson = useMemo(() => {
     if (!Array.isArray(categoryLessons)) return undefined;
     return categoryLessons.find((item) => item.id === activeLessonId);
   }, [categoryLessons, activeLessonId]);
 
-  // Logic hiển thị Breadcrumb
   const { topicName, categoryTitle } = useMemo(() => {
     if (!Array.isArray(sidebarData))
       return { topicName: "", categoryTitle: "" };
@@ -123,7 +118,6 @@ export default function GrammarLearnPage() {
       <ProtectedRoute>
         <MainHeader />
         <div className="container py-4" style={{ marginTop: "80px" }}>
-          {/* === BREADCRUMB === */}
           <div className="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
             <h5 className="text-primary fw-bold">
               <span className="text-muted fw-normal">Grammar » </span>
@@ -143,7 +137,6 @@ export default function GrammarLearnPage() {
           </div>
 
           <div className="row" style={{ marginTop: "-20px" }}>
-            {/* === LEFT SIDEBAR === */}
             <div className="col-md-3 mb-4">
               {loadingSidebar ? (
                 <div className="text-center py-4 text-muted">
@@ -155,7 +148,6 @@ export default function GrammarLearnPage() {
               )}
             </div>
 
-            {/* === MAIN CONTENT === */}
             <div className="col-md-9">
               <div
                 className="card shadow-sm border-0"
@@ -172,7 +164,6 @@ export default function GrammarLearnPage() {
                     </div>
                   ) : categoryLessons.length > 0 ? (
                     <>
-                      {/* --- TAB NAVIGATION (MENU CON) --- */}
                       <ul
                         className="nav nav-pills mb-4 gap-2"
                         style={{ overflowX: "auto", flexWrap: "nowrap" }}
@@ -206,14 +197,12 @@ export default function GrammarLearnPage() {
                         ))}
                       </ul>
 
-                      {/* --- NỘI DUNG BÀI HỌC --- */}
                       {currentLesson && (
                         <div className="grammar-lesson fade-in">
                           <h2 className="text-primary fw-bold mb-4 border-bottom pb-2">
                             {currentLesson.title}
                           </h2>
 
-                          {/* 1. Định nghĩa */}
                           {currentLesson.explanation && (
                             <div className="mb-4">
                               <h5 className="fw-bold text-dark mb-2">
@@ -233,7 +222,6 @@ export default function GrammarLearnPage() {
                             </div>
                           )}
 
-                          {/* 2. Cấu trúc */}
                           {currentLesson.structure && (
                             <div className="mb-4">
                               <h5 className="fw-bold text-dark mb-2">
@@ -261,7 +249,6 @@ export default function GrammarLearnPage() {
                             </div>
                           )}
 
-                          {/* 3. Ví dụ */}
                           {currentLesson.example && (
                             <div className="mb-4">
                               <h5 className="fw-bold text-dark mb-2">
@@ -286,7 +273,6 @@ export default function GrammarLearnPage() {
                             </div>
                           )}
 
-                          {/* 4. Mẹo */}
                           {currentLesson.tip && (
                             <div className="mb-4">
                               <h5 className="fw-bold text-dark mb-2">
@@ -307,7 +293,6 @@ export default function GrammarLearnPage() {
                             </div>
                           )}
 
-                          {/* 5. Hình ảnh */}
                           {currentLesson.imageUrl && (
                             <div className="text-center mt-4">
                               <img

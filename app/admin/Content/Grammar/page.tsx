@@ -495,7 +495,6 @@ export default function AdminGrammarPage() {
                               </div>
                             </div>
 
-                            {/* ==> NÚT XÓA TOPIC <== */}
                             <Popconfirm
                               title="Xóa danh mục này?"
                               description="Hành động này sẽ xóa cả các bài học bên trong."
@@ -527,7 +526,6 @@ export default function AdminGrammarPage() {
               </Card>
             </div>
 
-            {/* RIGHT: LESSON TABLE */}
             <div className="col-md-9 mb-4">
               <Card className="shadow-sm border-0 h-100">
                 <div className="d-flex justify-content-between align-items-center mb-4">
@@ -598,7 +596,6 @@ export default function AdminGrammarPage() {
         </div>
       </div>
 
-      {/* Modal 1: Lesson */}
       <Modal
         title={
           <div className="fs-5 fw-bold">

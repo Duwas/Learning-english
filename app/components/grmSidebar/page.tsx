@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -7,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 export interface GrmSidebarProps {
   data: GrmTopicData[];
 }
-
 export interface GrmTopicData {
   topic_id: number;
   topic_name: string;

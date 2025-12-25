@@ -9,14 +9,13 @@ export type PartItem = number | { id: number; title: string };
 export interface TopicData {
   topic_id: number;
   topic_name: string;
-  group_words: PartItem[]; // Chấp nhận cả số và object
+  group_words: PartItem[];
 }
 
 interface PartSidebarProps {
   data: TopicData[];
 }
 
-// Component con: Hiển thị 1 Topic
 const SingleTopic = ({
   topic,
   activePartId,
@@ -28,7 +27,6 @@ const SingleTopic = ({
 
   return (
     <div className="mb-2">
-      {/* HEADER TOPIC */}
       <div
         className="d-flex align-items-center p-2 rounded"
         onClick={() => setIsOpen(!isOpen)}
@@ -72,11 +70,9 @@ const SingleTopic = ({
             let displayLabel: string;
 
             if (typeof part === "number") {
-              // Trường hợp 1: Dữ liệu cũ (Chỉ là số)
               id = part;
               displayLabel = `Part ${id}`;
             } else {
-              // Trường hợp 2: Dữ liệu mới (Object có title)
               id = part.id;
               displayLabel = `Part ${id}: ${part.title}`;
             }
@@ -116,7 +112,6 @@ const SingleTopic = ({
   );
 };
 
-// Component Chính
 export default function PartSidebar({ data }: PartSidebarProps) {
   const searchParams = useSearchParams();
   const activePartId = searchParams.get("part");
@@ -131,12 +126,10 @@ export default function PartSidebar({ data }: PartSidebarProps) {
         padding: "15px",
         border: "1px solid #eee",
 
-        // --- CẤU HÌNH SCROLL & STICKY ---
-
-        top: "100px", // Cách mép trên màn hình 100px (để chừa chỗ cho Header)
-        maxHeight: "calc(100vh )", // Chiều cao tối đa = màn hình - header - margin
-        overflowY: "auto", // Bật thanh cuộn dọc nếu nội dung dài
-        paddingRight: "5px", // Chừa chỗ cho thanh scrollbar không che nội dung
+        top: "100px",
+        maxHeight: "calc(100vh )",
+        overflowY: "auto",
+        paddingRight: "5px",
       }}
     >
       {data.map((topic) => (
@@ -156,7 +149,6 @@ export default function PartSidebar({ data }: PartSidebarProps) {
           opacity: 0.9;
         }
 
-        /* --- TÙY CHỈNH THANH CUỘN (SCROLLBAR) --- */
         .sidebar-scroll-container::-webkit-scrollbar {
           width: 6px;
         }

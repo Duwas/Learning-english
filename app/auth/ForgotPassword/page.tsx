@@ -54,7 +54,6 @@ export default function ForgotPassword() {
     }
   };
 
-  // ================= Countdown =================
   useEffect(() => {
     if (timeLeft <= 0) return;
     const timer = setInterval(
@@ -64,7 +63,6 @@ export default function ForgotPassword() {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // ================= Verify OTP =================
   const handleOTP = async () => {
     if (!otp || otp.length !== 6) {
       setOtpError(true);
@@ -90,7 +88,6 @@ export default function ForgotPassword() {
     }
   };
 
-  // ================= Resend OTP =================
   const resendOtp = async () => {
     if (timeLeft > 0) return;
     setLoading();
@@ -143,7 +140,6 @@ export default function ForgotPassword() {
                 </button>
               </form>
 
-              {/* Dialog nhập OTP */}
               {isDialog && (
                 <div className="otp-dialog">
                   <h5>Nhập mã OTP</h5>

@@ -1,7 +1,7 @@
-// FILE: /app/hooks/useSkillMenuData.ts
+
 
 import { useState, useEffect } from "react";
-import api from "@/app/services/api"; // Giả định service API đã được định nghĩa
+import api from "@/app/services/api"; 
 
 interface Level {
  id: number;
@@ -33,7 +33,6 @@ export const useSkillMenuData = () => {
         fetchMenu();
     }, []);
 
-    // Chỉ trả về các kỹ năng chính (thường là 4 skills, vocabulary, grammar)
     const skills = menuData.filter(skill => 
         ['listening', 'reading', 'writing', 'speaking'].includes(skill.name.toLowerCase())
     );

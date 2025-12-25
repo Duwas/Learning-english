@@ -6,15 +6,12 @@ import {
   RedoOutlined,
   ArrowRightOutlined,
   SendOutlined,
-  ExclamationCircleOutlined, // Import icon cảnh báo
-  HistoryOutlined, // ICON LỊCH SỬ MỚI
-  // CloseCircleFilled, // Không dùng trực tiếp
-  // CheckSquareFilled, // Không dùng trực tiếp
-  ArrowLeftOutlined, // ICON QUAY LẠI
+  ExclamationCircleOutlined,
+  HistoryOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import flashAPI from "@/app/services/api/flashAPI";
 
-// --- TYPE ĐỊNH NGHĨA ---
 interface Option {
   optionId: number;
   optionText: string;
@@ -24,7 +21,7 @@ interface QuestionNode {
   questionId: number;
   questionText: string;
   options: Option[];
-  // **THÊM: Thêm trường correctOptionId để hiển thị đáp án đúng**
+
   correctOptionId?: number;
 }
 
@@ -38,7 +35,7 @@ interface ResultDetail {
   questionId: number;
   selectedOptionId: number;
   correct: boolean;
-  // **THÊM: Thêm trường correctOptionId từ server (nếu API có trả về)**
+
   correctOptionId?: number;
 }
 
@@ -56,10 +53,8 @@ interface QuizModalProps {
   grammarId?: number;
 }
 
-// --- 1. HÀM TRỘN MẢNG (SHUFFLE) ---
-// Thuật toán Fisher-Yates Shuffle
 const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array]; // Copy mảng để không ảnh hưởng mảng gốc
+  const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -67,7 +62,6 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-// **HÀM TRỘN CÁC OPTIONS TRONG MỘT CÂU HỎI (Áp dụng cho Quiz Mode)**
 const shuffleOptions = (question: QuestionNode): QuestionNode => {
   if (!question || !question.options) return question;
   const shuffledOptions = shuffleArray(question.options);
@@ -77,7 +71,6 @@ const shuffleOptions = (question: QuestionNode): QuestionNode => {
   };
 };
 
-// **HÀM LẤY ĐÁP ÁN ĐÚNG CỦA CÂU HỎI TỪ MẢNG QUESTIONS**
 const getCorrectOptionIdFromQuestions = (
   questionId: number,
   questions: QuestionNode[]
@@ -101,15 +94,12 @@ export default function QuizModal({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
 
-  // --- STATE CẢNH BÁO ---
   const [warningMsg, setWarningMsg] = useState<string | null>(null);
 
   const [resultData, setResultData] = useState<QuizResult | null>(null);
 
-  // **THÊM STATE MỚI: Trạng thái hiển thị lịch sử làm bài**
   const [showHistory, setShowHistory] = useState(false);
 
-  // **THÊM HÀM MỚI: Hàm để gộp đáp án đúng từ mảng questions vào resultData**
   const mergeCorrectAnswers = (
     result: QuizResult,
     quizQuestions: QuestionNode[]
@@ -119,7 +109,7 @@ export default function QuizModal({
         res.questionId,
         quizQuestions
       );
-      // Gộp correctOptionId vào ResultDetail
+
       return {
         ...res,
         correctOptionId: correctOptionId,
@@ -150,7 +140,6 @@ export default function QuizModal({
     }, [isOpen, groupId]);
   }
 
-  // LOGIC FETCH MỚI: Trộn câu hỏi và trộn đáp án trong mỗi câu hỏi
   const fetchQuiz1 = async () => {
     setLoading(true);
 
@@ -168,11 +157,8 @@ export default function QuizModal({
 
         const rawQuestions = quizData.subQuestionNodes || [];
 
-        // --- 1. TRỘN CÂU HỎI TỔNG THỂ ---
         const shuffledQuestions = shuffleArray(rawQuestions);
 
-        // --- 2. TRỘN ĐÁP ÁN TRONG MỖI CÂU HỎI VÀ LƯU VÀO STATE (FULL RANDOMIZATION) ---
-        // State questions sẽ lưu trữ cấu trúc đã trộn cho toàn bộ bài làm
         const finalQuizStructure = shuffledQuestions.map((q) =>
           shuffleOptions(q)
         );
@@ -199,10 +185,8 @@ export default function QuizModal({
 
         const rawQuestions = quizData.subQuestionNodes || [];
 
-        // --- 1. TRỘN CÂU HỎI TỔNG THỂ ---
         const shuffledQuestions = shuffleArray(rawQuestions);
 
-        // --- 2. TRỘN ĐÁP ÁN TRONG MỖI CÂU HỎI VÀ LƯU VÀO STATE (FULL RANDOMIZATION) ---
         const finalQuizStructure = shuffledQuestions.map((q) =>
           shuffleOptions(q)
         );
@@ -220,8 +204,8 @@ export default function QuizModal({
     setUserAnswers({});
     setResultData(null);
     setExerciseId(null);
-    setWarningMsg(null); // Reset cảnh báo
-    setShowHistory(false); // **RESET LỊCH SỬ**
+    setWarningMsg(null);
+    setShowHistory(false);
   };
 
   const handleSelectOption = (qId: number, optId: number) => {
@@ -229,14 +213,14 @@ export default function QuizModal({
       ...prev,
       [qId]: optId,
     }));
-    // Khi người dùng chọn đáp án, ẩn cảnh báo đi (nếu có)
+
     if (warningMsg) setWarningMsg(null);
   };
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
-      setWarningMsg(null); // Reset cảnh báo khi qua câu mới
+      setWarningMsg(null);
     }
   };
 
@@ -258,12 +242,10 @@ export default function QuizModal({
     );
 
     if (unansweredIndex !== -1) {
-      // Nếu tìm thấy câu chưa làm:
-      // 1. Chuyển ngay tới câu đó
       setCurrentIndex(unansweredIndex);
-      // 2. Hiển thị cảnh báo
+
       setWarningMsg("Bạn chưa trả lời câu hỏi này! Vui lòng chọn đáp án.");
-      return; // Dừng, không gửi bài
+      return;
     }
 
     setSubmitting(true);
@@ -287,7 +269,6 @@ export default function QuizModal({
       const data = res.data || res;
       let result: QuizResult = Array.isArray(data) ? data[0] : data;
 
-      // **GỘP ĐÁP ÁN ĐÚNG TRƯỚC KHI LƯU VÀO STATE**
       result = mergeCorrectAnswers(result, questions);
 
       setResultData(result);
@@ -300,21 +281,17 @@ export default function QuizModal({
     }
   };
 
-  // Hàm đếm số câu đúng
   const calculateCorrectCount = (results: ResultDetail[]) => {
     if (!results) return 0;
     return results.filter((item) => item.correct === true).length;
   };
 
-  // Hàm lấy QuestionNode dựa trên QuestionId
-  // HÀM NÀY BÂY GIỜ LẤY CÂU HỎI VỚI OPTIONS ĐÃ TRỘN
   const getQuestionById = (questionId: number) => {
     return questions.find((q) => q.questionId === questionId);
   };
 
   if (!isOpen) return null;
 
-  // Lấy câu hỏi để render: luôn là questions[currentIndex] vì nó đã được trộn sẵn
   const questionToRender = questions[currentIndex];
 
   return (
@@ -452,7 +429,6 @@ export default function QuizModal({
                         style={{ maxHeight: "500px", overflowY: "auto" }}
                       >
                         {resultData.results.map((resultItem, index) => {
-                          // Lấy câu hỏi từ mảng questions (BÂY GIỜ ĐÃ CÓ OPTIONS TRỘN VÀ THỨ TỰ CÂU HỎI TRỘN)
                           const question = getQuestionById(
                             resultItem.questionId
                           );
@@ -461,7 +437,6 @@ export default function QuizModal({
 
                           const selectedOptionId = resultItem.selectedOptionId;
 
-                          // Lấy đáp án đúng
                           const correctOptionId =
                             resultItem.correctOptionId ||
                             question.correctOptionId;
@@ -518,7 +493,7 @@ export default function QuizModal({
                                       }
                                     } else if (isSelected && !isCorrect) {
                                       optionClass =
-                                        "bg-primary-subtle border-primary text-dark"; // nền xanh nhạt, viền xanh
+                                        "bg-primary-subtle border-primary text-dark";
                                       badgeText = "Đáp án bạn chọn";
                                       badgeBg = "bg-primary";
                                     }

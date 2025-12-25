@@ -1,4 +1,3 @@
-// app/User/writing/page.tsx (Sử dụng Bootstrap Grid, Tông màu Tím)
 "use client";
 
 import { useSearchParams } from "next/navigation";
@@ -17,7 +16,6 @@ const mockWritingTopics = [
     level: "A1",
     imageUrl: "/images/writing/email_short.jpg",
   },
-  // ...
 ];
 
 export default function WritingPage() {
@@ -25,7 +23,6 @@ export default function WritingPage() {
   const skill = searchParams.get("skill") || "Writing";
   const level = searchParams.get("level") || "A1";
 
-  // *** SỬA LỖI 1: Khởi tạo topics là mảng rỗng và loading = true ***
   const [topics, setTopics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +36,6 @@ export default function WritingPage() {
   };
 
   useEffect(() => {
-    // Logic gọi API cho Writing
     if (!skill || !level) return;
     const levelNumber = levelMap[level];
     if (!levelNumber) return;
@@ -62,7 +58,7 @@ export default function WritingPage() {
       <MainHeader />
       <div
         style={{
-          marginTop: "80px",
+          marginTop: "3.3%",
           backgroundColor: "#f8f9fa",
           minHeight: "100vh",
         }}
@@ -82,7 +78,6 @@ export default function WritingPage() {
           </div>
         </div>
 
-        {/* Breadcrumb */}
         <div className="bg-white border-bottom shadow-sm">
           <div className="container">
             <nav className="py-2" aria-label="breadcrumb">
@@ -100,7 +95,6 @@ export default function WritingPage() {
           </div>
         </div>
 
-        {/* Nội dung chính: Grid các bài kiểm tra */}
         <div className="container py-4">
           {loading ? (
             <p
@@ -114,7 +108,6 @@ export default function WritingPage() {
               Không có bài kiểm tra nào.
             </p>
           ) : (
-            // Bố cục 3 cột cố định (row-cols-3)
             <div className="row row-cols-3 g-4">
               {topics.map((t) => (
                 <div key={t.id} className="col">

@@ -1,5 +1,3 @@
-// FILE: /app/User/reading/test/page.tsx
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -67,9 +65,6 @@ interface ResultModalProps {
   onRedo: () => void;
 }
 
-// --------------------------------------------------------------------------
-// COMPONENT MODAL HIỂN THỊ KẾT QUẢ
-// --------------------------------------------------------------------------
 const ResultModal = ({
   isOpen,
   onClose,
@@ -178,10 +173,6 @@ const ResultModal = ({
     </Modal>
   );
 };
-
-// --------------------------------------------------------------------------
-// COMPONENT READING TEST PAGE
-// --------------------------------------------------------------------------
 
 export default function ReadingTestPage() {
   const searchParams = useSearchParams();

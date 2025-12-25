@@ -2,9 +2,9 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const PRIMARY_COLOR = "#ff6b81"; // Màu hồng đậm/Coral
+const PRIMARY_COLOR = "#ff6b81"; 
 const ACCENT_COLOR = "#ffe5e5";
-const TEXT_OVERLAY_COLOR = "#ff6b81"; // Màu Coral/Hồng đậm (Dùng cho dải tiêu đề chính)
+const TEXT_OVERLAY_COLOR = "#ff6b81"; 
 
 interface TopicCardProps {
   id: number;
@@ -33,7 +33,7 @@ const SpeakingTopicCard: React.FC<TopicCardProps> = ({
     <div
       onClick={handleClick}
       className="card shadow-sm h-100"
-      // Thêm hiệu ứng hover vào style
+      
       style={{
         borderRadius: "0.5rem",
         overflow: "hidden",
@@ -41,7 +41,7 @@ const SpeakingTopicCard: React.FC<TopicCardProps> = ({
         transition: "transform 0.3s, box-shadow 0.3s",
         border: `1px solid ${ACCENT_COLOR}`,
       }}
-      // Hiệu ứng Hover: Nâng thẻ lên và đổ bóng mạnh hơn
+      
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = "translateY(-5px)";
         e.currentTarget.style.boxShadow = "0 1rem 3rem rgba(0, 0, 0, 0.175)";
@@ -52,7 +52,6 @@ const SpeakingTopicCard: React.FC<TopicCardProps> = ({
           "0 .125rem .25rem rgba(0, 0, 0, .075)";
       }}
     >
-      {/* 1. Image Area & Level Tag */}
       <div
         className="position-relative"
         style={{
@@ -63,7 +62,6 @@ const SpeakingTopicCard: React.FC<TopicCardProps> = ({
           backgroundColor: ACCENT_COLOR,
         }}
       >
-        {/* Level Tag */}
         <span
           className="badge position-absolute bg-dark"
           style={{
@@ -77,30 +75,28 @@ const SpeakingTopicCard: React.FC<TopicCardProps> = ({
           {level}
         </span>
 
-        {/* Name Overlay - Dải tiêu đề chính (Lúc trước là description) */}
         <div
           className="position-absolute w-100 text-center"
           style={{
             bottom: 0,
-            backgroundColor: TEXT_OVERLAY_COLOR, // Màu hồng đậm
+            backgroundColor: TEXT_OVERLAY_COLOR, 
             padding: "0.5rem 0.5rem",
             boxShadow: "0 -2px 5px rgba(0,0,0,0.2)",
           }}
         >
           <h3
-            className="m-0 text-truncate" // Dùng text-truncate để xử lý tên dài
+            className="m-0 text-truncate" 
             style={{
               fontSize: "1rem",
               fontWeight: "900",
               color: "white",
             }}
           >
-            {name} {/* Hiển thị Tên Chủ đề ở đây */}
+            {name} 
           </h3>
         </div>
       </div>
 
-      {/* 2. Footer Content - Phần miêu tả dưới ảnh */}
       <div className="card-body p-3">
         <p
           className="card-text mb-1"
@@ -119,7 +115,7 @@ const SpeakingTopicCard: React.FC<TopicCardProps> = ({
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
-            WebkitLineClamp: 3, // Giới hạn 3 dòng
+            WebkitLineClamp: 3, 
             WebkitBoxOrient: "vertical",
           }}
         >

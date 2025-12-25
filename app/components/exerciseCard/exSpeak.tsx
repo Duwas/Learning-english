@@ -1,5 +1,3 @@
-// FILE: /app/components/exerciseCard/exSpeak.tsx - FINAL VERSION CÓ GHI ÂM THẬT
-
 "use client";
 
 import React, { useState, useRef } from "react";
@@ -11,19 +9,18 @@ import {
   Typography,
   Alert,
   Popconfirm,
-} from "antd"; // Import Popconfirm
+} from "antd";
 import {
   AudioOutlined,
   CloudUploadOutlined,
   CheckCircleOutlined,
-  StopOutlined, // Icon cho nút dừng
-  DeleteOutlined, // Icon cho nút xóa
+  StopOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const { Title, Text } = Typography;
 
-// --- INTERFACES (Đảm bảo đồng bộ với Page.tsx) ---
 interface SpeakingExerciseData {
   exerciseId: number;
   title: string;
@@ -37,19 +34,14 @@ interface SpeakingProps {
   exercise: SpeakingExerciseData;
   onSubmit: (file: File) => void;
   isSubmitting: boolean;
-  fileToSubmit: File | null; // Thay đổi kiểu hàm setFileToSubmit (dùng hàm đã bọc ở Page.tsx)
+  fileToSubmit: File | null;
   setFileToSubmit: (file: File | null) => void;
-  // Prop mới để phát lại audio
+
   audioURLToPlay: string | null;
 }
 
-// Màu sắc chủ đạo (Tím đậm)
 const PRIMARY_COLOR = "#6f42c1";
-const ACCENT_BG = "#f5f0ff"; // Nền nhạt hơn cho card
-
-// --------------------------------------------------------------------------
-// COMPONENT SPEAKING UI
-// --------------------------------------------------------------------------
+const ACCENT_BG = "#f5f0ff";
 
 const SpeakingComponent: React.FC<SpeakingProps> = ({
   exercise,
@@ -57,42 +49,39 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
   isSubmitting,
   fileToSubmit,
   setFileToSubmit,
-  audioURLToPlay, // Sử dụng prop để nghe lại
+  audioURLToPlay,
 }) => {
-  const [isRecording, setIsRecording] = useState(false); // Refs cho MediaRecorder và stream
+  const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
 
   const { title, description, topic, level, instructions } = exercise;
   const hasFile = !!fileToSubmit;
-  const allowedFormats = "MP3, WAV, M4A, WebM"; // ⭐ LOGIC GHI ÂM THỰC SỰ & DỪNG GHI ÂM
+  const allowedFormats = "MP3, WAV, M4A, WebM";
 
   const handleRecordToggle = async () => {
     if (isSubmitting) return;
 
     if (isRecording) {
-      // DỪNG GHI ÂM
       mediaRecorderRef.current?.stop();
       setIsRecording(false);
-      message.success("Đã dừng ghi âm."); // Tắt stream (tắt đèn mic)
+      message.success("Đã dừng ghi âm.");
       streamRef.current?.getTracks().forEach((track) => track.stop());
     } else {
-      // BẮT ĐẦU GHI ÂM
       try {
-        setFileToSubmit(null); // Xóa file cũ trước khi ghi âm mới // Xin quyền và lấy stream
+        setFileToSubmit(null);
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
         streamRef.current = stream;
 
-        // Chọn mimeType tốt nhất (WebM thường được hỗ trợ tốt)
         const mimeType = MediaRecorder.isTypeSupported("audio/webm")
           ? "audio/webm"
           : "audio/mp4";
         const mediaRecorder = new MediaRecorder(stream, { mimeType });
         mediaRecorderRef.current = mediaRecorder;
-        audioChunksRef.current = []; // Reset chunks
+        audioChunksRef.current = [];
 
         mediaRecorder.ondataavailable = (event) => {
           audioChunksRef.current.push(event.data);
@@ -101,7 +90,7 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
         mediaRecorder.onstop = () => {
           const audioBlob = new Blob(audioChunksRef.current, {
             type: mimeType,
-          }); // Chuyển Blob thành File để nộp (Dùng tên file đặc trưng để phân biệt)
+          });
           const audioFile = new File(
             [audioBlob],
             `Recorded_${Date.now()}.webm`,
@@ -119,13 +108,13 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
         setIsRecording(false);
       }
     }
-  }; // ⭐ Xóa file đã chọn/ghi
+  };
 
   const handleRemoveFile = () => {
     if (isSubmitting || isRecording) return;
     setFileToSubmit(null);
     message.info("Đã xóa file đã chọn.");
-  }; // ⭐ LOGIC TẢI FILE ĐÃ CẬP NHẬT
+  };
 
   const uploadProps = {
     name: "file",
@@ -133,9 +122,8 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
     multiple: false,
     maxCount: 1,
     beforeUpload: () => {
-      // Đảm bảo dừng ghi âm nếu đang ghi
       if (isRecording) handleRecordToggle();
-      // Xóa file cũ trước khi upload file mới
+
       setFileToSubmit(null);
       return true;
     },
@@ -154,7 +142,6 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
       }
     },
     onRemove: () => {
-      // Bỏ onRemove của antd, dùng nút xóa riêng
       return true;
     },
   };
@@ -250,7 +237,6 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
                   shape="circle"
                   size="large"
                   danger={isRecording}
-                  // Thay đổi icon khi đang ghi/chưa ghi
                   icon={
                     isRecording ? (
                       <StopOutlined style={{ fontSize: "30px" }} />

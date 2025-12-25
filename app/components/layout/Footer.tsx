@@ -1,5 +1,4 @@
 "use client";
-// component/layout/Footer.js
 import React from "react";
 import { Layout } from "antd";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -45,7 +44,6 @@ const MainFooter = () => {
               </p>
             </div>
 
-            {/* Cột 2: Levels */}
             <div className="col-md-2 mb-4 mb-md-0 border-end border-secondary pe-3">
               <h5 className="text-white mb-3 fw-semibold">Levels</h5>
               <ul className="list-unstyled small">
@@ -71,6 +69,22 @@ const MainFooter = () => {
                     className="text-decoration-none text-white-50"
                   >
                     B1 Intermediate
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/levels/b1"
+                    className="text-decoration-none text-white-50"
+                  >
+                    B2 Upper-Intermediate
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/levels/b1"
+                    className="text-decoration-none text-white-50"
+                  >
+                    C1 Advanced
                   </Link>
                 </li>
               </ul>

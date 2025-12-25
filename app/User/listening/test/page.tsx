@@ -317,7 +317,6 @@ export default function ListeningTestPage() {
             backgroundColor: "#f8f9fa",
           }}
         >
-          {/* HIỂN THỊ LOADING/ERROR */}
           {loading && (
             <div className="text-center py-5">
               <Spin size="large" />
@@ -330,7 +329,6 @@ export default function ListeningTestPage() {
             </div>
           )}
 
-          {/* HIỂN THỊ MODAL KẾT QUẢ */}
           {isModalOpen && result && exerciseData && (
             <ResultModal
               isOpen={isModalOpen}
@@ -342,7 +340,6 @@ export default function ListeningTestPage() {
             />
           )}
 
-          {/* HIỂN THỊ COMPONENT BÀI TẬP */}
           {exerciseData && (
             <ListeningComponent
               exercise={exerciseData}
@@ -355,7 +352,6 @@ export default function ListeningTestPage() {
             />
           )}
 
-          {/* HIỂN THỊ THÔNG BÁO KHI KHÔNG CÓ DATA */}
           {!loading && !error && !exerciseData && (
             <div className="container py-5">
               <Alert

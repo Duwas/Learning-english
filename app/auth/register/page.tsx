@@ -34,7 +34,6 @@ export default function Register() {
   const [timeLeft, setTimeLeft] = useState(0);
 
   const { callApi } = useApi(showToast);
-  // ================= Register =================
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading();
@@ -71,7 +70,6 @@ export default function Register() {
       setLoading();
     }
   };
-  // ================= Verify OTP =================
   const handleOTP = async () => {
     if (!otp || otp.length !== 6) {
       setOtpError(false);
@@ -98,7 +96,6 @@ export default function Register() {
     }
   };
 
-  // ================= Resend OTP =================
   const resendOtp = async () => {
     setLoading();
     if (timeLeft > 0) return;
@@ -124,7 +121,7 @@ export default function Register() {
       });
     }, 1000);
 
-    return () => clearInterval(timer); // cleanup
+    return () => clearInterval(timer);
   }, [timeLeft]);
   return (
     <>
@@ -132,7 +129,6 @@ export default function Register() {
         <MainHeader />
         <div className="register-container vh-100 p-0">
           <div className="row h-100 g-0">
-            {/* Image */}
             <div className="col-lg-7 d-none d-lg-flex justify-content-center align-items-center register-image-col">
               <img
                 src={registerImageUrl}
@@ -141,7 +137,6 @@ export default function Register() {
               />
             </div>
 
-            {/* Form */}
             <div className="col-lg-5 d-flex justify-content-center align-items-center bg-white">
               <div className="register-form-container">
                 <h2 className="register-title">Tạo tài khoản mới</h2>

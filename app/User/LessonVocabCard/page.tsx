@@ -60,15 +60,12 @@ export default function LearnPage() {
     }
   }, [currentPart]);
 
-  // --- 3. TÌM TÊN TOPIC (SỬA LỖI SIDEBARDATA.FIND IS NOT A FUNCTION) ---
   const currentTopicName = useMemo(() => {
-    // Kiểm tra nếu sidebarData chưa phải là mảng hoặc rỗng
     if (!Array.isArray(sidebarData) || sidebarData.length === 0) {
       return "Loading...";
     }
 
     const foundTopic = sidebarData.find((topic) => {
-      // Kiểm tra kỹ group_words có phải mảng không trước khi .some
       if (!Array.isArray(topic.group_words)) return false;
 
       return topic.group_words.some((gw: any) => {
@@ -79,7 +76,6 @@ export default function LearnPage() {
 
     if (foundTopic) return foundTopic.topic_name;
 
-    // Nếu có dữ liệu nhưng không tìm thấy part, lấy tên topic đầu tiên làm mặc định
     return sidebarData[0]?.topic_name || "Unknown Topic";
   }, [currentPart, sidebarData]);
 
@@ -89,7 +85,6 @@ export default function LearnPage() {
         <MainHeader />
 
         <div className="container py-4" style={{ marginTop: "50px" }}>
-          {/* HEADER VỚI NÚT ÔN TẬP */}
           <div className="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
             <h5 className="text-primary fw-bold mb-0">
               <span className="text-muted fw-normal">Flashcard » </span>
@@ -110,12 +105,10 @@ export default function LearnPage() {
           </div>
 
           <div className="row align-items-start" style={{ marginTop: "-10px" }}>
-            {/* SIDEBAR TRÁI */}
             <div className="col-md-3 mb-4">
               <PartSidebar data={sidebarData} />
             </div>
 
-            {/* CONTENT PHẢI (FLASHCARD) */}
             <div className="col-md-9">
               <div
                 className="card shadow-sm border-0"

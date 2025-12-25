@@ -1,4 +1,3 @@
-// app/User/reading/page.tsx (Sử dụng Bootstrap Grid, Tông màu Xanh Lam Đậm)
 "use client";
 
 import { useSearchParams } from "next/navigation";
@@ -8,10 +7,9 @@ import ReadingTopicCard from "@/app/components/TopicCard/readingpage";
 import { Main } from "next/document";
 import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
-// Định nghĩa màu Xanh Lam Đậm chủ đạo
+
 const READING_COLOR = "#446acbff";
 
-// Dữ liệu giả định (Giữ nguyên)
 const mockReadingTopics = [
   {
     id: 1,
@@ -65,12 +63,11 @@ export default function ReadingPage() {
       <MainHeader />
       <div
         style={{
-          marginTop: "4%",
+          marginTop: "3.3%",
           backgroundColor: "#f8f9fa",
           minHeight: "100vh",
         }}
       >
-        {/* Tiêu đề chính (Màu XANH LAM ĐẬM chủ đạo) */}
         <div className="py-3 shadow" style={{ backgroundColor: READING_COLOR }}>
           <div className="container">
             <h1
@@ -86,7 +83,6 @@ export default function ReadingPage() {
           </div>
         </div>
 
-        {/* Breadcrumb */}
         <div className="bg-white border-bottom shadow-sm">
           <div className="container">
             <nav className="py-2" aria-label="breadcrumb">
@@ -104,7 +100,6 @@ export default function ReadingPage() {
           </div>
         </div>
 
-        {/* Nội dung chính: Grid các bài kiểm tra */}
         <div className="container py-4">
           {loading ? (
             <p
@@ -118,7 +113,6 @@ export default function ReadingPage() {
               Không có bài kiểm tra nào.
             </p>
           ) : (
-            // Bố cục 3 cột cố định (row-cols-3)
             <div className="row row-cols-3 g-4">
               {topics.map((t) => (
                 <div key={t.id} className="col">

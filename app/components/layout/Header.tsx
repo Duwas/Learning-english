@@ -5,7 +5,7 @@ import { Layout, Menu, Button, Avatar } from "antd";
 import type { MenuProps } from "antd";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import "../../css/main-menu.css";
-// Import API
+
 import api from "@/app/services/api";
 import infoApi from "@/app/services/api/infoAPI";
 
@@ -52,13 +52,11 @@ const MainHeader = () => {
   const isUserSubPage =
     pathname && pathname.startsWith("/User/") && pathname !== "/User";
 
-  // --- STYLE CHUNG CHO LABEL MENU ---
   const menuLabelStyle: React.CSSProperties = {
     fontSize: "16px",
     fontWeight: 500,
   };
 
-  // 1. Fetch Menu Data
   useEffect(() => {
     const fetchMenu = async () => {
       try {
@@ -71,7 +69,6 @@ const MainHeader = () => {
     fetchMenu();
   }, []);
 
-  // 2. Handle Scroll Effect
   useEffect(() => {
     const handleScroll = () => {
       const current = window.scrollY;
@@ -85,30 +82,26 @@ const MainHeader = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 3. Logic: Check Login & Fetch User Avatar (CẬP NHẬT LOGIC)
   useEffect(() => {
     const checkLoginAndFetchAvatar = async () => {
       const token = localStorage.getItem("token");
       const storedUserStr = localStorage.getItem("user");
 
-      // Nếu không có token hoặc user -> Set trạng thái chưa đăng nhập
       if (!token || !storedUserStr) {
         setLoggedIn(false);
         setUserAvatar(null);
-        // Đảm bảo sạch sẽ storage nếu thiếu 1 trong 2
+
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         return;
       }
 
-      // Nếu có token, set tạm là loggedIn để UI phản hồi nhanh
       setLoggedIn(true);
 
       try {
         const currentUser = JSON.parse(storedUserStr);
         const userId = currentUser.id || currentUser.userId;
 
-        // Gọi API để lấy Avatar mới nhất
         const res = await infoApi.getProfile(userId);
         if (res?.data?.avatarUrl) {
           setUserAvatar(res.data.avatarUrl);
@@ -116,8 +109,6 @@ const MainHeader = () => {
       } catch (error) {
         console.error("Phiên đăng nhập hết hạn hoặc lỗi API:", error);
 
-        // QUAN TRỌNG: Nếu gọi API thất bại (thường là 401 Unauthorized)
-        // -> Coi như hết hạn, xóa token và chuyển về nút Đăng nhập
         setLoggedIn(false);
         setUserAvatar(null);
         localStorage.removeItem("token");
@@ -126,9 +117,8 @@ const MainHeader = () => {
     };
 
     checkLoginAndFetchAvatar();
-  }, [pathname]); // Chạy lại mỗi khi đổi trang
+  }, [pathname]);
 
-  // 4. Logic: Xác định Menu nào đang Active
   useEffect(() => {
     if (pathname?.includes("/User/translate")) {
       setSelectedKeys(["translate"]);

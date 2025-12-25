@@ -40,7 +40,7 @@ const sidebarItems: SidebarItem[] = [
   {
     name: "Vocabulary",
     icon: FaLanguage,
-    // Bạn hãy thay đường dẫn này bằng route thực tế của trang Vocabulary
+
     link: "/admin/Content/Vocabulary",
   },
   {
@@ -73,12 +73,12 @@ const Sidebar: React.FC<SidebarProps> = ({ show = true }) => {
       style={{
         width: "240px",
         height: "100vh",
-        position: "fixed", // Quan trọng: Đặt Sidebar cố định
+        position: "fixed",
         top: 0,
         left: 0,
-        zIndex: 1020, // Để nằm dưới Header (thường là 1030)
+        zIndex: 1020,
         transition: "transform 0.3s ease-in-out",
-        transform: show ? "translateX(0)" : "translateX(-100%)", // Logic ẩn/hiện
+        transform: show ? "translateX(0)" : "translateX(-100%)",
       }}
     >
       <h3 className="text-success mb-4 text-center">Admin Panel</h3>
@@ -128,7 +128,6 @@ const Sidebar: React.FC<SidebarProps> = ({ show = true }) => {
                 </div>
               </>
             ) : (
-              // Render link bình thường (như Grammar, Vocab, Overview...)
               <a
                 className="nav-link text-white d-flex align-items-center"
                 href={item.link}

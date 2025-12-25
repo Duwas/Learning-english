@@ -74,7 +74,6 @@ const { Panel } = Collapse;
 export default function AdminVocabularyPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- STATE DATA ---
   const [treeData, setTreeData] = useState<TopicItem[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<{
     id: number;
@@ -89,12 +88,10 @@ export default function AdminVocabularyPage() {
   const [loadingTree, setLoadingTree] = useState(false);
   const [loadingWords, setLoadingWords] = useState(false);
 
-  // --- STATE MODAL WORD ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VocabItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // --- STATE MODAL TOPIC (NEW) ---
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [submittingTopic, setSubmittingTopic] = useState(false);
 
@@ -129,7 +126,6 @@ export default function AdminVocabularyPage() {
     }
   };
 
-  // 2. Fetch Words
   const fetchWords = async (groupId: number) => {
     try {
       setLoadingWords(true);
@@ -154,7 +150,6 @@ export default function AdminVocabularyPage() {
     }
   }, [selectedGroup]);
 
-  // Filter Topics Search
   const filteredTreeData = useMemo(() => {
     if (!searchTerm) return treeData;
     const lowerSearch = searchTerm.toLowerCase();
@@ -241,7 +236,7 @@ export default function AdminVocabularyPage() {
       message.success("Thêm chủ đề thành công!");
       setIsTopicModalOpen(false);
       topicForm.resetFields();
-      fetchTreeData(); 
+      fetchTreeData();
     } catch (error) {
       console.error(error);
       message.error("Lỗi khi thêm chủ đề!");
@@ -256,7 +251,6 @@ export default function AdminVocabularyPage() {
       message.success("Đã xóa chủ đề!");
       fetchTreeData();
 
-      // Nếu đang chọn topic vừa xóa -> reset
       if (selectedGroup?.topicId === topicId) {
         setSelectedGroup(null);
         setWords([]);
@@ -364,28 +358,6 @@ export default function AdminVocabularyPage() {
     },
   ];
 
-  // const handleExportCSV = async () => {
-  //   try {
-  //     const res = await api.post(
-  //       "/admin/vocabulary/export/csv",
-  //       {},
-  //       { responseType: "blob" }
-  //     );
-  //     const url = window.URL.createObjectURL(new Blob([res.data]));
-  //     const link = document.createElement("a");
-  //     link.href = url;
-  //     link.setAttribute("download", "vocabulary.csv");
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     link.remove();
-  //     window.URL.revokeObjectURL(url);
-  //     message.success("Xuất CSV thành công!");
-  //   } catch (err) {
-  //     console.error(err);
-  //     message.error("Xuất CSV thất bại!");
-  //   }
-  // };
-
   const handleExportXLSX = async () => {
     try {
       const res = await api.get("/admin/vocabulary/export/xlsx", {
@@ -473,10 +445,8 @@ export default function AdminVocabularyPage() {
           </Button>
         </div>
 
-        {/* Body */}
         <div className="p-4 flex-grow-1">
           <div className="row h-100">
-            {/* Sidebar Trái (Danh mục Topic) */}
             <div className="col-md-3 mb-4">
               <Card
                 className="shadow-sm border-0 h-100"
@@ -488,7 +458,6 @@ export default function AdminVocabularyPage() {
                 }}
               >
                 <div className="p-3 border-bottom bg-light">
-                  {/* Tiêu đề & Nút Thêm Topic */}
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <h6 className="fw-bold m-0 text-secondary">
                       <FaFolderOpen className="me-2" /> DANH MỤC
@@ -562,7 +531,7 @@ export default function AdminVocabularyPage() {
                                   size="small"
                                   className="text-secondary opacity-50 hover-opacity-100"
                                   icon={<FaTrash size={12} />}
-                                  onClick={(e) => e.stopPropagation()} // Chặn sự kiện click vào panel
+                                  onClick={(e) => e.stopPropagation()}
                                 />
                               </Popconfirm>
                             </div>
@@ -620,7 +589,6 @@ export default function AdminVocabularyPage() {
               </Card>
             </div>
 
-            {/* Content Phải (Danh sách từ vựng) */}
             <div className="col-md-9 mb-4">
               <Card className="shadow-sm border-0 h-100">
                 <div className="d-flex align-items-center mb-4">
@@ -690,8 +658,6 @@ export default function AdminVocabularyPage() {
           </div>
         </div>
       </div>
-
-      {/* Modal Form: Thêm/Sửa Từ Vựng */}
       <Modal
         title={
           <div className="fs-5 fw-bold">

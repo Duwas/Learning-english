@@ -1,5 +1,3 @@
-// FILE: /app/components/exerciseCard/exWrite.tsx
-
 "use client";
 
 import React, { Dispatch, SetStateAction } from "react";
@@ -10,7 +8,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-// --- INTERFACES ---
 interface WritingExerciseData {
   exerciseId: number;
   title: string;
@@ -28,7 +25,7 @@ interface WritingProps {
   isSubmitting: boolean;
 }
 
-const PRIMARY_COLOR = "#02162bff"; // Màu xanh dương
+const PRIMARY_COLOR = "#02162bff";
 
 const WritingComponent: React.FC<WritingProps> = ({
   exercise,
@@ -81,11 +78,10 @@ const WritingComponent: React.FC<WritingProps> = ({
             </ol>
           </nav>
 
-          {/* 3. INSTRUCTIONS / PROMPT */}
           <Card
             className="shadow-sm mb-4"
             style={{
-              backgroundColor: "#e3f2fd", // Xanh dương nhạt
+              backgroundColor: "#e3f2fd",
               borderLeft: `5px solid ${PRIMARY_COLOR}`,
               borderRadius: "8px",
             }}
@@ -101,7 +97,6 @@ const WritingComponent: React.FC<WritingProps> = ({
             </Text>
           </Card>
 
-          {/* 4. TEXT INPUT AREA */}
           <Card className="shadow-sm mb-4">
             <Title level={5}>Bài làm của bạn</Title>
             <TextArea
@@ -116,7 +111,6 @@ const WritingComponent: React.FC<WritingProps> = ({
             </div>
           </Card>
 
-          {/* 5. SUBMIT BUTTON */}
           <div className="text-center mt-4">
             <Button
               type="primary"

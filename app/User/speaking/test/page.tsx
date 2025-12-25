@@ -1,4 +1,4 @@
-// FILE: /app/User/speaking/test/page.tsx - FINAL VERSION
+
 
 "use client";
 
@@ -72,7 +72,7 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
   result,
   onRedo,
 }) => {
-  // Logic xác định màu sắc (0-100)
+  
   const getAntdColor = (score: number) => {
     if (score >= 7) return "green";
     if (score >= 5) return "gold";
@@ -81,7 +81,7 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
 
   const PRIMARY_COLOR_MODAL = "#5e35b1";
 
-  // Format feedback text
+  
   const formatFeedback = (text: string) => {
     return text.split("\n").map((line, index) => (
       <React.Fragment key={index}>
@@ -91,7 +91,7 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
     ));
   };
 
-  // Chiều cao tối đa cho phần thân nội dung cuộn được
+  
   const MODAL_CONTENT_MAX_HEIGHT = "70vh";
 
   return (
@@ -306,7 +306,6 @@ export default function SpeakingTestPage() {
     <>
       <ProtectedRoute>
         <MainHeader />
-        {/* Modal hiện kết quả */}
         {isModalOpen && speakingResult && (
           <SpeakingResultModal
             isOpen={isModalOpen}

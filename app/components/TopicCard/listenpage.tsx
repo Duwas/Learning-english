@@ -36,7 +36,7 @@ const TopicCard: React.FC<TopicCardProps> = ({
         cursor: "pointer",
         transition: "box-shadow 0.3s, transform 0.3s",
       }}
-      // Thêm hiệu ứng hover (tùy chọn)
+      
       onMouseOver={(e) => {
         e.currentTarget.style.boxShadow = "0 0.5rem 1rem rgba(0, 0, 0, 0.2)";
         e.currentTarget.style.transform = "translateY(-3px)";
@@ -47,18 +47,16 @@ const TopicCard: React.FC<TopicCardProps> = ({
         e.currentTarget.style.transform = "translateY(0)";
       }}
     >
-      {/* Image Area - Dùng background-image và cố định chiều cao */}
       <div
         className="position-relative"
         style={{
-          height: "10rem", // Cố định chiều cao
-          backgroundImage: `url(${finalImageUrl})`, // Dùng ảnh đã xử lý
+          height: "10rem", 
+          backgroundImage: `url(${finalImageUrl})`, 
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundColor: "#ccc",
         }}
       >
-        {/* Level Tag (Nền đen) */}
         <span
           className="badge position-absolute"
           style={{
@@ -77,7 +75,6 @@ const TopicCard: React.FC<TopicCardProps> = ({
           style={{ bottom: "3rem", left: "0.5rem", zIndex: 10 }}
         ></div>
 
-        {/* Text Overlay (Nền vàng) */}
         <div
           className="position-absolute w-100 text-center"
           style={{ bottom: 0, backgroundColor: "#ffc107", padding: "0.2rem 0" }}
@@ -87,14 +84,13 @@ const TopicCard: React.FC<TopicCardProps> = ({
             style={{
               fontSize: "0.9rem",
               fontWeight: "bold",
-              color: "#333", // Màu văn bản tối
+              color: "#333", 
             }}
           >
             {description}
           </h3>
         </div>
 
-        {/* Site Branding (Có thể ẩn nếu không cần) */}
         <div
           className="position-absolute"
           style={{
@@ -106,11 +102,9 @@ const TopicCard: React.FC<TopicCardProps> = ({
             zIndex: 10,
           }}
         >
-          {/* Ví dụ: Website Name */}
         </div>
       </div>
 
-      {/* Footer Content - Phần miêu tả dưới ảnh */}
       <div className="card-body text-center p-3">
         <p
           className="card-text m-0"
