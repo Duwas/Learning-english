@@ -1,5 +1,3 @@
-// FILE: /app/components/exerciseCard/exSpeak.tsx
-
 "use client";
 
 import React, { useState, useRef } from "react";
@@ -9,14 +7,13 @@ import {
   CloudUploadOutlined,
   StopOutlined,
   DeleteOutlined,
-  SoundOutlined, // <--- ĐÃ SỬA: Dùng SoundOutlined thay cho FileAudioOutlined
+  SoundOutlined,
   SendOutlined,
 } from "@ant-design/icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const { Title, Text, Paragraph } = Typography;
 
-// --- INTERFACES ---
 interface SpeakingExerciseData {
   exerciseId: number;
   title: string;
@@ -35,8 +32,8 @@ interface SpeakingProps {
   audioURLToPlay: string | null;
 }
 
-const PRIMARY_COLOR = "#6f42c1"; // Tím
-const ACCENT_BG = "#f5f0ff"; // Nền nhạt
+const PRIMARY_COLOR = "#6f42c1";
+const ACCENT_BG = "#f5f0ff";
 
 const SpeakingComponent: React.FC<SpeakingProps> = ({
   exercise,
@@ -45,11 +42,9 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
   fileToSubmit,
   setFileToSubmit,
 }) => {
-  // State ghi âm
   const [isRecording, setIsRecording] = useState(false);
   const [timer, setTimer] = useState(0);
 
-  // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
@@ -58,13 +53,11 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
 
   const { title, description, topic, level, instructions } = exercise;
 
-  // --- 1. XỬ LÝ GHI ÂM ---
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      // Chọn mimeType
       const mimeType = MediaRecorder.isTypeSupported("audio/webm")
         ? "audio/webm"
         : "audio/mp4";
@@ -86,14 +79,12 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
         );
         setFileToSubmit(audioFile);
 
-        // Tắt stream mic
         stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.start();
       setIsRecording(true);
 
-      // Bắt đầu đếm giờ
       setTimer(0);
       timerIntervalRef.current = setInterval(() => {
         setTimer((prev) => prev + 1);
@@ -114,7 +105,6 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
     }
   };
 
-  // --- 2. XỬ LÝ UPLOAD FILE ---
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -122,7 +112,7 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Check định dạng cơ bản nếu cần
+
       if (!file.type.startsWith("audio/")) {
         message.error("Vui lòng chỉ chọn file âm thanh!");
         return;
@@ -130,11 +120,10 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
       setFileToSubmit(file);
       message.success("Đã chọn file: " + file.name);
     }
-    // Reset value để chọn lại file cùng tên vẫn được
+
     if (e.target.value) e.target.value = "";
   };
 
-  // --- 3. XÓA FILE / RESET ---
   const handleRemoveFile = () => {
     setFileToSubmit(null);
     setIsRecording(false);
@@ -142,12 +131,10 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
   };
 
-  // --- 4. NỘP BÀI ---
   const handleSubmit = () => {
     if (fileToSubmit) onSubmit(fileToSubmit);
   };
 
-  // Helper format giây -> mm:ss
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -175,7 +162,6 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
             </Text>
           </div>
 
-          {/* INSTRUCTIONS CARD */}
           <Card
             className="shadow-sm mb-4"
             style={{
@@ -187,9 +173,7 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
             <Paragraph>{instructions || description}</Paragraph>
           </Card>
 
-          {/* MAIN ACTION AREA */}
           <Card className="shadow-sm text-center py-4">
-            {/* TRƯỜNG HỢP 1: ĐANG GHI ÂM */}
             {isRecording ? (
               <div className="animate-fade-in">
                 <div className="mb-3">
@@ -213,8 +197,7 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
                 />
                 <div className="mt-2 text-muted">Nhấn để dừng</div>
               </div>
-            ) : // TRƯỜNG HỢP 2: ĐÃ CÓ FILE (Ghi xong hoặc Upload xong)
-            fileToSubmit ? (
+            ) : fileToSubmit ? (
               <div className="animate-fade-in">
                 <div className="d-flex justify-content-center mb-4">
                   <Card
@@ -229,7 +212,6 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
                     <div className="d-flex align-items-center justify-content-between mb-3">
                       <div className="d-flex align-items-center overflow-hidden">
                         <div className="me-3 p-2 rounded-circle bg-white text-primary">
-                          {/* SỬA ICON TẠI ĐÂY */}
                           <SoundOutlined style={{ fontSize: 24 }} />
                         </div>
                         <div className="text-start overflow-hidden">
@@ -253,8 +235,6 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
                         Xóa
                       </Button>
                     </div>
-
-                    {/* Audio Preview */}
                     <audio
                       controls
                       src={URL.createObjectURL(fileToSubmit)}
@@ -282,9 +262,7 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
                 </Button>
               </div>
             ) : (
-              // TRƯỜNG HỢP 3: CHƯA CÓ GÌ -> CHỌN 1 TRONG 2
               <div className="d-flex justify-content-center gap-5 py-3">
-                {/* Nút Ghi Âm */}
                 <div className="text-center">
                   <Button
                     shape="circle"
@@ -308,7 +286,6 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
                   style={{ height: 60 }}
                 ></div>
 
-                {/* Nút Upload */}
                 <div className="text-center">
                   <input
                     type="file"

@@ -87,7 +87,7 @@ const WritingResultModal: React.FC<WritingModalProps> = ({
       result.vocab_score +
       result.coherence_score +
       result.relevance_score) /
-      4
+      4,
   );
   const MODAL_CONTENT_MAX_HEIGHT = "70vh";
   return (
@@ -149,8 +149,8 @@ const WritingResultModal: React.FC<WritingModalProps> = ({
                         getAntdColor(score) === "green"
                           ? "#52c41a"
                           : getAntdColor(score) === "gold"
-                          ? "#faad14"
-                          : "#ff4d4f",
+                            ? "#faad14"
+                            : "#ff4d4f",
                     }}
                   >
                     {score}
@@ -187,7 +187,7 @@ export default function WritingTestPage() {
   const topicId = searchParams.get("topicId");
 
   const [exerciseData, setExerciseData] = useState<WritingExerciseData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,7 +204,7 @@ export default function WritingTestPage() {
     setError(null);
     try {
       const res: AxiosResponse<WritingExerciseData[]> = await api.get(
-        `/quiz-tree/getByTopic/${topicId}`
+        `/quiz-tree/getByTopic/${topicId}`,
       );
       const raw = res.data?.[0];
 
@@ -283,27 +283,27 @@ export default function WritingTestPage() {
   return (
     <>
       <ProtectedRoute>
-        <MainHeader />
+      <MainHeader />
 
-        {/* Modal hiện kết quả */}
-        {isModalOpen && writingResult && (
-          <WritingResultModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            result={writingResult}
-            onRedo={resetQuizAndFetch}
-          />
-        )}
-
-        <WritingComponent
-          exercise={exerciseData}
-          transcript={transcript}
-          setTranscript={setTranscript}
-          onSubmit={handleSubmitWriting}
-          isSubmitting={isSubmitting}
+      {/* Modal hiện kết quả */}
+      {isModalOpen && writingResult && (
+        <WritingResultModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          result={writingResult}
+          onRedo={resetQuizAndFetch}
         />
+      )}
 
-        <MainFooter />
+      <WritingComponent
+        exercise={exerciseData}
+        transcript={transcript}
+        setTranscript={setTranscript}
+        onSubmit={handleSubmitWriting}
+        isSubmitting={isSubmitting}
+      />
+
+      <MainFooter />
       </ProtectedRoute>
     </>
   );

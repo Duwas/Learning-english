@@ -136,7 +136,7 @@ const MainHeader = () => {
   const handleNavigate = (
     skillName: string,
     skillId: number,
-    levelId: string
+    levelId: string,
   ) => {
     const path = skillName.toLowerCase().replace(/\s/g, "");
     router.push(`/User/${path}?skill=${skillId}&level=${levelId}`);
@@ -224,8 +224,8 @@ const MainHeader = () => {
   const headerBackgroundColor = isUserSubPage
     ? "#001529"
     : isScrolled
-    ? "#001529"
-    : "transparent";
+      ? "#001529"
+      : "transparent";
 
   return (
     <Header

@@ -114,7 +114,7 @@ const ResultModal = ({
           <div className="col-4">
             <div className="card p-3 shadow-sm border-0">
               <div className="fs-1 fw-bold text-success">
-                {Math.round(result.score)}%
+                {Math.round(result.score)}
               </div>
               <div className="text-muted">Điểm Số</div>
             </div>
@@ -194,7 +194,7 @@ export default function ReadingTestPage() {
     setError(null);
     try {
       const res: AxiosResponse<ExerciseData[]> = await api.get(
-        `/quiz-tree/getByTopic/${topicId}`
+        `/quiz-tree/getByTopic/${topicId}`,
       );
       if (res.data && res.data.length > 0) {
         setExerciseData(res.data[0]);
@@ -211,7 +211,7 @@ export default function ReadingTestPage() {
 
   const submitToBackend = async (
     exerciseId: number,
-    answers: Record<number, number>
+    answers: Record<number, number>,
   ) => {
     const userAnswersArray = Object.entries(answers).map(([qId, oId]) => ({
       questionId: parseInt(qId),
@@ -269,7 +269,7 @@ export default function ReadingTestPage() {
         [questionId]: value,
       }));
     },
-    [isSubmitted]
+    [isSubmitted],
   );
 
   const handleSubmitQuiz = () => {
@@ -280,7 +280,7 @@ export default function ReadingTestPage() {
     ) {
       if (
         !window.confirm(
-          `Bạn chưa trả lời hết các câu hỏi. Bạn có muốn nộp bài?`
+          `Bạn chưa trả lời hết các câu hỏi. Bạn có muốn nộp bài?`,
         )
       ) {
         return;

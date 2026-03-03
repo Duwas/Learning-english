@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, {
@@ -19,6 +17,7 @@ import {
   Tag,
   Typography,
   Card,
+  message,
 } from "antd";
 import { ExperimentOutlined, RedoOutlined } from "@ant-design/icons";
 import { AxiosError, AxiosResponse } from "axios";
@@ -72,7 +71,6 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
   result,
   onRedo,
 }) => {
-  
   const getAntdColor = (score: number) => {
     if (score >= 7) return "green";
     if (score >= 5) return "gold";
@@ -81,7 +79,6 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
 
   const PRIMARY_COLOR_MODAL = "#5e35b1";
 
-  
   const formatFeedback = (text: string) => {
     return text.split("\n").map((line, index) => (
       <React.Fragment key={index}>
@@ -91,7 +88,6 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
     ));
   };
 
-  
   const MODAL_CONTENT_MAX_HEIGHT = "70vh";
 
   return (
@@ -160,8 +156,8 @@ const SpeakingResultModal: React.FC<SpeakingModalProps> = ({
                         getAntdColor(colorScore) === "green"
                           ? "#52c41a"
                           : getAntdColor(colorScore) === "gold"
-                          ? "#faad14"
-                          : "#ff4d4f",
+                            ? "#faad14"
+                            : "#ff4d4f",
                     }}
                   >
                     {displayedScore}
@@ -199,7 +195,7 @@ export default function SpeakingTestPage() {
   const topicId = searchParams.get("topicId");
 
   const [exerciseData, setExerciseData] = useState<SpeakingExerciseData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -215,7 +211,7 @@ export default function SpeakingTestPage() {
     setLoading(true);
     try {
       const res: AxiosResponse<SpeakingExerciseData[]> = await api.get(
-        `/quiz-tree/getByTopic/${topicId}`
+        `/quiz-tree/getByTopic/${topicId}`,
       );
       const raw = res.data?.[0];
 
@@ -237,7 +233,7 @@ export default function SpeakingTestPage() {
 
   const handleSubmitFile = async (file: File) => {
     if (!exerciseData || !file) {
-      if (!file) console.error("Lỗi: File audio không tồn tại.");
+      if (!file) message.warning("Vui lòng chọn file ghi âm trước khi nộp!");
       return;
     }
 
@@ -251,19 +247,20 @@ export default function SpeakingTestPage() {
     try {
       const res: AxiosResponse<SpeakingResultResponse> =
         await flashAPI.submitSpeaking(formData, exerciseData.exerciseId);
-
       setSpeakingResult(res.data);
       setIsModalOpen(true);
       setFileToSubmit(null);
-      alert("Nộp bài thành công!");
+
+      message.success("Nộp bài thành công!");
     } catch (err: any) {
       console.error(
         "🔥 SERVER ERROR LOGS:",
         err.response?.status,
-        err.response?.data
+        err.response?.data,
       );
       setError("Lỗi khi nộp bài.");
-      alert("Nộp bài thất bại. Vui lòng kiểm tra console log.");
+
+      message.error("Nộp bài thất bại. Vui lòng thử lại sau!");
     } finally {
       setIsSubmitting(false);
     }

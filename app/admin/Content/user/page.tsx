@@ -11,13 +11,18 @@ import {
   Tag,
   Tooltip,
 } from "antd";
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { FaSearch, FaLock, FaLockOpen, FaTrash } from "react-icons/fa";
-import "bootstrap/dist/css/bootstrap.min.css";
-import Sidebar from "@/app/components/sidebar/page";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+// Import Sidebar component (Đảm bảo đường dẫn đúng)
+import Sidebar from "@/app/components/sidebar/page";
+
+// Import API Service vừa tạo ở bước 1
 import dashboardAPI from "@/app/services/api/dashboard";
 
+// --- Types Definitions ---
 interface UserFromAPI {
   id: number;
   name: string;
@@ -28,7 +33,7 @@ interface UserFromAPI {
   address: string;
   avatarUrl: string;
   role: string;
-  status: number;
+  status: number; // 0: Pending, 1: Active, 2: Locked
   createdAt: string;
 }
 
@@ -45,36 +50,46 @@ interface DataType {
 const SIDEBAR_WIDTH = 240;
 
 export default function UserManagement() {
+  // --- States ---
   const [data, setData] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSidebar, setShowSidebar] = useState(true);
   const [searchText, setSearchText] = useState("");
+  const [pagination, setPagination] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: 5,
+    showSizeChanger: true,
+    pageSizeOptions: ["5", "10", "20", "50", "100"],
+  });
 
+  // --- API: Fetch Data ---
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const response = await dashboardAPI.getAllUsers();
 
-        if (response.data && Array.isArray(response.data)) {
-          const mappedData: DataType[] = response.data.map(
-            (user: UserFromAPI) => ({
-              key: user.id.toString(),
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              avatarUrl: user.avatarUrl,
-              status: user.status,
-              joinDate: user.createdAt
-                ? new Date(user.createdAt).toISOString().split("T")[0]
-                : "N/A",
-            })
-          );
+        // Kiểm tra cấu trúc response trả về từ Axios
+        // Nếu API của bạn trả về data trực tiếp (do interceptor), hãy bỏ ".data" ở response.data
+        const rawData = response.data;
+
+        if (rawData && Array.isArray(rawData)) {
+          const mappedData: DataType[] = rawData.map((user: UserFromAPI) => ({
+            key: user.id.toString(),
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            avatarUrl: user.avatarUrl,
+            status: user.status,
+            joinDate: user.createdAt
+              ? new Date(user.createdAt).toISOString().split("T")[0]
+              : "N/A",
+          }));
           setData(mappedData);
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
-        message.error("Không thể tải dữ liệu.");
+        message.error("Không thể tải danh sách người dùng.");
       } finally {
         setLoading(false);
       }
@@ -83,6 +98,7 @@ export default function UserManagement() {
     fetchData();
   }, []);
 
+  // --- Statistics Calculation ---
   const stats = useMemo(() => {
     return {
       total: data.length,
@@ -92,25 +108,34 @@ export default function UserManagement() {
     };
   }, [data]);
 
+  // --- Search Filtering ---
   const filteredData = data.filter(
     (item) =>
-      item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchText.toLowerCase())
+      item.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.email?.toLowerCase().includes(searchText.toLowerCase()),
   );
+
+  // --- Handlers ---
+  const handleTableChange = (newPagination: TablePaginationConfig) => {
+    setPagination(newPagination);
+  };
 
   const handleStatusChange = async (record: DataType) => {
     try {
+      // Logic: Nếu đang khóa (2) thì mở (1), ngược lại thì khóa (2)
       const newStatus = record.status === 2 ? 1 : 2;
       const actionText = newStatus === 2 ? "khóa" : "mở khóa";
 
+      // Gọi API
       await dashboardAPI.updateStatusAccount(record.id);
 
       message.success(`Đã ${actionText} tài khoản ${record.name}`);
 
+      // Cập nhật State Local để không cần reload lại trang
       setData((prev) =>
         prev.map((item) =>
-          item.id === record.id ? { ...item, status: newStatus } : item
-        )
+          item.id === record.id ? { ...item, status: newStatus } : item,
+        ),
       );
     } catch (error) {
       console.error(error);
@@ -120,8 +145,12 @@ export default function UserManagement() {
 
   const handleDelete = async (id: number) => {
     try {
+      // Gọi API
       await dashboardAPI.deleteAccount(id);
+
       message.success("Xóa tài khoản thành công!");
+
+      // Cập nhật State Local
       setData((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error(error);
@@ -131,20 +160,24 @@ export default function UserManagement() {
 
   const getInitials = (name: string) => {
     if (!name) return "U";
-    const names = name.split(" ");
+    const names = name.trim().split(" ");
     return names.length > 1
-      ? names[names.length - 2][0] + names[names.length - 1][0]
-      : name[0];
+      ? (names[names.length - 2][0] + names[names.length - 1][0]).toUpperCase()
+      : name[0].toUpperCase();
   };
 
+  // --- Table Columns ---
   const columns: ColumnsType<DataType> = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "STT",
+      key: "stt",
       width: 60,
       align: "center",
-      sorter: (a, b) => a.id - b.id,
+      render: (_, __, index) => {
+        const current = pagination.current || 1;
+        const pageSize = pagination.pageSize || 5;
+        return (current - 1) * pageSize + index + 1;
+      },
     },
     {
       title: "User",
@@ -173,6 +206,7 @@ export default function UserManagement() {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      align: "center",
       render: (status) => {
         let color = "default";
         let text = "Không xác định";
@@ -204,11 +238,11 @@ export default function UserManagement() {
     {
       title: "Thao tác",
       key: "action",
+      align: "center",
       render: (_, record) => {
         const isLocked = record.status === 2;
         return (
-          <div className="d-flex gap-2 align-items-center">
-            {/* SỬA ĐỔI QUAN TRỌNG: Dùng Button thay cho div để bấm nhạy hơn */}
+          <div className="d-flex gap-2 align-items-center justify-content-center">
             <Tooltip title={isLocked ? "Mở khóa tài khoản" : "Khóa tài khoản"}>
               <Button
                 type="text"
@@ -218,16 +252,14 @@ export default function UserManagement() {
                 }
                 style={{
                   color: isLocked ? "#52c41a" : "#faad14",
-                  backgroundColor: "transparent",
                 }}
                 onClick={() => handleStatusChange(record)}
               />
             </Tooltip>
 
-            {/* Nút Xóa */}
             <Popconfirm
               title="Xóa người dùng"
-              description="Hành động này không thể hoàn tác!"
+              description={`Bạn có chắc muốn xóa ${record.name}?`}
               onConfirm={() => handleDelete(record.id)}
               okText="Xóa"
               cancelText="Hủy"
@@ -239,7 +271,6 @@ export default function UserManagement() {
                   shape="circle"
                   danger
                   icon={<FaTrash size={16} />}
-                  style={{ backgroundColor: "transparent" }}
                 />
               </Tooltip>
             </Popconfirm>
@@ -249,6 +280,7 @@ export default function UserManagement() {
     },
   ];
 
+  // --- Render ---
   return (
     <div
       style={{
@@ -287,12 +319,13 @@ export default function UserManagement() {
           <h5 className="fw-bold m-0 ms-2">Hệ thống quản trị</h5>
         </div>
 
+        {/* Main Content */}
         <div className="container-fluid p-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="fw-bold text-dark m-0">Quản lý Users</h2>
           </div>
 
-          {/* Cards Thống kê */}
+          {/* Statistics Cards */}
           <div className="row mb-4 g-3">
             {[
               {
@@ -336,7 +369,7 @@ export default function UserManagement() {
             ))}
           </div>
 
-          {/* Bảng dữ liệu */}
+          {/* Table Card */}
           <div className="card border-0 shadow-sm">
             <div className="card-body p-4">
               <div className="row mb-4 align-items-center">
@@ -360,9 +393,14 @@ export default function UserManagement() {
               <Table
                 columns={columns}
                 dataSource={filteredData}
-                pagination={{ pageSize: 5, showSizeChanger: true }}
+                pagination={{
+                  ...pagination,
+                  total: filteredData.length,
+                }}
+                onChange={handleTableChange}
                 loading={loading}
                 rowClassName="align-middle"
+                scroll={{ x: 800 }} // Hỗ trợ scroll ngang trên mobile
               />
             </div>
           </div>

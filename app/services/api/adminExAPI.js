@@ -17,16 +17,18 @@ export const exerciseService = {
   create: async (params, imageFile, audioFile) => {
   const formData = new FormData();
 
+  formData.append("title", params.title);
+  formData.append("type", String(params.type));
+  formData.append("groupWord", String(params.groupWord ?? 0));
+  formData.append("topicId", String(params.topicId));
+  formData.append("description", params.description ?? "");
+
   if (imageFile) formData.append("image", imageFile);
   if (audioFile) formData.append("audio", audioFile);
 
   return api.post("/exercise/create", formData, {
-    params: {
-      title: params.title,
-      type: Number(params.type),
-      groupWord: params.groupWord ?? 0,
-      topicId: Number(params.topicId),
-      description: params.description ?? "",
+    headers: {
+      "Content-Type": "multipart/form-data",
     },
   });
 },
@@ -36,16 +38,19 @@ update: async (id, params, imageFile, audioFile) => {
   if (!id) throw new Error("Missing exercise id");
 
   const formData = new FormData();
+
+  formData.append("title", params.title);
+  formData.append("type", String(params.type));
+  formData.append("groupWord", String(params.groupWord ?? 0));
+  formData.append("topicId", String(params.topicId));
+  formData.append("description", params.description ?? "");
+
   if (imageFile) formData.append("image", imageFile);
   if (audioFile) formData.append("audio", audioFile);
 
-  return api.put(`/exercise/update/${Number(id)}`, formData, {
-    params: {
-      title: params.title,
-      type: Number(params.type),
-      groupWord: params.groupWord ?? 0,
-      topicId: Number(params.topicId),
-      description: params.description ?? "",
+  return api.put(`/exercise/update/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
     },
   });
 },
@@ -99,11 +104,11 @@ update: async (id, params, imageFile, audioFile) => {
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'quiz-tree.xlsx'); // tên file
+      link.setAttribute('download', 'quiz-tree.xlsx'); 
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url); // giải phóng memory
+      window.URL.revokeObjectURL(url); 
     })
     .catch((err) => {
       console.error(err);

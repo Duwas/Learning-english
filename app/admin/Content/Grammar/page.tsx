@@ -113,33 +113,6 @@ export default function AdminGrammarPage() {
     initData();
   }, []);
 
-  const handleImportCSV = (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    api
-      .post("/admin/grammarItem/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then(() => {
-        message.success("Nhập Excel thành công!");
-      })
-      .catch((err) => {
-        console.error(err);
-        message.error("Nhập Excel thất bại!");
-      });
-  };
-
-  const handleImportClick = () => {
-    console.log("CLICK IMPORT");
-
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImportCSV(file);
-  };
-
   const fetchTopics = async () => {
     try {
       setLoadingTopics(true);
@@ -167,6 +140,41 @@ export default function AdminGrammarPage() {
     } finally {
       setLoadingLessons(false);
     }
+  };
+
+  const handleImportCSV = (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    api
+      .post("/admin/grammarItem/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(() => {
+        message.success("Nhập Excel thành công!");
+        fetchTopics();
+        if (selectedTopic) {
+          fetchLessons(selectedTopic);
+        }
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        message.error("Nhập Excel thất bại!");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      });
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImportCSV(file);
   };
 
   useEffect(() => {
@@ -369,7 +377,6 @@ export default function AdminGrammarPage() {
           flexDirection: "column",
         }}
       >
-        {/* Header */}
         <div className="bg-white px-4 py-3 shadow-sm d-flex justify-content-between align-items-center sticky-top">
           <div className="d-flex align-items-center">
             <Button
@@ -393,10 +400,8 @@ export default function AdminGrammarPage() {
           </Button>
         </div>
 
-        {/* Content */}
         <div className="p-4 flex-grow-1">
           <div className="row h-100">
-            {/* LEFT: TOPIC LIST */}
             <div className="col-md-3 mb-4">
               <Card
                 className="shadow-sm border-0 h-100"
@@ -467,7 +472,6 @@ export default function AdminGrammarPage() {
                               transition: "all 0.2s",
                             }}
                           >
-                            {/* Click Area để chọn Topic */}
                             <div
                               onClick={() => setSelectedTopic(item.topic_id)}
                               style={{

@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import api from "@/app/services/api";
+
 import {
   Table,
   Button,
@@ -21,7 +23,7 @@ import {
   Upload,
   InputNumber,
   Popconfirm,
-  Radio,
+  Checkbox,
   Divider,
   Switch,
 } from "antd";
@@ -42,7 +44,6 @@ import {
 } from "@ant-design/icons";
 import Sidebar from "@/app/components/sidebar/page";
 
-
 import { exerciseService } from "@/app/services/api/adminExAPI";
 import { topicService } from "@/app/services/api/topicService";
 import type { TableColumnsType, UploadFile } from "antd";
@@ -50,7 +51,6 @@ import type { TableColumnsType, UploadFile } from "antd";
 const { Title, Text } = Typography;
 const { Option: SelectOption } = Select;
 const SIDEBAR_WIDTH = 240;
-
 
 interface ExerciseParams {
   topicId?: number;
@@ -89,8 +89,19 @@ interface ExerciseType {
   questions?: QuestionType[];
 }
 
+const skills = [
+  { name: "Tất cả", id: "0" },
+  { name: "Từ vựng", id: "1" },
+  { name: "Ngữ pháp", id: "2" },
+  { name: "Listening", id: "3" },
+  { name: "Speaking", id: "4" },
+  { name: "Reading", id: "5" },
+  { name: "Writing", id: "6" },
+];
+
 export default function ExerciseManagementPage() {
-  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [loadingMenu, setLoadingMenu] = useState(false);
   const [menuData, setMenuData] = useState<any[]>([]);
   const [menuDataLevel, setMenuDataLevel] = useState<any[]>([]);
@@ -105,42 +116,38 @@ export default function ExerciseManagementPage() {
   const [exercises, setExercises] = useState<ExerciseType[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingExercise, setEditingExercise] = useState<ExerciseType | null>(
-    null
+    null,
   );
   const [form] = Form.useForm();
   const [fileListAudio, setFileListAudio] = useState<UploadFile[]>([]);
   const [fileListImage, setFileListImage] = useState<UploadFile[]>([]);
 
-  
   const [isQModalOpen, setIsQModalOpen] = useState(false);
   const [isQSubmitting, setIsQSubmitting] = useState(false);
   const [currentExerciseId, setCurrentExerciseId] = useState<number | null>(
-    null
+    null,
   );
   const [editingQuestion, setEditingQuestion] = useState<QuestionType | null>(
-    null
+    null,
   );
-  
+
   const [editingQuestionOptions, setEditingQuestionOptions] = useState<
     OptionType[]
   >([]);
   const [qForm] = Form.useForm();
 
-  
   const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
   const [currentQuestionForOption, setCurrentQuestionForOption] =
     useState<QuestionType | null>(null);
   const [optionList, setOptionList] = useState<OptionType[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
-  
+
   const [editingOption, setEditingOption] = useState<OptionType | null>(null);
   const [optionForm] = Form.useForm();
 
-  
   useEffect(() => {
     const fetchMenu = async () => {
       setLoadingMenu(true);
@@ -158,7 +165,6 @@ export default function ExerciseManagementPage() {
     fetchMenu();
   }, []);
 
-  
   useEffect(() => {
     const fetchTopics = async () => {
       if (!selectedSkillId || !selectedLevelId) {
@@ -173,7 +179,7 @@ export default function ExerciseManagementPage() {
         } else {
           res = await topicService.getBySkillAndLevel(
             selectedSkillId,
-            selectedLevelId
+            selectedLevelId,
           );
         }
         const data = Array.isArray(res.data)
@@ -187,7 +193,6 @@ export default function ExerciseManagementPage() {
     fetchTopics();
   }, [selectedSkillId, selectedLevelId]);
 
-  
   const fetchExercises = async () => {
     if (!selectedTopicId) {
       message.warning("Vui lòng chọn chủ đề!");
@@ -219,7 +224,6 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  
   const handleOpenModal = (record?: ExerciseType) => {
     form.resetFields();
     setFileListAudio([]);
@@ -242,9 +246,9 @@ export default function ExerciseManagementPage() {
     try {
       const params: ExerciseParams = {
         title: values.title,
-        type: Number(values.type), 
+        type: Number(values.type),
         groupWord: values.groupWord ? Number(values.groupWord) : 0,
-        topicId: Number(selectedTopicId), 
+        topicId: Number(selectedTopicId),
         description: values.description ?? "",
       };
 
@@ -256,7 +260,7 @@ export default function ExerciseManagementPage() {
           editingExercise.id,
           params,
           imgFile,
-          audFile
+          audFile,
         );
         message.success("Cập nhật bài tập thành công!");
       } else {
@@ -265,7 +269,7 @@ export default function ExerciseManagementPage() {
       }
 
       setIsModalOpen(false);
-      fetchExercises();
+      await fetchExercises();
     } catch (e) {
       console.error(e);
       message.error("Có lỗi xảy ra!");
@@ -285,24 +289,19 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  
-
-  
   const handleExpandRow = async (expanded: boolean, record: ExerciseType) => {
     if (expanded) {
       await reloadQuestions(record.id || record.exerciseId);
     }
   };
 
-  
   const reloadQuestions = async (exerciseId: number) => {
-    
     setExercises((prev) =>
       prev.map((e) =>
         (e.id || e.exerciseId) === exerciseId
           ? { ...e, isLoadingQuestions: true }
-          : e
-      )
+          : e,
+      ),
     );
 
     try {
@@ -320,8 +319,8 @@ export default function ExerciseManagementPage() {
                 questionCount: questions.length,
                 isLoadingQuestions: false,
               }
-            : e
-        )
+            : e,
+        ),
       );
     } catch (error) {
       console.error(error);
@@ -329,18 +328,17 @@ export default function ExerciseManagementPage() {
         prev.map((e) =>
           (e.id || e.exerciseId) === exerciseId
             ? { ...e, isLoadingQuestions: false }
-            : e
-        )
+            : e,
+        ),
       );
     }
   };
 
-  
   const handleOpenQModal = (exerciseId: number, question?: QuestionType) => {
     setCurrentExerciseId(exerciseId);
     setEditingQuestion(question || null);
 
-    qForm.resetFields(); 
+    qForm.resetFields();
 
     if (question) {
       qForm.setFieldsValue({
@@ -368,11 +366,9 @@ export default function ExerciseManagementPage() {
       };
 
       if (editingQuestion) {
-        
         await exerciseService.updateQuestion(editingQuestion.id, payload);
         message.success("Cập nhật câu hỏi thành công");
       } else {
-        
         await exerciseService.createQuestion(payload);
         message.success("Thêm câu hỏi thành công");
       }
@@ -389,7 +385,7 @@ export default function ExerciseManagementPage() {
 
   const handleDeleteQuestion = async (
     questionId: number,
-    exerciseId: number
+    exerciseId: number,
   ) => {
     try {
       await exerciseService.deleteQuestion(questionId);
@@ -400,7 +396,6 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  
   const fetchOptions = async (questionId: number) => {
     setLoadingOptions(true);
     try {
@@ -423,14 +418,13 @@ export default function ExerciseManagementPage() {
     fetchOptions(question.id);
   };
 
-  
   const handleCreateOption = async (values: any) => {
     if (!currentQuestionForOption) return;
 
     try {
       await exerciseService.createOption({
         questionId: currentQuestionForOption!.id,
-        optionText: values.optionText, 
+        optionText: values.optionText,
         isCorrect: values.isCorrect ?? false,
       });
 
@@ -442,7 +436,6 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  
   const handleUpdateOption = async (values: any) => {
     if (!editingOption) return;
     if (!currentQuestionForOption) return;
@@ -475,7 +468,6 @@ export default function ExerciseManagementPage() {
     }
   };
 
-  
   const columns: TableColumnsType<ExerciseType> = [
     {
       title: "Thông tin bài tập",
@@ -515,10 +507,10 @@ export default function ExerciseManagementPage() {
           {t === 0
             ? "Trắc nghiệm 1 đáp án"
             : t === 4
-            ? "Nghe & Trả lời"
-            : t === 6
-            ? "Viết đoạn văn"
-            : "Khác"}
+              ? "Nói"
+              : t === 6
+                ? "Viết đoạn văn"
+                : "Khác"}
         </Tag>
       ),
     },
@@ -552,7 +544,7 @@ export default function ExerciseManagementPage() {
   ];
 
   const questionColumns = (
-    exerciseId: number
+    exerciseId: number,
   ): TableColumnsType<QuestionType> => [
     {
       title: "Nội dung câu hỏi",
@@ -595,6 +587,57 @@ export default function ExerciseManagementPage() {
       ),
     },
   ];
+
+  const [visible, setVisible] = useState(false);
+  const [selectedSkills, setSelectedSkills] = useState<string>();
+
+  const handleExportXLSX = async () => {
+    try {
+      if (!selectedSkills) return;
+      const res = await api.get(`quiz-tree/export/xlsx/${selectedSkills}`, {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "excercise.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      message.success("Xuất XLSX thành công!");
+      setVisible(false);
+    } catch (err) {
+      console.error(err);
+      message.error("Xuất XLSX thất bại!");
+    }
+  };
+
+  const handleImportCSV = (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    api
+      .post("/quiz-tree/upload-quiz-json", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(() => {
+        message.success("Nhập CSV thành công!");
+      })
+      .catch((err) => {
+        console.error(err);
+        message.error("Nhập CSV thất bại!");
+      });
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImportCSV(file);
+  };
 
   return (
     <>
@@ -690,20 +733,52 @@ export default function ExerciseManagementPage() {
                 Kết quả tìm kiếm: {exercises.length} bài tập
               </span>
               <div className="d-flex gap-2 ms-auto">
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => handleOpenModal()}
-                >
-                  Xuất file CSV
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<ExportOutlined />}
-                  onClick={() => handleOpenModal()}
-                >
-                  Nhập file CSV
-                </Button>
+                <div>
+                  <input
+                    type="file"
+                    accept=".csv, .xlsx"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    onChange={handleFileChange}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<ImportOutlined />}
+                    onClick={handleImportClick}
+                  >
+                    Nhập file Excel
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    type="primary"
+                    icon={<ExportOutlined />}
+                    onClick={() => setVisible(true)}
+                  >
+                    Xuất file Excel
+                  </Button>
+
+                  <Modal
+                    title="Chọn skill để xuất"
+                    visible={visible}
+                    onOk={handleExportXLSX}
+                    onCancel={() => setVisible(false)}
+                    okText="Xuất"
+                  >
+                    <Select
+                      style={{ width: "100%" }}
+                      placeholder="Chọn Skill để xuất"
+                      value={selectedSkills}
+                      onChange={(v) => setSelectedSkills(v)}
+                    >
+                      {skills.map((l: any) => (
+                        <SelectOption key={l.id} value={l.id}>
+                          {l.name}
+                        </SelectOption>
+                      ))}
+                    </Select>
+                  </Modal>
+                </div>
                 <Button
                   type="primary"
                   icon={<ImportOutlined />}

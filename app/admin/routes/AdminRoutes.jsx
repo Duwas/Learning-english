@@ -5,7 +5,7 @@ import { Routes, Route } from 'react-router-dom';
 // Giả định mỗi thư mục Content có một component chính, ví dụ: GrammarManagement
 import GrammarManagement from '../Content/Grammar';
 import ListenManagement from '../Content/Listen';
-import OverviewDashboard from '../Content/Overview'; // Trang tổng quan
+import OverviewDashboard from '../Content/Overview/page'; // Trang tổng quan
 import ReadingManagement from '../Content/Reading';
 import VocabularyManagement from '../Content/Vocabulary';
 import WritingManagement from '../Content/Writing';

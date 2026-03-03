@@ -48,6 +48,12 @@ export default function Login() {
         true
       );
 
+      if (data?.user.role == "ADMIN") {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        window.location.href = "/admin/Content/Overview";
+        return;
+      }
       if (!data.activate) {
         showToast(
           "error",

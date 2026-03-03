@@ -53,7 +53,7 @@ export default function Register() {
     try {
       await callApi(
         () => authApi.register({ name, phone, email, password }),
-        true,
+        false,
         true
       );
       showToast(

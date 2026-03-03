@@ -388,10 +388,20 @@ export default function AdminVocabularyPage() {
       })
       .then(() => {
         message.success("Nhập CSV thành công!");
+        fetchTreeData();
+        if (selectedGroup) {
+          fetchWords(selectedGroup.id);
+        }
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       })
       .catch((err) => {
         console.error(err);
         message.error("Nhập CSV thất bại!");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       });
   };
 
@@ -417,7 +427,6 @@ export default function AdminVocabularyPage() {
           flexDirection: "column",
         }}
       >
-        {/* Header */}
         <div
           className="bg-white px-4 py-3 shadow-sm d-flex justify-content-between align-items-center sticky-top"
           style={{ zIndex: 100 }}
@@ -513,7 +522,6 @@ export default function AdminVocabularyPage() {
                                 <FaFolder className="me-2 text-warning" />{" "}
                                 {topic.topic_name}
                               </span>
-                              {/* Nút Xóa Topic */}
                               <Popconfirm
                                 title="Xóa chủ đề này?"
                                 description="Hành động này sẽ xóa cả các từ vựng bên trong."
@@ -743,7 +751,6 @@ export default function AdminVocabularyPage() {
         </Form>
       </Modal>
 
-      {/* Modal Form: Thêm Topic (Mới) */}
       <Modal
         title="Thêm Chủ Đề Mới"
         open={isTopicModalOpen}
