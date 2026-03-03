@@ -8,16 +8,6 @@ import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
 const WRITING_COLOR = "#52c41a";
 
-const mockWritingTopics = [
-  {
-    id: 1,
-    name: "Writing a short email",
-    description: "EMAIL FOR AN APPOINTMENT",
-    level: "A1",
-    imageUrl: "/images/writing/email_short.jpg",
-  },
-];
-
 export default function WritingPage() {
   const searchParams = useSearchParams();
   const skill = searchParams.get("skill") || "Writing";

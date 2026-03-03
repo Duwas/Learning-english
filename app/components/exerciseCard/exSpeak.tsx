@@ -1,26 +1,22 @@
+// FILE: /app/components/exerciseCard/exSpeak.tsx
+
 "use client";
 
 import React, { useState, useRef } from "react";
-import {
-  Button,
-  Card,
-  Upload,
-  message,
-  Typography,
-  Alert,
-  Popconfirm,
-} from "antd";
+import { Button, Card, message, Typography, Divider, Spin } from "antd";
 import {
   AudioOutlined,
   CloudUploadOutlined,
-  CheckCircleOutlined,
   StopOutlined,
   DeleteOutlined,
+  SoundOutlined, // <--- ĐÃ SỬA: Dùng SoundOutlined thay cho FileAudioOutlined
+  SendOutlined,
 } from "@ant-design/icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
+// --- INTERFACES ---
 interface SpeakingExerciseData {
   exerciseId: number;
   title: string;
@@ -36,12 +32,11 @@ interface SpeakingProps {
   isSubmitting: boolean;
   fileToSubmit: File | null;
   setFileToSubmit: (file: File | null) => void;
-
   audioURLToPlay: string | null;
 }
 
-const PRIMARY_COLOR = "#6f42c1";
-const ACCENT_BG = "#f5f0ff";
+const PRIMARY_COLOR = "#6f42c1"; // Tím
+const ACCENT_BG = "#f5f0ff"; // Nền nhạt
 
 const SpeakingComponent: React.FC<SpeakingProps> = ({
   exercise,
@@ -49,346 +44,298 @@ const SpeakingComponent: React.FC<SpeakingProps> = ({
   isSubmitting,
   fileToSubmit,
   setFileToSubmit,
-  audioURLToPlay,
 }) => {
+  // State ghi âm
   const [isRecording, setIsRecording] = useState(false);
+  const [timer, setTimer] = useState(0);
+
+  // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { title, description, topic, level, instructions } = exercise;
-  const hasFile = !!fileToSubmit;
-  const allowedFormats = "MP3, WAV, M4A, WebM";
 
-  const handleRecordToggle = async () => {
-    if (isSubmitting) return;
+  // --- 1. XỬ LÝ GHI ÂM ---
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
 
-    if (isRecording) {
-      mediaRecorderRef.current?.stop();
+      // Chọn mimeType
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : "audio/mp4";
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        const audioFile = new File(
+          [audioBlob],
+          `recording_${Date.now()}.webm`,
+          { type: mimeType }
+        );
+        setFileToSubmit(audioFile);
+
+        // Tắt stream mic
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+
+      // Bắt đầu đếm giờ
+      setTimer(0);
+      timerIntervalRef.current = setInterval(() => {
+        setTimer((prev) => prev + 1);
+      }, 1000);
+
+      message.info("Đang ghi âm...");
+    } catch (err) {
+      console.error("Lỗi mic:", err);
+      message.error("Không thể truy cập microphone!");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
       setIsRecording(false);
-      message.success("Đã dừng ghi âm.");
-      streamRef.current?.getTracks().forEach((track) => track.stop());
-    } else {
-      try {
-        setFileToSubmit(null);
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        streamRef.current = stream;
-
-        const mimeType = MediaRecorder.isTypeSupported("audio/webm")
-          ? "audio/webm"
-          : "audio/mp4";
-        const mediaRecorder = new MediaRecorder(stream, { mimeType });
-        mediaRecorderRef.current = mediaRecorder;
-        audioChunksRef.current = [];
-
-        mediaRecorder.ondataavailable = (event) => {
-          audioChunksRef.current.push(event.data);
-        };
-
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, {
-            type: mimeType,
-          });
-          const audioFile = new File(
-            [audioBlob],
-            `Recorded_${Date.now()}.webm`,
-            { type: mimeType }
-          );
-          setFileToSubmit(audioFile);
-        };
-
-        mediaRecorder.start();
-        setIsRecording(true);
-        message.info("Bắt đầu ghi âm...");
-      } catch (err) {
-        console.error("Lỗi truy cập microphone:", err);
-        message.error("Không thể truy cập microphone. Vui lòng cấp quyền.");
-        setIsRecording(false);
-      }
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     }
   };
 
+  // --- 2. XỬ LÝ UPLOAD FILE ---
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      // Check định dạng cơ bản nếu cần
+      if (!file.type.startsWith("audio/")) {
+        message.error("Vui lòng chỉ chọn file âm thanh!");
+        return;
+      }
+      setFileToSubmit(file);
+      message.success("Đã chọn file: " + file.name);
+    }
+    // Reset value để chọn lại file cùng tên vẫn được
+    if (e.target.value) e.target.value = "";
+  };
+
+  // --- 3. XÓA FILE / RESET ---
   const handleRemoveFile = () => {
-    if (isSubmitting || isRecording) return;
     setFileToSubmit(null);
-    message.info("Đã xóa file đã chọn.");
+    setIsRecording(false);
+    setTimer(0);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
   };
 
-  const uploadProps = {
-    name: "file",
-    accept: "audio/*",
-    multiple: false,
-    maxCount: 1,
-    beforeUpload: () => {
-      if (isRecording) handleRecordToggle();
-
-      setFileToSubmit(null);
-      return true;
-    },
-    customRequest: ({ onSuccess }: any) => {
-      setTimeout(() => {
-        onSuccess("ok");
-      }, 0);
-    },
-    onChange(info: any) {
-      if (info.file.status === "done") {
-        setFileToSubmit(info.file.originFileObj);
-        setIsRecording(false);
-        message.success(`${info.file.name} tải lên thành công.`);
-      } else if (info.file.status === "error") {
-        message.error(`${info.file.name} tải lên thất bại.`);
-      }
-    },
-    onRemove: () => {
-      return true;
-    },
-  };
-
+  // --- 4. NỘP BÀI ---
   const handleSubmit = () => {
-    if (!fileToSubmit) {
-      message.warning("Vui lòng ghi âm hoặc tải lên file trước khi nộp bài.");
-      return;
-    }
-    onSubmit(fileToSubmit);
+    if (fileToSubmit) onSubmit(fileToSubmit);
+  };
+
+  // Helper format giây -> mm:ss
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
   return (
     <div
       className="container py-5"
-      style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}
+      style={{
+        marginTop: "1.5%",
+        minHeight: "100vh",
+        backgroundColor: "#f8f9fa",
+      }}
     >
       <div className="row justify-content-center">
         <div className="col-lg-8">
-          <div className="text-center">
-            <Title
-              level={2}
-              className="fw-bold text-uppercase mb-1 text-white py-2"
-              style={{ backgroundColor: PRIMARY_COLOR }}
-            >
+          {/* HEADER */}
+          <div className="text-center mb-4">
+            <Title level={2} style={{ color: PRIMARY_COLOR }}>
               {title}
             </Title>
-
-            <p className="text-center text-muted mb-4">Level: {level}</p>
+            <Text type="secondary">
+              {topic} - {level}
+            </Text>
           </div>
 
-          <nav aria-label="breadcrumb" className="mb-4">
-            <ol className="breadcrumb">
-              <li
-                className="breadcrumb-item fw-bold"
-                style={{ color: "#ffc107" }}
-              >
-                <i className="fas fa-microphone me-1"></i> Speaking
-              </li>
-
-              <li className="breadcrumb-item active" aria-current="page">
-                {topic}
-              </li>
-            </ol>
-          </nav>
-
+          {/* INSTRUCTIONS CARD */}
           <Card
-            className="shadow-sm mb-5"
+            className="shadow-sm mb-4"
             style={{
               backgroundColor: ACCENT_BG,
               borderLeft: `5px solid ${PRIMARY_COLOR}`,
-              borderRadius: "8px",
             }}
           >
-            <Title level={5} style={{ color: PRIMARY_COLOR }}>
-                            <i className="fas fa-book-reader me-1"></i> Topic
-              Instructions
-            </Title>
-
-            <Text strong style={{ display: "block", marginBottom: "10px" }}>
-              {instructions || title}
-            </Text>
-
-            <Text type="secondary" style={{ lineHeight: "1.6" }}>
-              {description}
-            </Text>
+            <Title level={5}>Instructions</Title>
+            <Paragraph>{instructions || description}</Paragraph>
           </Card>
 
-          <div className="row g-4 mb-5">
-            <div className="col-md-6">
-              <Card
-                className="shadow-sm text-center h-100"
-                onClick={!isSubmitting ? handleRecordToggle : undefined}
-                style={{
-                  cursor: "pointer",
-                  border: isRecording
-                    ? "2px solid #dc3545"
-                    : audioURLToPlay &&
-                      fileToSubmit?.name.startsWith("Recorded_")
-                    ? "2px solid #28a745"
-                    : "1px solid #ddd",
-                  backgroundColor: isRecording ? "#fff0f0" : "white",
-                  transition: "all 0.3s",
-                }}
-                hoverable={!isRecording && !isSubmitting}
-              >
-                <Title level={4} className="mb-3">
-                  Ghi âm
-                </Title>
+          {/* MAIN ACTION AREA */}
+          <Card className="shadow-sm text-center py-4">
+            {/* TRƯỜNG HỢP 1: ĐANG GHI ÂM */}
+            {isRecording ? (
+              <div className="animate-fade-in">
+                <div className="mb-3">
+                  <Text type="danger" strong className="fs-4">
+                    Đang ghi âm: {formatTime(timer)}
+                  </Text>
+                  <div
+                    className="spinner-grow text-danger ms-2"
+                    role="status"
+                    style={{ width: "10px", height: "10px" }}
+                  ></div>
+                </div>
+                <Button
+                  type="primary"
+                  danger
+                  shape="circle"
+                  size="large"
+                  icon={<StopOutlined style={{ fontSize: 24 }} />}
+                  onClick={stopRecording}
+                  style={{ width: 80, height: 80 }}
+                />
+                <div className="mt-2 text-muted">Nhấn để dừng</div>
+              </div>
+            ) : // TRƯỜNG HỢP 2: ĐÃ CÓ FILE (Ghi xong hoặc Upload xong)
+            fileToSubmit ? (
+              <div className="animate-fade-in">
+                <div className="d-flex justify-content-center mb-4">
+                  <Card
+                    size="small"
+                    style={{
+                      width: "100%",
+                      maxWidth: "500px",
+                      backgroundColor: "#f9f9f9",
+                      border: `1px solid ${PRIMARY_COLOR}`,
+                    }}
+                  >
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                      <div className="d-flex align-items-center overflow-hidden">
+                        <div className="me-3 p-2 rounded-circle bg-white text-primary">
+                          {/* SỬA ICON TẠI ĐÂY */}
+                          <SoundOutlined style={{ fontSize: 24 }} />
+                        </div>
+                        <div className="text-start overflow-hidden">
+                          <span
+                            className="d-block text-truncate"
+                            style={{ maxWidth: "250px" }}
+                          >
+                            {fileToSubmit.name}
+                          </span>
+                          <span style={{ fontSize: 12 }}>
+                            {(fileToSubmit.size / 1024 / 1024).toFixed(2)} MB
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={handleRemoveFile}
+                      >
+                        Xóa
+                      </Button>
+                    </div>
+
+                    {/* Audio Preview */}
+                    <audio
+                      controls
+                      src={URL.createObjectURL(fileToSubmit)}
+                      style={{ width: "100%" }}
+                    />
+                  </Card>
+                </div>
 
                 <Button
                   type="primary"
-                  shape="circle"
                   size="large"
-                  danger={isRecording}
-                  icon={
-                    isRecording ? (
-                      <StopOutlined style={{ fontSize: "30px" }} />
-                    ) : (
-                      <AudioOutlined style={{ fontSize: "30px" }} />
-                    )
-                  }
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    backgroundColor: isRecording ? "red" : PRIMARY_COLOR,
-                  }}
+                  icon={isSubmitting ? <Spin /> : <SendOutlined />}
+                  onClick={handleSubmit}
                   disabled={isSubmitting}
-                />
-
-                <p
-                  className={`mt-3 mb-0 fw-bold ${
-                    isRecording ? "text-danger" : "text-primary"
-                  }`}
+                  style={{
+                    backgroundColor: PRIMARY_COLOR,
+                    borderColor: PRIMARY_COLOR,
+                    height: 50,
+                    paddingLeft: 40,
+                    paddingRight: 40,
+                    fontSize: 18,
+                  }}
                 >
-                  {isRecording
-                    ? "Đang Ghi Âm... Nhấn để dừng"
-                    : "Nhấn để ghi âm"}
-                </p>
+                  {isSubmitting ? "Đang nộp bài..." : "Nộp Bài Ngay"}
+                </Button>
+              </div>
+            ) : (
+              // TRƯỜNG HỢP 3: CHƯA CÓ GÌ -> CHỌN 1 TRONG 2
+              <div className="d-flex justify-content-center gap-5 py-3">
+                {/* Nút Ghi Âm */}
+                <div className="text-center">
+                  <Button
+                    shape="circle"
+                    size="large"
+                    icon={<AudioOutlined style={{ fontSize: 28 }} />}
+                    onClick={startRecording}
+                    style={{
+                      width: 80,
+                      height: 80,
+                      border: `2px solid ${PRIMARY_COLOR}`,
+                      color: PRIMARY_COLOR,
+                    }}
+                  />
+                  <div className="mt-3 fw-bold text-secondary">
+                    Ghi âm trực tiếp
+                  </div>
+                </div>
 
-                {audioURLToPlay &&
-                  fileToSubmit?.name.startsWith("Recorded_") &&
-                  !isRecording && (
-                    <div className="mt-3">
-                      <Text type="success" className="d-block mb-2">
-                        <CheckCircleOutlined /> File đã ghi:{" "}
-                        {fileToSubmit?.name.substring(0, 15)}...
-                      </Text>
-                      <div className="d-flex justify-content-center align-items-center">
-                        {/* TRÌNH PHÁT AUDIO */}
-                        <audio
-                          controls
-                          src={audioURLToPlay}
-                          className="flex-grow-1 me-2"
-                          style={{ height: "35px" }}
-                        >
-                          Trình duyệt của bạn không hỗ trợ audio.
-                        </audio>
-                        <Popconfirm
-                          title="Xóa bài nói?"
-                          description="Bạn có chắc chắn muốn xóa file này không?"
-                          onConfirm={handleRemoveFile}
-                          okText="Xóa"
-                          cancelText="Hủy"
-                        >
-                          <Button
-                            type="primary"
-                            danger
-                            icon={<DeleteOutlined />}
-                            size="small"
-                            disabled={isSubmitting}
-                          />
-                        </Popconfirm>
-                      </div>
-                    </div>
-                  )}
-              </Card>
-            </div>
+                <div
+                  className="vr align-self-center"
+                  style={{ height: 60 }}
+                ></div>
 
-            <div className="col-md-6">
-              <Card
-                className="shadow-sm h-100"
-                style={{
-                  border:
-                    audioURLToPlay &&
-                    !fileToSubmit?.name.startsWith("Recorded_")
-                      ? "2px solid #28a745"
-                      : "1px dashed #ddd",
-                  backgroundColor: "white",
-                }}
-              >
-                <Title level={4} className="text-center mb-3">
-                  Tải file
-                </Title>
-
-                <Upload.Dragger
-                  {...uploadProps}
-                  showUploadList={false}
-                  className="py-3"
-                  disabled={isRecording || isSubmitting}
-                >
-                  <p className="ant-upload-drag-icon">
-                    <CloudUploadOutlined
-                      style={{ fontSize: "30px", color: PRIMARY_COLOR }}
-                    />
-                  </p>
-                  <p className="ant-upload-text fw-bold">Click để chọn file</p> 
-                  <p className="ant-upload-hint text-muted">{allowedFormats}</p>
-                </Upload.Dragger>
-
-                {audioURLToPlay &&
-                  !fileToSubmit?.name.startsWith("Recorded_") && (
-                    <div className="mt-3">
-                      <Text type="success" className="d-block mb-2">
-                        <CheckCircleOutlined /> File đã tải: **
-                        {fileToSubmit?.name}**
-                      </Text>
-                      <div className="d-flex justify-content-center align-items-center">
-                        {/* TRÌNH PHÁT AUDIO */}
-                        <audio
-                          controls
-                          src={audioURLToPlay}
-                          className="flex-grow-1 me-2"
-                          style={{ height: "35px" }}
-                        >
-                          Trình duyệt của bạn không hỗ trợ audio.
-                        </audio>
-                        <Popconfirm
-                          title="Xóa file?"
-                          description="Bạn có chắc chắn muốn xóa file này không?"
-                          onConfirm={handleRemoveFile}
-                          okText="Xóa"
-                          cancelText="Hủy"
-                        >
-                          <Button
-                            type="primary"
-                            danger
-                            icon={<DeleteOutlined />}
-                            size="small"
-                            disabled={isSubmitting}
-                          />
-                        </Popconfirm>
-                      </div>
-                    </div>
-                  )}
-              </Card>
-            </div>
-          </div>
-
-          <div className="text-center mt-4">
-            <Button
-              type="primary"
-              size="large"
-              onClick={handleSubmit}
-              disabled={!hasFile || isSubmitting || isRecording}
-              loading={isSubmitting}
-              style={{
-                width: "100%",
-                height: "50px",
-                backgroundColor: PRIMARY_COLOR,
-                borderColor: PRIMARY_COLOR,
-                fontWeight: "bold",
-              }}
-            >
-              Nộp bài
-            </Button>
-          </div>
+                {/* Nút Upload */}
+                <div className="text-center">
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    onChange={handleFileChange}
+                  />
+                  <Button
+                    shape="circle"
+                    size="large"
+                    icon={<CloudUploadOutlined style={{ fontSize: 28 }} />}
+                    onClick={handleUploadClick}
+                    style={{
+                      width: 80,
+                      height: 80,
+                      border: "2px dashed #999",
+                      color: "#666",
+                    }}
+                  />
+                  <div className="mt-3 fw-bold text-secondary">
+                    Tải file lên
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
         </div>
       </div>
     </div>

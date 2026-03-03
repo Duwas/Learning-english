@@ -12,7 +12,7 @@ import {
   LoadingOutlined,
   LogoutOutlined,
   LockOutlined,
-  ExclamationCircleOutlined, // Import icon cảnh báo cho popup logout
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -29,13 +29,11 @@ import {
 import type { UploadProps } from "antd";
 import dayjs from "dayjs";
 
-// Import API
 import infoApi from "@/app/services/api/infoAPI";
 import authApi from "@/app/services/api/authAPI";
 import MainFooter from "@/app/components/layout/Footer";
 import MainHeader from "@/app/components/layout/Header";
 
-// --- STYLES ---
 const styles = {
   headerBg: {
     backgroundColor: "#343a40",
@@ -123,22 +121,18 @@ export default function UserProfile() {
   const [activeTab, setActiveTab] = useState("info");
   const [openLogout, setOpenLogout] = useState(false);
 
-  // State Data
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdatingInfo, setIsUpdatingInfo] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [isChangingPass, setIsChangingPass] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
-  // Forms
   const [form] = Form.useForm();
   const [passForm] = Form.useForm();
 
-  // --- FETCH DATA ---
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -146,7 +140,7 @@ export default function UserProfile() {
 
       if (!storedUserStr) {
         message.warning("Vui lòng đăng nhập.");
-        router.push("/login"); // Hoặc /auth/login tùy route của bạn
+        router.push("/login");
         return;
       }
 
@@ -185,13 +179,12 @@ export default function UserProfile() {
   const handleLogoutProcess = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    window.location.href = "/auth/login"; // Chuyển về trang đăng nhập
+    window.location.href = "/auth/login";
   };
   const handleLogout = () => {
     setOpenLogout(true);
   };
 
-  // --- LOGIC 2: UPLOAD AVATAR ---
   const handleAvatarUpload: UploadProps["customRequest"] = async ({
     file,
     onSuccess,
@@ -222,7 +215,6 @@ export default function UserProfile() {
     },
   };
 
-  // --- LOGIC 3: UPDATE INFO ---
   const showEditModal = () => {
     if (!profile) return;
     form.setFieldsValue({
@@ -262,7 +254,6 @@ export default function UserProfile() {
     }
   };
 
-  // --- LOGIC 4: CHANGE PASSWORD (Có Popup xác nhận) ---
   const showChangePassModal = () => {
     passForm.resetFields();
     setIsPassModalOpen(true);
@@ -273,10 +264,8 @@ export default function UserProfile() {
       setIsChangingPass(true);
       const { oldPassword, newPassword } = values;
 
-      // 1. Gọi API đổi mật khẩu
       await infoApi.changePassword(profile.id, oldPassword, newPassword);
 
-      // 2. Đóng modal form nhập liệu
       setIsPassModalOpen(false);
 
       Modal.success({
@@ -299,7 +288,6 @@ export default function UserProfile() {
     }
   };
 
-  // --- RENDER UI ---
   if (loading)
     return (
       <div
@@ -326,12 +314,10 @@ export default function UserProfile() {
           minHeight: "100vh",
         }}
       >
-        {/* Header Profile */}
         <div style={styles.headerBg}>
           <div className="container">
             <div className="row align-items-center mb-4">
               <div className="col-md-8 d-flex align-items-center">
-                {/* Avatar */}
                 <div style={{ position: "relative", marginRight: "20px" }}>
                   {isUploadingAvatar ? (
                     <div
@@ -379,7 +365,6 @@ export default function UserProfile() {
                   </Upload>
                 </div>
 
-                {/* Name & Basic Info */}
                 <div>
                   <h2
                     style={{
@@ -444,7 +429,6 @@ export default function UserProfile() {
           </div>
         </div>
 
-        {/* Info Body */}
         <div className="container mt-4">
           <div
             style={{

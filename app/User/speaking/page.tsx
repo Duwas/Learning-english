@@ -91,17 +91,14 @@ export default function SpeakPage() {
           </div>
         </div>
 
-        {/* Breadcrumb */}
         <div className="bg-white border-bottom shadow-sm">
           <div className="container">
             <nav className="py-2" aria-label="breadcrumb">
               <ol className="breadcrumb mb-0" style={{ fontSize: "0.9rem" }}>
-                {/* Sửa lại màu chữ thành màu xám đậm (Bootstrap default) */}
                 <li className="breadcrumb-item" style={{ color: "#6c757d" }}>
                   Speaking
                 </li>
 
-                {/* MỤC ACTIVE (Nền Hồng) */}
                 <li
                   className="breadcrumb-item active"
                   style={{
@@ -119,7 +116,6 @@ export default function SpeakPage() {
           </div>
         </div>
 
-        {/* Nội dung chính: Grid các bài kiểm tra */}
         <div className="container py-4">
           {loading ? (
             <p
