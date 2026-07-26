@@ -10,7 +10,7 @@ import { useApi } from "@/app/hooks/useApi";
 import { useToast } from "@/app/hooks/useToast";
 import authApi from "@/app/services/api/authAPI";
 import { Modal } from "antd";
-import "./login.module.css";
+import "./login.css";
 
 const loginImageUrl = "/img/Login_img.png";
 
@@ -245,7 +245,7 @@ export default function Login() {
             <br />
             Chúng tôi đã gửi mã OTP đến
             <br />
-            <strong>{email}</strong>
+            <p className="otp-description">{email}</p>
           </p>
 
           <input

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import "./register.module.css";
+import "./register.css";
 import MainFooter from "@/app/components/layout/Footer";
 import MainHeader from "@/app/components/layout/Header";
 import { FaEye, FaEyeSlash } from "react-icons/fa";

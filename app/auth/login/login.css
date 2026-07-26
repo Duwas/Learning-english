@@ -116,7 +116,7 @@
     color: #DB4437; /* Màu đỏ của Google */
 }
 .otp-title {
-  font-size: 22px;
+  font-size: 15px;
   font-weight: 600;
   margin-bottom: 16px;
 }
@@ -125,7 +125,7 @@
 .otp-input {
   width: 100%;
   padding: 12px 14px;
-  font-size: 20px;
+  font-size: 15px;
   text-align: center;
   letter-spacing: 5px;
   border: 1px solid #d0d0d0;
@@ -133,7 +133,12 @@
   outline: none;
   transition: 0.2s;
 }
-
+.otp-description {
+    font-size: 15px;
+    color: #666;
+    line-height: 1.6;
+    text-align: center;
+}
 .otp-input:focus {
   border-color: #1677ff;
   box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.25);
