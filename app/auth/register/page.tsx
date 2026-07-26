@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import "./register.css";
+import "./register.module.css";
 import MainFooter from "@/app/components/layout/Footer";
 import MainHeader from "@/app/components/layout/Header";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -54,12 +54,12 @@ export default function Register() {
       await callApi(
         () => authApi.register({ name, phone, email, password }),
         false,
-        true
+        true,
       );
       showToast(
         "success",
         "Thành công",
-        "Đăng ký thành công! Vui lòng nhập OTP để kích hoạt."
+        "Đăng ký thành công! Vui lòng nhập OTP để kích hoạt.",
       );
       setIsDialog(true);
       setTimeLeft(30);
@@ -89,7 +89,7 @@ export default function Register() {
       showToast(
         "error",
         "OTP sai",
-        err?.response?.data?.message || "Mã OTP không chính xác!"
+        err?.response?.data?.message || "Mã OTP không chính xác!",
       );
     } finally {
       setLoading();

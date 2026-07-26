@@ -612,21 +612,21 @@ export default function AdminVocabularyPage() {
                         style={{ display: "none" }}
                         onChange={handleFileChange}
                       />
-                      <Button
+                      {/* <Button
                         type="primary"
                         icon={<ImportOutlined />}
                         onClick={handleImportClick}
                       >
                         Nhập file CSV
-                      </Button>
+                      </Button> */}
                     </div>
-                    <Button
+                    {/* <Button
                       type="primary"
                       icon={<ExportOutlined />}
                       onClick={handleExportXLSX}
                     >
                       Xuất file CSV
-                    </Button>
+                    </Button> */}
                     <Button
                       type="primary"
                       icon={<FaPlus />}

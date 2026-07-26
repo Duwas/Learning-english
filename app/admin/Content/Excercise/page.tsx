@@ -429,7 +429,7 @@ export default function ExerciseManagementPage() {
       });
 
       message.success("Thêm đáp án thành công");
-      form.resetFields();
+      optionForm.resetFields();
       fetchOptions(currentQuestionForOption.id);
     } catch (err) {
       message.error("Thêm đáp án thất bại");
@@ -449,7 +449,7 @@ export default function ExerciseManagementPage() {
 
       message.success("Cập nhật đáp án thành công");
       setEditingOption(null);
-      form.resetFields();
+      optionForm.resetFields();
       fetchOptions(currentQuestionForOption.id);
     } catch (err) {
       message.error("Cập nhật đáp án thất bại");
@@ -741,7 +741,7 @@ export default function ExerciseManagementPage() {
                     style={{ display: "none" }}
                     onChange={handleFileChange}
                   />
-                  <Button
+                  {/* <Button
                     type="primary"
                     icon={<ImportOutlined />}
                     onClick={handleImportClick}
@@ -756,8 +756,8 @@ export default function ExerciseManagementPage() {
                     onClick={() => setVisible(true)}
                   >
                     Xuất file Excel
-                  </Button>
-
+                  </Button> */}
+  
                   <Modal
                     title="Chọn skill để xuất"
                     visible={visible}
@@ -909,8 +909,15 @@ export default function ExerciseManagementPage() {
                   listType="picture"
                   maxCount={1}
                   fileList={fileListImage}
-                  beforeUpload={(f) => {
-                    setFileListImage([f]);
+                  beforeUpload={(file) => {
+                    setFileListImage([
+                      {
+                        uid: file.uid,
+                        name: file.name,
+                        status: "done",
+                        originFileObj: file,
+                      },
+                    ]);
                     return false;
                   }}
                   onRemove={() => setFileListImage([])}
@@ -920,8 +927,15 @@ export default function ExerciseManagementPage() {
                 <Upload
                   maxCount={1}
                   fileList={fileListAudio}
-                  beforeUpload={(f) => {
-                    setFileListAudio([f]);
+                  beforeUpload={(file) => {
+                    setFileListAudio([
+                      {
+                        uid: file.uid,
+                        name: file.name,
+                        status: "done",
+                        originFileObj: file,
+                      },
+                    ]);
                     return false;
                   }}
                   onRemove={() => setFileListAudio([])}
@@ -983,7 +997,7 @@ export default function ExerciseManagementPage() {
           onCancel={() => {
             setIsOptionModalOpen(false);
             setEditingOption(null);
-            form.resetFields();
+            optionForm.resetFields();
           }}
           footer={null}
           width={700}
@@ -1006,7 +1020,7 @@ export default function ExerciseManagementPage() {
             </div>
 
             <Form
-              form={form}
+              form={optionForm}
               layout="vertical"
               onFinish={editingOption ? handleUpdateOption : handleCreateOption}
             >
@@ -1034,7 +1048,7 @@ export default function ExerciseManagementPage() {
                   <Button
                     onClick={() => {
                       setEditingOption(null);
-                      form.resetFields();
+                      optionForm.resetFields();
                     }}
                   >
                     Huỷ sửa
@@ -1073,7 +1087,10 @@ export default function ExerciseManagementPage() {
                       size="small"
                       onClick={() => {
                         setEditingOption(record);
-                        form.setFieldsValue(record);
+                        optionForm.setFieldsValue({
+                          optionText: record.optionText,
+                          isCorrect: record.isCorrect,
+                        });
                       }}
                     >
                       Sửa

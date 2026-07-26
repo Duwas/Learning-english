@@ -46,7 +46,7 @@ export default function GrammarLearnPage() {
         const res = await callApi(
           () => grammarAPI.getTreeGrammar(),
           true,
-          true
+          true,
         );
 
         console.log(res);
@@ -77,7 +77,7 @@ export default function GrammarLearnPage() {
         const res = await callApi(
           () => grammarAPI.getGrammarByCategory(currentCategoryId),
           true,
-          true
+          true,
         );
 
         const rawData = res.data || res;
@@ -115,227 +115,227 @@ export default function GrammarLearnPage() {
 
   return (
     <>
-      <ProtectedRoute>
-        <MainHeader />
-        <div className="container py-4" style={{ marginTop: "80px" }}>
-          <div className="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
-            <h5 className="text-primary fw-bold">
-              <span className="text-muted fw-normal">Grammar » </span>
-              {loadingSidebar ? "Đang tải..." : categoryTitle || "Danh mục"}
-            </h5>
-            <button
-              onClick={() => setShowQuiz(true)}
-              className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
-              style={{
-                backgroundColor: "#0d6efd",
-                border: "none",
-                transition: "transform 0.2s",
-              }}
-            >
-              Ôn tập
-            </button>
+      {/* <ProtectedRoute> */}
+      <MainHeader />
+      <div className="container py-4" style={{ marginTop: "80px" }}>
+        <div className="mb-4 border-bottom pb-2 d-flex justify-content-between align-items-center">
+          <h5 className="text-primary fw-bold">
+            <span className="text-muted fw-normal">Grammar » </span>
+            {loadingSidebar ? "Đang tải..." : categoryTitle || "Danh mục"}
+          </h5>
+          <button
+            onClick={() => setShowQuiz(true)}
+            className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+            style={{
+              backgroundColor: "#0d6efd",
+              border: "none",
+              transition: "transform 0.2s",
+            }}
+          >
+            Ôn tập
+          </button>
+        </div>
+
+        <div className="row" style={{ marginTop: "-20px" }}>
+          <div className="col-md-3 mb-4">
+            {loadingSidebar ? (
+              <div className="text-center py-4 text-muted">
+                <div className="spinner-border spinner-border-sm me-2"></div>{" "}
+                Đang tải menu...
+              </div>
+            ) : (
+              <GrmSidebar data={sidebarData} />
+            )}
           </div>
 
-          <div className="row" style={{ marginTop: "-20px" }}>
-            <div className="col-md-3 mb-4">
-              {loadingSidebar ? (
-                <div className="text-center py-4 text-muted">
-                  <div className="spinner-border spinner-border-sm me-2"></div>{" "}
-                  Đang tải menu...
-                </div>
-              ) : (
-                <GrmSidebar data={sidebarData} />
-              )}
-            </div>
-
-            <div className="col-md-9">
-              <div
-                className="card shadow-sm border-0"
-                style={{ minHeight: "500px" }}
-              >
-                <div className="card-body bg-white rounded p-4">
-                  {loadingLessons ? (
-                    <div className="d-flex flex-column align-items-center justify-content-center h-100 py-5">
-                      <div
-                        className="spinner-border text-primary"
-                        style={{ width: "3rem", height: "3rem" }}
-                      ></div>
-                      <p className="mt-3 text-muted">Đang tải bài học...</p>
-                    </div>
-                  ) : categoryLessons.length > 0 ? (
-                    <>
-                      <ul
-                        className="nav nav-pills mb-4 gap-2"
-                        style={{ overflowX: "auto", flexWrap: "nowrap" }}
-                      >
-                        {categoryLessons.map((lesson) => (
-                          <li key={lesson.id} className="nav-item">
-                            <button
-                              className={`nav-link border ${
+          <div className="col-md-9">
+            <div
+              className="card shadow-sm border-0"
+              style={{ minHeight: "500px" }}
+            >
+              <div className="card-body bg-white rounded p-4">
+                {loadingLessons ? (
+                  <div className="d-flex flex-column align-items-center justify-content-center h-100 py-5">
+                    <div
+                      className="spinner-border text-primary"
+                      style={{ width: "3rem", height: "3rem" }}
+                    ></div>
+                    <p className="mt-3 text-muted">Đang tải bài học...</p>
+                  </div>
+                ) : categoryLessons.length > 0 ? (
+                  <>
+                    <ul
+                      className="nav nav-pills mb-4 gap-2"
+                      style={{ overflowX: "auto", flexWrap: "nowrap" }}
+                    >
+                      {categoryLessons.map((lesson) => (
+                        <li key={lesson.id} className="nav-item">
+                          <button
+                            className={`nav-link border ${
+                              activeLessonId === lesson.id
+                                ? "active"
+                                : "bg-light text-dark"
+                            }`}
+                            onClick={() => setActiveLessonId(lesson.id)}
+                            style={{
+                              whiteSpace: "nowrap",
+                              borderRadius: "20px",
+                              fontWeight: "500",
+                              backgroundColor:
                                 activeLessonId === lesson.id
-                                  ? "active"
-                                  : "bg-light text-dark"
-                              }`}
-                              onClick={() => setActiveLessonId(lesson.id)}
+                                  ? "#4dabf7"
+                                  : undefined,
+                              borderColor:
+                                activeLessonId === lesson.id
+                                  ? "#4dabf7"
+                                  : undefined,
+                            }}
+                          >
+                            {lesson.title.split("(")[0].trim()}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {currentLesson && (
+                      <div className="grammar-lesson fade-in">
+                        <h2 className="text-primary fw-bold mb-4 border-bottom pb-2">
+                          {currentLesson.title}
+                        </h2>
+
+                        {currentLesson.explanation && (
+                          <div className="mb-4">
+                            <h5 className="fw-bold text-dark mb-2">
+                              <i className="bi bi-book me-2"></i>1. Định nghĩa &
+                              Cách dùng
+                            </h5>
+                            <p
+                              className="text-secondary"
                               style={{
-                                whiteSpace: "nowrap",
-                                borderRadius: "20px",
-                                fontWeight: "500",
-                                backgroundColor:
-                                  activeLessonId === lesson.id
-                                    ? "#4dabf7"
-                                    : undefined,
-                                borderColor:
-                                  activeLessonId === lesson.id
-                                    ? "#4dabf7"
-                                    : undefined,
+                                fontSize: "1.05rem",
+                                lineHeight: "1.6",
+                                textAlign: "justify",
                               }}
                             >
-                              {lesson.title.split("(")[0].trim()}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+                              {currentLesson.explanation}
+                            </p>
+                          </div>
+                        )}
 
-                      {currentLesson && (
-                        <div className="grammar-lesson fade-in">
-                          <h2 className="text-primary fw-bold mb-4 border-bottom pb-2">
-                            {currentLesson.title}
-                          </h2>
-
-                          {currentLesson.explanation && (
-                            <div className="mb-4">
-                              <h5 className="fw-bold text-dark mb-2">
-                                <i className="bi bi-book me-2"></i>1. Định nghĩa
-                                & Cách dùng
-                              </h5>
-                              <p
-                                className="text-secondary"
+                        {currentLesson.structure && (
+                          <div className="mb-4">
+                            <h5 className="fw-bold text-dark mb-2">
+                              <i className="bi bi-gear me-2"></i>2. Cấu trúc
+                              (Structure)
+                            </h5>
+                            <div
+                              className="p-3 rounded"
+                              style={{
+                                backgroundColor: "#fff5f5",
+                                borderLeft: "5px solid #dc3545",
+                              }}
+                            >
+                              <pre
+                                className="mb-0 fw-bold text-danger"
                                 style={{
-                                  fontSize: "1.05rem",
-                                  lineHeight: "1.6",
-                                  textAlign: "justify",
+                                  fontFamily: "inherit",
+                                  fontSize: "1.1rem",
+                                  whiteSpace: "pre-line",
                                 }}
                               >
-                                {currentLesson.explanation}
-                              </p>
+                                {currentLesson.structure}
+                              </pre>
                             </div>
-                          )}
+                          </div>
+                        )}
 
-                          {currentLesson.structure && (
-                            <div className="mb-4">
-                              <h5 className="fw-bold text-dark mb-2">
-                                <i className="bi bi-gear me-2"></i>2. Cấu trúc
-                                (Structure)
-                              </h5>
-                              <div
-                                className="p-3 rounded"
+                        {currentLesson.example && (
+                          <div className="mb-4">
+                            <h5 className="fw-bold text-dark mb-2">
+                              <i className="bi bi-chat-dots me-2"></i>3. Ví dụ
+                              minh họa
+                            </h5>
+                            <div
+                              className="alert alert-primary border-0 shadow-sm"
+                              style={{ backgroundColor: "#e7f1ff" }}
+                            >
+                              <pre
+                                className="mb-0 text-dark"
                                 style={{
-                                  backgroundColor: "#fff5f5",
-                                  borderLeft: "5px solid #dc3545",
+                                  fontFamily: "inherit",
+                                  whiteSpace: "pre-line",
+                                  fontSize: "1rem",
                                 }}
                               >
-                                <pre
-                                  className="mb-0 fw-bold text-danger"
-                                  style={{
-                                    fontFamily: "inherit",
-                                    fontSize: "1.1rem",
-                                    whiteSpace: "pre-line",
-                                  }}
-                                >
-                                  {currentLesson.structure}
-                                </pre>
-                              </div>
+                                {currentLesson.example}
+                              </pre>
                             </div>
-                          )}
+                          </div>
+                        )}
 
-                          {currentLesson.example && (
-                            <div className="mb-4">
-                              <h5 className="fw-bold text-dark mb-2">
-                                <i className="bi bi-chat-dots me-2"></i>3. Ví dụ
-                                minh họa
-                              </h5>
-                              <div
-                                className="alert alert-primary border-0 shadow-sm"
-                                style={{ backgroundColor: "#e7f1ff" }}
-                              >
-                                <pre
-                                  className="mb-0 text-dark"
-                                  style={{
-                                    fontFamily: "inherit",
-                                    whiteSpace: "pre-line",
-                                    fontSize: "1rem",
-                                  }}
-                                >
-                                  {currentLesson.example}
-                                </pre>
-                              </div>
-                            </div>
-                          )}
-
-                          {currentLesson.tip && (
-                            <div className="mb-4">
-                              <h5 className="fw-bold text-dark mb-2">
-                                <i className="bi bi-lightbulb me-2 text-warning"></i>
-                                Mẹo ghi nhớ
-                              </h5>
-                              <div className="alert alert-warning border-0 shadow-sm">
-                                <pre
-                                  className="mb-0 text-dark"
-                                  style={{
-                                    fontFamily: "inherit",
-                                    whiteSpace: "pre-line",
-                                  }}
-                                >
-                                  {currentLesson.tip}
-                                </pre>
-                              </div>
-                            </div>
-                          )}
-
-                          {currentLesson.imageUrl && (
-                            <div className="text-center mt-4">
-                              <img
-                                src={currentLesson.imageUrl}
-                                alt={currentLesson.title}
-                                className="img-fluid rounded shadow"
+                        {currentLesson.tip && (
+                          <div className="mb-4">
+                            <h5 className="fw-bold text-dark mb-2">
+                              <i className="bi bi-lightbulb me-2 text-warning"></i>
+                              Mẹo ghi nhớ
+                            </h5>
+                            <div className="alert alert-warning border-0 shadow-sm">
+                              <pre
+                                className="mb-0 text-dark"
                                 style={{
-                                  maxHeight: "400px",
-                                  objectFit: "contain",
+                                  fontFamily: "inherit",
+                                  whiteSpace: "pre-line",
                                 }}
-                              />
+                              >
+                                {currentLesson.tip}
+                              </pre>
                             </div>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center py-5">
-                      <div
-                        className="text-muted mb-3"
-                        style={{ fontSize: "3rem" }}
-                      >
-                        📂
+                          </div>
+                        )}
+
+                        {currentLesson.imageUrl && (
+                          <div className="text-center mt-4">
+                            <img
+                              src={currentLesson.imageUrl}
+                              alt={currentLesson.title}
+                              className="img-fluid rounded shadow"
+                              style={{
+                                maxHeight: "400px",
+                                objectFit: "contain",
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
-                      <h4 className="text-muted">Chưa có bài học nào</h4>
-                      <p>Nội dung đang được cập nhật cho danh mục này.</p>
+                    )}
+                  </>
+                ) : (
+                  <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center py-5">
+                    <div
+                      className="text-muted mb-3"
+                      style={{ fontSize: "3rem" }}
+                    >
+                      📂
                     </div>
-                  )}
-                </div>
+                    <h4 className="text-muted">Chưa có bài học nào</h4>
+                    <p>Nội dung đang được cập nhật cho danh mục này.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <QuizModal
-          isOpen={showQuiz}
-          onClose={() => setShowQuiz(false)}
-          groupId={-1}
-          grammarId={currentCategoryId}
-        />
+      <QuizModal
+        isOpen={showQuiz}
+        onClose={() => setShowQuiz(false)}
+        groupId={-1}
+        grammarId={currentCategoryId}
+      />
 
-        <MainFooter />
-      </ProtectedRoute>
+      <MainFooter />
+      {/* </ProtectedRoute> */}
     </>
   );
 }

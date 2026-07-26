@@ -10,7 +10,7 @@ import { useApi } from "@/app/hooks/useApi";
 import { useToast } from "@/app/hooks/useToast";
 import authApi from "@/app/services/api/authAPI";
 import { Modal } from "antd";
-import "./login.css";
+import "./login.module.css";
 
 const loginImageUrl = "/img/Login_img.png";
 
@@ -45,10 +45,10 @@ export default function Login() {
       const data = await callApi(
         () => authApi.login({ email, password }),
         false,
-        true
+        true,
       );
-
-      if (data?.user.role == "ADMIN") {
+      console.log(data);
+      if (data?.user?.role == "ADMIN") {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         window.location.href = "/admin/Content/Overview";
@@ -58,7 +58,7 @@ export default function Login() {
         showToast(
           "error",
           "Lỗi",
-          "Tài khoản chưa được kích hoạt. Vui lòng nhập OTP!"
+          "Tài khoản chưa được kích hoạt. Vui lòng nhập OTP!",
         );
         setIsDialog(true);
         const expire = Date.now() + 30000;
@@ -71,10 +71,32 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
       window.location.href = "/";
     } catch (err: any) {
+      const message = err?.response?.data?.message;
+      const activate = err?.response?.data?.activate;
+      console.log("LOGIN ERROR:", err);
+      console.log("STATUS:", err?.response?.status);
+      console.log("DATA:", err?.response?.data);
+
+      if (activate === false) {
+        showToast(
+          "warning",
+          "Tài khoản chưa kích hoạt",
+          "Vui lòng nhập OTP để xác thực.",
+        );
+
+        setIsDialog(true);
+
+        const expire = Date.now() + 30000;
+        localStorage.setItem("otpExpire", expire.toString());
+        setTimeLeft(30);
+
+        return;
+      }
+
       showToast(
         "error",
         "Đăng nhập thất bại",
-        err?.response?.data?.message || "Email hoặc mật khẩu không đúng"
+        message || "Email hoặc mật khẩu không đúng",
       );
     }
   };
@@ -97,7 +119,7 @@ export default function Login() {
       showToast(
         "error",
         "OTP sai",
-        err?.response?.data?.message || "Mã OTP không chính xác!"
+        err?.response?.data?.message || "Mã OTP không chính xác!",
       );
     } finally {
     }
@@ -207,44 +229,48 @@ export default function Login() {
       <Modal
         open={isDialog}
         centered
-        onCancel={() => setIsDialog(false)}
         footer={null}
-        width={380}
+        onCancel={() => setIsDialog(false)}
+        width={430}
         destroyOnClose
+        className="otp-modal"
       >
-        <div className="text-center">
-          <h2 className="otp-title">Nhập mã OTP</h2>
+        <div className="otp-container">
+          <div className="otp-icon">📩</div>
+
+          <h2 className="otp-title">Xác thực tài khoản</h2>
+
+          <p className="otp-description">
+            Tài khoản của bạn chưa được kích hoạt.
+            <br />
+            Chúng tôi đã gửi mã OTP đến
+            <br />
+            <strong>{email}</strong>
+          </p>
 
           <input
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
             maxLength={6}
             className={`otp-input ${otpError ? "otp-error" : ""}`}
-            placeholder="Nhập 6 chữ số"
+            placeholder="Nhập mã OTP"
             inputMode="numeric"
-            pattern="[0-9]*"
-            aria-label="OTP"
           />
 
           {otpError && (
             <div className="otp-error-text">OTP phải gồm 6 chữ số</div>
           )}
 
-          <button
-            onClick={handleOTP}
-            className="otp-btn-confirm"
-            style={{ marginTop: 18 }}
-          >
+          <button onClick={handleOTP} className="otp-btn-confirm">
             Xác nhận
           </button>
+
           <button
             onClick={resendOtp}
             className="otp-btn-resend"
             disabled={timeLeft > 0}
-            style={{ marginTop: 10 }}
-            aria-disabled={timeLeft > 0}
           >
-            {timeLeft > 0 ? `Gửi lại (${timeLeft}s)` : "Gửi lại OTP"}
+            {timeLeft > 0 ? `Gửi lại sau ${timeLeft}s` : "Gửi lại OTP"}
           </button>
         </div>
       </Modal>

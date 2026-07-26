@@ -28,7 +28,7 @@ import SpeakingComponent from "@/app/components/exerciseCard/exSpeak";
 import MainHeader from "@/app/components/layout/Header";
 import MainFooter from "@/app/components/layout/Footer";
 
-import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/css/bootstrap.min.css";
 import ProtectedRoute from "@/app/routes/ProtectedRoute";
 
 const { Text, Title } = Typography;
@@ -301,29 +301,29 @@ export default function SpeakingTestPage() {
 
   return (
     <>
-      <ProtectedRoute>
-        <MainHeader />
-        {isModalOpen && speakingResult && (
-          <SpeakingResultModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            result={speakingResult}
-            onRedo={resetQuizAndFetch}
-          />
-        )}
-
-        <SpeakingComponent
-          exercise={exerciseData}
-          onSubmit={handleSubmitFile}
-          isSubmitting={isSubmitting}
-          fileToSubmit={fileToSubmit}
-          setFileToSubmit={
-            setFileToSubmit as Dispatch<SetStateAction<File | null>>
-          }
-          audioURLToPlay={null}
+      {/* <ProtectedRoute> */}
+      <MainHeader />
+      {isModalOpen && speakingResult && (
+        <SpeakingResultModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          result={speakingResult}
+          onRedo={resetQuizAndFetch}
         />
-        <MainFooter />
-      </ProtectedRoute>
+      )}
+
+      <SpeakingComponent
+        exercise={exerciseData}
+        onSubmit={handleSubmitFile}
+        isSubmitting={isSubmitting}
+        fileToSubmit={fileToSubmit}
+        setFileToSubmit={
+          setFileToSubmit as Dispatch<SetStateAction<File | null>>
+        }
+        audioURLToPlay={null}
+      />
+      <MainFooter />
+      {/* </ProtectedRoute> */}
     </>
   );
 }
